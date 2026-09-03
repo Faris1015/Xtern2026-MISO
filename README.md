@@ -1,1 +1,84 @@
-# Xtern2026-MISO
+# ⚡ MISO OmniSearch: Predictive Context & Comparative Knowledge Engine
+> **Xtern Fall 2026 Challenge Submission** | **Partner:** Midcontinent Independent System Operator (MISO)  
+> **Challenge Prompt 1:** *Intelligent Navigation of MISO's Public Information*
+
+[![Status](https://img.shields.io/badge/Status-Active%20Development-0284C7.svg)]()
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-059669.svg)]()
+[![React](https://img.shields.io/badge/Frontend-React%20%2B%20Tailwind-0284C7.svg)]()
+[![WCAG](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-10B981.svg)]()
+
+---
+
+## 🌟 What is MISO OmniSearch?
+**MISO OmniSearch** is a next-generation energy intelligence and discovery engine built to transform how **Market & Power Traders**, **Municipal Utilities and Electric Co-ops**, and the **General Public** discover, analyze, and extract MISO's public energy data.
+
+Instead of a passive chatbot or confusing nested web pages, OmniSearch provides:
+1. 🧠 **Session-Aware Journey Pre-Fetching:** Detects active browsing paths on `misoenergy.org` and pre-loads relevant metrics with **zero cold start**.
+2. 🔍 **Unified OmniSearch Bar:** Single search input for plain-English questions, market hubs, acronyms, and reports with real-time auto-suggest.
+3. 📊 **360° Knowledge Canvas:** Verified answers with page-level PDF citations, isolated KPI cards, and live interactive Recharts graphs.
+4. ⚖️ **Side-by-Side Comparison Engine:** Point-and-click comparative matrices to compare **Hubs** (*Indiana vs. Michigan vs. Texas*), **Fuel Types** (*Wind vs. Solar vs. Gas*), and **Transmission Plans**.
+5. 📄 **1-Click Branded PDF Briefing Studio:** Generates publication-ready 1-page PDF fact sheets and filtered CSV spreadsheets in 3 seconds.
+
+---
+
+## 🚀 Master Tasks & GitHub Issues (For the Team)
+All tasks and ready-to-use LLM prompt templates are documented in:
+👉 **[TASKS_AND_ISSUES.md](./TASKS_AND_ISSUES.md)**
+
+| Issue | Role & Owner | Key Deliverable |
+| :--- | :--- | :--- |
+| **[Issue #1](.github/issues/ISSUE_01_backend_omnisearch_api.md)** | Member 1 (*Lead Backend & AI*) | FastAPI Search Pipeline & Comparison Endpoints |
+| **[Issue #2](.github/issues/ISSUE_02_backend_pdf_briefing_generator.md)** | Member 1 (*Lead Backend & AI*) | ReportLab 1-Click PDF Briefing Generator Service |
+| **[Issue #3](.github/issues/ISSUE_03_frontend_omnisearch_bar_session_radar.md)** | Member 2 (*Frontend Lead*) | OmniSearch Input Bar & Session-Aware Radar UI |
+| **[Issue #4](.github/issues/ISSUE_04_frontend_360_canvas_comparison.md)** | Member 2 (*Frontend Lead*) | 360° Knowledge Canvas & Recharts Comparison Matrix |
+| **[Issue #5](.github/issues/ISSUE_05_data_market_and_grid_datasets.md)** | Member 3 (*Data Lead*) | MISO Market Hubs, Fuel Mix & Peak Datasets |
+| **[Issue #6](.github/issues/ISSUE_06_data_related_queries_graph_crosswalk.md)** | Member 3 (*Data Lead*) | Related-Queries Intent Graph & Legacy Crosswalk |
+| **[Issue #7](.github/issues/ISSUE_07_design_wcag_a11y_voice_briefing.md)** | Member 4 (*UI/UX & A11y*) | Figma Design System, WCAG 2.1 AA Audit & Voice Briefing |
+| **[Issue #8](.github/issues/ISSUE_08_pm_roi_model_pitch_deck_script.md)** | Member 5 (*PM & Pitch*) | CSR Deflection ROI Model, 10–12 Slide Deck & Demo Script |
+
+---
+
+## 🛠️ Repository Structure
+```
+Xtern2026-MISO/
+├── backend/                  # FastAPI Python backend
+│   ├── main.py               # REST API server
+│   ├── data_manager.py       # Market & grid data query engine
+│   ├── pdf_generator.py      # ReportLab 1-click PDF briefing builder
+│   ├── error_doctor.py       # API error diagnostic engine
+│   ├── crosswalk.json        # Legacy report ↔ API field mapping dictionary
+│   ├── glossary.json         # 40+ MISO acronyms dictionary
+│   └── requirements.txt
+├── frontend/                 # React + TypeScript + Tailwind CSS
+│   ├── src/
+│   │   ├── components/       # OmniSearch, Canvas, Comparison, Jargon HUD
+│   │   ├── api.ts            # Client API client
+│   │   ├── types.ts          # TypeScript interfaces
+│   │   └── App.tsx           # Main application shell
+│   └── package.json
+├── .github/issues/           # 8 Informative, LLM-ready task issue templates
+├── TASKS_AND_ISSUES.md       # Master task tracking roadmap
+└── scripts/                  # Automation & GitHub sync scripts
+```
+
+---
+
+## ⚡ Quickstart
+
+### 1. Backend Setup
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+API Documentation: `http://localhost:8000/docs`
+
+### 2. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Web Application: `http://localhost:3000`
