@@ -1,0 +1,72 @@
+{
+  "LMP": {
+    "term": "Locational Marginal Price",
+    "category": "Market Pricing",
+    "eli5": "The cost of serving the next megawatt of electricity at a specific location, combining energy cost, transmission line congestion, and power line losses.",
+    "technical": "Calculated by Security-Constrained Economic Dispatch (SCED) as: LMP = Energy Component (MEC) + Congestion Component (MCC) + Marginal Loss Component (MLC).",
+    "formula": "LMP = Energy + Congestion + Loss"
+  },
+  "CONE": {
+    "term": "Cost of New Entry",
+    "category": "Resource Adequacy",
+    "eli5": "The estimated annual cost to build and operate a brand-new natural gas peaker plant in MISO, used as the benchmark price cap in capacity auctions.",
+    "technical": "Determined annually per Local Resource Zone (LRZ) under Tariff Module E-1 to establish the maximum clearing price in the Planning Resource Auction (PRA).",
+    "formula": "Benchmark Cap for Capacity Auctions ($/MW-day)"
+  },
+  "PRA": {
+    "term": "Planning Resource Auction",
+    "category": "Resource Adequacy",
+    "eli5": "MISO's annual capacity auction where utilities ensure they have enough power plants reserved to keep the lights on during peak summer and winter days.",
+    "technical": "Annual auction conducted under Tariff Module E-1 enforcing Planning Reserve Margin Requirements (PRMR) across all 10 MISO Local Resource Zones.",
+    "formula": "Demand (PRMR) vs. Supply (ZRCs)"
+  },
+  "MTEP": {
+    "term": "MISO Transmission Expansion Plan",
+    "category": "Transmission Planning",
+    "eli5": "MISO's comprehensive multi-billion dollar master plan to build, upgrade, and reinforce high-voltage power lines across 15 states.",
+    "technical": "Annual planning cycle approved by the MISO Board of Directors containing baseline reliability, market efficiency, and public policy transmission projects.",
+    "formula": "Annual Board Approved Portfolio"
+  },
+  "LRTP": {
+    "term": "Long Range Transmission Planning",
+    "category": "Transmission Planning",
+    "eli5": "A multi-tranche regional superhighway transmission initiative to transport low-cost wind and solar from rural areas to major cities.",
+    "technical": "Strategic 20-year planning horizon (Tranche 1 approved at $10.3B / 3,600+ miles; Tranche 2 covering MISO Midwest; Tranche 3 covering MISO South).",
+    "formula": "Regional 345kV & 765kV Backbone"
+  },
+  "JTIQ": {
+    "term": "Joint Targeted Interconnection Queue",
+    "category": "Interregional Planning",
+    "eli5": "A partnership between MISO and Southwest Power Pool (SPP) to unlock new power lines right along their shared border.",
+    "technical": "Coordinated seam transmission study between MISO and SPP identifying high-priority interregional projects to lower interconnection network upgrade costs.",
+    "formula": "5 Seam Projects (~490 miles)"
+  },
+  "DPP": {
+    "term": "Definitive Planning Phase",
+    "category": "Generator Interconnection",
+    "eli5": "The rigorous technical study phase where power plant developers wait for MISO approval to connect their new wind, solar, or battery project to the grid.",
+    "technical": "Three-phase cluster study process (DPP Phase 1, Phase 2, Phase 3) evaluating system impact, thermal constraints, and network upgrade cost assignments.",
+    "formula": "Phase 1 (SIS) -> Phase 2 (Detailed) -> Phase 3 (Facilities Study)"
+  },
+  "LOLE": {
+    "term": "Loss of Load Expectation",
+    "category": "Reliability Metrics",
+    "eli5": "A strict safety standard requiring that the electric grid has enough generators so power never runs short more than 1 day in 10 years.",
+    "technical": "Probabilistic resource adequacy metric standard targeting an LOLE of less than 0.1 days/year (1 day in 10 years) used to calibrate the Planning Reserve Margin.",
+    "formula": "LOLE <= 0.1 days/year"
+  },
+  "OASIS": {
+    "term": "Open Access Same-Time Information System",
+    "category": "Transmission Operations",
+    "eli5": "The public website and database where power companies reserve and purchase capacity on MISO's high-voltage lines.",
+    "technical": "FERC-mandated real-time information and reservation system (Order 889) for booking Available Transfer Capability (ATC) and transmission services.",
+    "formula": "Available Transfer Capability (ATC) Marketplace"
+  },
+  "FTR": {
+    "term": "Financial Transmission Rights",
+    "category": "Market Instruments",
+    "eli5": "A financial contract that protects electricity buyers and sellers from unexpected price spikes caused by crowded power lines.",
+    "technical": "Financial instruments that entitle the holder to a revenue stream or charge based on the Day-Ahead Market Locational Marginal Price congestion component differences.",
+    "formula": "Target = (MCC_Sink - MCC_Source) * MW"
+  }
+}
