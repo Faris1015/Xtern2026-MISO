@@ -20,6 +20,9 @@ dist/
 build/
 .next/
 *.log
+.vite/
+coverage/
+*.tsbuildinfo
 
 # Environments
 .env
@@ -28,4 +31,3 @@ build/
 # OS
 .DS_Store
 Thumbs.db
-
