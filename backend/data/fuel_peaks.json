@@ -1,4 +1,13 @@
 {
+  "meta": {
+    "version": "0.1.0",
+    "last_updated": "2026-09-05",
+    "basis": "MISO July 2025 Fact Sheet",
+    "data_type": "verified",
+    "source": [
+      "https://cdn.misoenergy.org/Corp%20Fact%20Sheet%20July%202025706040.pdf"
+    ]
+  },
   "generation_mix": {
     "as_of": "2025-07",
     "basis": "MISO July 2025 Fact Sheet",
