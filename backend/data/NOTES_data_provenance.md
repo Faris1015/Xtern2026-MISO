@@ -25,6 +25,7 @@ discrepancy here.
 | 638M MWh annual production | Fact Sheet (2024) | July 2025 Fact Sheet | High | "638 Million MWh" under Energy Production January–December 2024. |
 | 77,000 transmission line-miles | Fact Sheet KEY FACTS | July 2025 Fact Sheet | High | Printed as "Transmission Line 77,000 Miles". |
 | 45M population served | Fact Sheet KEY FACTS | July 2025 Fact Sheet | High | Printed as "Population Served 45 Million". |
+| 15 states served | `glossary.json` MISO entry | glossary.json | High | `states_served` counts U.S. states only; MISO's footprint also includes the Canadian province of Manitoba, which has no field of its own in this schema. |
 
 ---
 
