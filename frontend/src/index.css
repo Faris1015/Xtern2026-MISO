@@ -3,20 +3,56 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply m-0 min-w-[320px] bg-canvas text-slate-900 antialiased;
-    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  :root {
+    color: #1e293b;
+    background: #f8fafc;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
   }
 
-  h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; }
+  body {
+    @apply m-0 min-w-[320px] bg-canvas text-miso-slate antialiased;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  a {
+    @apply underline-offset-2;
+  }
+  a:hover {
+    @apply underline;
+  }
+  button,
+  input,
+  select,
+  summary {
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-miso-sky;
+  }
 }
 
-@layer utilities {
-  .font-display { font-family: Georgia, "Times New Roman", serif; }
-  .radar-orbit { animation: orbit 5s ease-in-out infinite; }
+@layer components {
+  .skip-link {
+    @apply sr-only fixed left-4 top-4 z-50 bg-white px-4 py-2 font-semibold text-miso-navy shadow-panel;
+  }
+  .skip-link:focus {
+    @apply not-sr-only;
+  }
+  .icon-button {
+    @apply inline-flex items-center justify-center p-1 text-miso-muted hover:bg-miso-card hover:text-miso-navy;
+  }
 }
 
-@keyframes orbit {
-  0%, 100% { transform: scale(0.95); opacity: 0.55; }
-  50% { transform: scale(1.08); opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

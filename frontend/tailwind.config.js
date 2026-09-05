@@ -4,12 +4,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        miso: { ink: "#17324d", teal: "#007c83", sand: "#f5f1e8", rust: "#d4773c" },
-        canvas: "#f7f8f6",
+        miso: {
+          navy: "#0F2942",
+          sky: "#0284C7",
+          emerald: "#059669",
+          slate: "#1E293B",
+          amber: "#D97706",
+          red: "#DC2626",
+          card: "#F8FAFC",
+          border: "#E2E8F0",
+          muted: "#64748B",
+          ink: "#0F2942",
+        },
+        canvas: "#F8FAFC",
       },
       boxShadow: {
-        subtle: "0 4px 20px rgba(23, 50, 77, 0.07)",
-        panel: "0 12px 40px rgba(23, 50, 77, 0.10)",
+        subtle: "0 4px 20px rgba(15, 41, 66, 0.07)",
+        panel: "0 12px 40px rgba(15, 41, 66, 0.10)",
       },
     },
   },

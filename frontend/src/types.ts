@@ -4,8 +4,13 @@ export type AudienceMode =
   | "Public / Media"
   | "State Regulator";
 
-export type Kpi = { label: string; value: string; color: string };
-export type FollowUp = { label: string; action: string; params: Record<string, unknown> };
+export type KpiColor = "sky" | "slate" | "red" | "emerald" | "amber" | "purple";
+export type Kpi = { label: string; value: string; color: KpiColor };
+export type FollowUp = {
+  label: string;
+  action: string;
+  params: Record<string, unknown>;
+};
 
 export type HourlyPoint = {
   hourEnding: number;
@@ -33,15 +38,45 @@ export type SearchResponse = {
   kpis: Kpi[];
   chartType: "lmp_series" | "fuel_mix" | "transmission_bar" | "glossary_card";
   hubId: string | null;
-  data: HourlyPoint[] | FuelPoint[] | Array<Record<string, unknown>> | Record<string, unknown>;
+  data:
+    | HourlyPoint[]
+    | FuelPoint[]
+    | Array<Record<string, unknown>>
+    | Record<string, unknown>;
   proactiveFollowUps: FollowUp[];
 };
 
 export type ComparisonResponse = {
-  compareType: string;
+  compareType: "hubs" | "fuels" | "plans";
   items: string[];
   title: string;
-  metricsSummary: Array<Record<string, unknown>>;
-  series: Array<Record<string, string | number>>;
+  metricsSummary: HubMetricSummary[];
+  series: ComparisonSeriesPoint[];
   sourceCitation: string;
+};
+
+export type HubMetricSummary = {
+  hubId: string;
+  name: string;
+  realTimeAvg: number;
+  dayAheadAvg: number;
+  spreadAvg: number;
+  peakHour: string;
+  peakPrice: number;
+  volume: string;
+};
+
+export type ComparisonSeriesPoint = {
+  hourEnding: number;
+  intervalLabel: string;
+  [key: string]: string | number;
+};
+
+export type SessionPrefetchResponse = {
+  sessionContext: string;
+  timestamp: string;
+  featuredHub: Record<string, unknown>;
+  generationMixSummary: FuelPoint[];
+  recentPeaks: Record<string, unknown>;
+  quickStartChips: Array<{ label: string; query: string; type: string }>;
 };
