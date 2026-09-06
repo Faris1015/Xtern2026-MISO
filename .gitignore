@@ -1,6 +1,27 @@
 # Python
 __pycache__/
 *.py[cod]
+<<<<<<< HEAD
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Node (frontend)
+node_modules/
+dist/
+build/
+=======
 *$py.class
 *.so
 .Python
@@ -29,3 +50,4 @@ build/
 .DS_Store
 Thumbs.db
 
+>>>>>>> main
