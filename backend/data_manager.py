@@ -354,10 +354,32 @@ class DataManager:
 
         # 5. Glossary
         glossary_file = self.data_path / "glossary.json"
+        if not glossary_file.exists() and (self.data_path.parent / "glossary.json").exists():
+            glossary_file = self.data_path.parent / "glossary.json"
+
         if glossary_file.exists():
             try:
                 with open(glossary_file, "r", encoding="utf-8") as f:
-                    self.glossary = json.load(f)
+                    loaded = json.load(f)
+                if isinstance(loaded, dict) and "terms" in loaded and isinstance(loaded["terms"], list):
+                    parsed_terms: Dict[str, Dict[str, Any]] = {}
+                    for item in loaded["terms"]:
+                        acronym = item.get("acronym", "").strip()
+                        if acronym:
+                            parsed_terms[acronym] = {
+                                "term": item.get("term") or item.get("name", acronym),
+                                "category": item.get("category", "Market Rule"),
+                                "eli5": item.get("eli5", ""),
+                                "technical": item.get("technical", ""),
+                                "formula": item.get("formula", ""),
+                                "related": item.get("related", []),
+                                "source": item.get("source", ""),
+                            }
+                    self.glossary = parsed_terms
+                elif isinstance(loaded, dict):
+                    self.glossary = loaded
+                else:
+                    self.glossary = DEFAULT_GLOSSARY
             except Exception:
                 self.glossary = DEFAULT_GLOSSARY
         else:
