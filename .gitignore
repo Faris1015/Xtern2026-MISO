@@ -24,6 +24,8 @@ build/
 .next/
 *.log
 .vite/
+coverage/
+*.tsbuildinfo
 
 # Environments / secrets
 .env
