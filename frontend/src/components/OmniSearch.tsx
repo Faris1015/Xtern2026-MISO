@@ -71,6 +71,7 @@ export default function OmniSearch({
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hasActiveSuggestion, setHasActiveSuggestion] = useState(false);
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -113,7 +114,10 @@ export default function OmniSearch({
     return () => document.removeEventListener("pointerdown", closeWhenOutside);
   }, []);
 
-  useEffect(() => setActiveIndex(0), [category, query]);
+  useEffect(() => {
+    setActiveIndex(0);
+    setHasActiveSuggestion(false);
+  }, [category, query]);
 
   const submit = (value: string) => {
     const cleanValue = value.trim();
@@ -193,12 +197,16 @@ export default function OmniSearch({
                 setActiveIndex((index) =>
                   Math.min(index + 1, Math.max(matches.length - 1, 0)),
                 );
+                setHasActiveSuggestion(true);
               } else if (event.key === "ArrowUp") {
                 event.preventDefault();
                 setActiveIndex((index) => Math.max(index - 1, 0));
+                setHasActiveSuggestion(true);
               } else if (event.key === "Enter") {
                 event.preventDefault();
-                submit(matches[activeIndex]?.label ?? query);
+                submit(
+                  hasActiveSuggestion ? matches[activeIndex]?.label ?? query : query,
+                );
               } else if (event.key === "Escape") setOpen(false);
             }}
             placeholder={

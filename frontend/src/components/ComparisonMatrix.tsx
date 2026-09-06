@@ -9,20 +9,43 @@ import {
   YAxis,
 } from "recharts";
 import { AlertCircle, GitCompareArrows, LoaderCircle } from "lucide-react";
-import type { ComparisonResponse } from "../types";
-
-const hubs = ["INDIANA.HUB", "MICHIGAN.HUB", "ILLINOIS.HUB", "TEXAS.HUB"];
+import { HUB_OPTIONS, type ComparisonResponse } from "../types";
 const strokeColors = ["#0284C7", "#B45309", "#1E293B", "#047857"];
+
+function numberValue(value: unknown) {
+  return typeof value === "number" ? value : null;
+}
+
+function stringValue(value: unknown) {
+  return typeof value === "string" ? value : null;
+}
+
+function metricValue(
+  summary: ComparisonResponse["metricsSummary"][number],
+  key: string,
+) {
+  return key in summary
+    ? Reflect.get(summary, key)
+    : undefined;
+}
 type Props = {
   apiBase: string;
   requestedHubs: string[] | null;
+  comparisonType: "hubs" | "fuels" | "plans";
+  requestedItems: string[] | null;
   onRequestedHubsHandled: () => void;
+  onComparisonTypeChange: (type: "hubs" | "fuels" | "plans") => void;
+  onClose: () => void;
 };
 
 export default function ComparisonMatrix({
   apiBase,
   requestedHubs,
+  comparisonType,
+  requestedItems,
   onRequestedHubsHandled,
+  onComparisonTypeChange,
+  onClose,
 }: Props) {
   const [selected, setSelected] = useState(["INDIANA.HUB", "MICHIGAN.HUB"]);
   const [comparison, setComparison] = useState<ComparisonResponse | null>(null);
@@ -32,35 +55,49 @@ export default function ComparisonMatrix({
 
   useEffect(() => {
     if (!requestedHubs) return;
-    const validHubs = requestedHubs.filter((hub) => hubs.includes(hub));
+    const validHubs = requestedHubs
+      .map((hub) => hub.toUpperCase())
+      .filter((hub): hub is (typeof HUB_OPTIONS)[number] =>
+        HUB_OPTIONS.includes(hub as (typeof HUB_OPTIONS)[number]),
+      );
     if (validHubs.length >= 2) setSelected(validHubs);
     onRequestedHubsHandled();
   }, [onRequestedHubsHandled, requestedHubs]);
+
+  useEffect(() => {
+    setComparison(null);
+  }, [comparisonType, requestedItems]);
 
   useEffect(() => {
     const controller = new AbortController();
     const version = ++requestVersion.current;
     setLoading(true);
     setError("");
-    fetch(`${apiBase}/api/compare?type=hubs&items=${selected.join(",")}`, {
-      signal: controller.signal,
-    })
+    const items = comparisonType === "hubs" ? selected : requestedItems ?? [];
+    fetch(
+      `${apiBase}/api/compare?type=${comparisonType}&items=${encodeURIComponent(items.join(","))}`,
+      {
+        signal: controller.signal,
+      },
+    )
       .then((response) => {
         if (!response.ok)
           throw new Error(`Comparison failed (${response.status})`);
         return response.json() as Promise<ComparisonResponse>;
       })
       .then((payload) => {
-        const missingField = selected.find((hub) =>
-          payload.series.some(
-            (point) =>
-              typeof point[`${hub.replace(".HUB", "")}_rt`] !== "number",
-          ),
-        );
-        if (missingField)
-          throw new Error(
-            `Comparison response is missing ${missingField.replace(".HUB", "")}_rt.`,
+        if (comparisonType === "hubs") {
+          const missingField = selected.find((hub) =>
+            payload.series.some(
+              (point) =>
+                typeof point[`${hub.replace(".HUB", "")}_rt`] !== "number",
+            ),
           );
+          if (missingField)
+            throw new Error(
+              `Comparison response is missing ${missingField.replace(".HUB", "")}_rt.`,
+            );
+        }
         if (version === requestVersion.current) setComparison(payload);
       })
       .catch((caught: unknown) => {
@@ -78,7 +115,7 @@ export default function ComparisonMatrix({
         if (version === requestVersion.current) setLoading(false);
       });
     return () => controller.abort();
-  }, [apiBase, selected]);
+  }, [apiBase, comparisonType, requestedItems, selected]);
 
   const chartData = useMemo(
     () =>
@@ -95,7 +132,8 @@ export default function ComparisonMatrix({
       }) ?? [],
     [comparison, selected],
   );
-
+  const isHubComparison = comparisonType === "hubs";
+  const isDataComparison = !isHubComparison;
   const toggleHub = (hub: string) =>
     setSelected((current) =>
       current.includes(hub)
@@ -114,27 +152,105 @@ export default function ComparisonMatrix({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-miso-sky">
-            <GitCompareArrows size={15} aria-hidden="true" /> Hub comparison
+            <GitCompareArrows size={15} aria-hidden="true" />{" "}
+            {isHubComparison ? "Hub comparison" : "Dataset comparison"}
           </p>
           <h2
             id="comparison-heading"
             className="mt-1 font-display text-xl font-semibold text-miso-navy"
           >
-            Compare hub price curves
+            {isHubComparison ? "Compare hub price curves" : "Compare market datasets"}
           </h2>
           <p className="mt-1 text-sm text-miso-muted">
-            Select two to four hubs. Keep at least two selected for a meaningful
-            comparison.
+            {isHubComparison
+              ? "Select two or more hubs. Keep at least two selected for a meaningful comparison."
+              : "Compare the selected backend datasets side by side."}
           </p>
         </div>
-        <span className="bg-miso-card px-3 py-1 text-xs font-semibold text-miso-muted">
-          {selected.length} selected
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="bg-miso-card px-3 py-1 text-xs font-semibold text-miso-muted">
+            {isHubComparison ? selected.length : requestedItems?.length ?? 0} selected
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="border border-miso-border px-3 py-1 text-xs font-semibold text-miso-muted hover:border-miso-sky hover:text-miso-sky"
+          >
+            Close
+          </button>
+        </div>
       </div>
-      <fieldset className="mt-5">
+      <nav
+        aria-label="Comparison type"
+        className="mt-5 flex flex-wrap gap-2 border-b border-miso-border pb-4"
+      >
+        {(
+          [
+            ["hubs", "Hub prices"],
+          ] as const
+        ).map(([type, label]) => (
+          <button
+            key={type}
+            type="button"
+            aria-current={comparisonType === type ? "page" : undefined}
+            onClick={() => onComparisonTypeChange(type)}
+            className={`px-3 py-2 text-xs font-semibold ${
+              comparisonType === type
+                ? "bg-miso-navy text-white"
+                : "border border-miso-border text-miso-muted hover:border-miso-sky hover:text-miso-sky"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+        <button
+          type="button"
+          aria-current={isDataComparison ? "page" : undefined}
+          onClick={() =>
+            onComparisonTypeChange(
+              comparisonType === "hubs" ? "fuels" : comparisonType,
+            )
+          }
+          className={`px-3 py-2 text-xs font-semibold ${
+            isDataComparison
+              ? "bg-miso-navy text-white"
+              : "border border-miso-border text-miso-muted hover:border-miso-sky hover:text-miso-sky"
+          }`}
+        >
+          Data comparison
+        </button>
+      </nav>
+      {isDataComparison && (
+        <nav
+          aria-label="Data comparison type"
+          className="mt-4 flex flex-wrap gap-2"
+        >
+          {(
+            [
+              ["fuels", "Fuel mix"],
+              ["plans", "Transmission plans"],
+            ] as const
+          ).map(([type, label]) => (
+            <button
+              key={type}
+              type="button"
+              aria-current={comparisonType === type ? "page" : undefined}
+              onClick={() => onComparisonTypeChange(type)}
+              className={`px-3 py-1.5 text-xs font-semibold ${
+                comparisonType === type
+                  ? "border border-miso-sky bg-sky-50 text-miso-sky"
+                  : "border border-miso-border text-miso-muted hover:border-miso-sky hover:text-miso-sky"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+      )}
+      {isHubComparison && <fieldset className="mt-5">
         <legend className="sr-only">Hubs to compare</legend>
         <div className="flex flex-wrap gap-3">
-          {hubs.map((hub) => {
+          {HUB_OPTIONS.map((hub) => {
             const isSelected = selected.includes(hub);
             const required = isSelected && selected.length === 2;
             return (
@@ -159,7 +275,7 @@ export default function ComparisonMatrix({
             );
           })}
         </div>
-      </fieldset>
+      </fieldset>}
       <div aria-live="polite">
         {loading && (
           <div className="flex items-center gap-2 py-12 text-sm text-miso-muted">
@@ -178,7 +294,7 @@ export default function ComparisonMatrix({
           </p>
         )}
       </div>
-      {!loading && !error && comparison && (
+      {!loading && !error && comparison && isHubComparison && (
         <>
           <div
             className="mt-5 h-72"
@@ -207,7 +323,23 @@ export default function ComparisonMatrix({
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {comparison.metricsSummary
-              .filter((summary) => selected.includes(String(summary.hubId)))
+              .filter(
+                (summary): summary is {
+                  hubId: string;
+                  name: string;
+                  realTimeAvg: number;
+                  dayAheadAvg: number;
+                  spreadAvg: number;
+                  peakHour: string;
+                  peakPrice: number;
+                  volume: string;
+                } =>
+                  "hubId" in summary &&
+                  "name" in summary &&
+                  "realTimeAvg" in summary &&
+                  "spreadAvg" in summary,
+              )
+              .filter((summary) => selected.includes(summary.hubId))
               .map((summary) => (
                 <div
                   key={String(summary.hubId)}
@@ -271,6 +403,46 @@ export default function ComparisonMatrix({
             {comparison.sourceCitation}
           </p>
         </>
+      )}
+      {!loading && !error && comparison && !isHubComparison && (
+        <div className="mt-5 space-y-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {comparison.metricsSummary.map((summary, index) => {
+              const label =
+                stringValue(metricValue(summary, "fuel")) ??
+                stringValue(metricValue(summary, "category")) ??
+                `Option ${index + 1}`;
+              const primary =
+                numberValue(metricValue(summary, "percentage")) ??
+                numberValue(metricValue(summary, "projects")) ??
+                0;
+              const unit =
+                comparisonType === "fuels" ? "%" : "projects";
+              return (
+                <div
+                  key={`${label}-${index}`}
+                  className="border border-miso-border bg-miso-card p-4"
+                >
+                  <p className="font-semibold text-miso-navy">{label}</p>
+                  <p className="mt-1 text-xl font-bold text-miso-sky">
+                    {primary.toLocaleString()} {unit}
+                  </p>
+                  {comparisonType === "fuels" && (
+                    <p className="mt-1 text-xs text-miso-muted">
+                      Peak record: {stringValue(metricValue(summary, "peakRecord")) ?? "—"}
+                    </p>
+                  )}
+                  {comparisonType === "plans" && (
+                    <p className="mt-1 text-xs text-miso-muted">
+                      {stringValue(metricValue(summary, "miles")) ?? "—"} ·{" "}
+                      {stringValue(metricValue(summary, "investment")) ?? "Investment not listed"}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </section>
   );

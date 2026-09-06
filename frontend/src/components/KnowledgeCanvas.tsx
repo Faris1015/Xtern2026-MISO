@@ -242,6 +242,13 @@ function DataTable({ result }: { result: SearchResponse }) {
   );
 }
 
+const relevantActions: Record<SearchResponse["chartType"], string[]> = {
+  lmp_series: ["compare_hubs", "show_spread", "download_csv", "generate_briefing"],
+  fuel_mix: ["compare_fuels", "view_queue", "download_factsheet"],
+  transmission_bar: ["compare_plans", "download_factsheet"],
+  glossary_card: ["view_tariff", "view_glossary", "search"],
+};
+
 export default function KnowledgeCanvas({
   apiBase,
   result,
@@ -331,44 +338,50 @@ export default function KnowledgeCanvas({
           </a>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {result.kpis.map((kpi) => (
-          <div
-            key={kpi.label}
-            className="border border-miso-border bg-white p-4"
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-miso-muted">
-              {kpi.label}
-            </p>
-            <p
-              className="mt-2 text-xl font-bold"
-              style={{ color: kpiColors[kpi.color] ?? kpiColors.sky }}
+      {result.chartType !== "glossary_card" && (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {result.kpis.map((kpi) => (
+            <div
+              key={kpi.label}
+              className="border border-miso-border bg-white p-4"
             >
-              {kpi.value}
-            </p>
-          </div>
-        ))}
-      </div>
-      <div className="border border-miso-border bg-white p-5 sm:p-6">
-        <div className="mb-4">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-miso-muted">
-            Supporting data
-          </p>
-          <h3 className="mt-1 font-display text-lg font-semibold text-miso-navy">
-            {result.chartType === "lmp_series"
-              ? "24-hour LMP curve"
-              : result.chartType === "fuel_mix"
-                ? "Generation mix"
-                : result.chartType === "transmission_bar"
-                  ? "Transmission portfolio"
-                  : "Glossary reference"}
-          </h3>
+              <p className="text-xs font-semibold uppercase tracking-wide text-miso-muted">
+                {kpi.label}
+              </p>
+              <p
+                className="mt-2 text-xl font-bold"
+                style={{ color: kpiColors[kpi.color] ?? kpiColors.sky }}
+              >
+                {kpi.value}
+              </p>
+            </div>
+          ))}
         </div>
-        <ChartForResult result={result} />
-        <DataTable result={result} />
-      </div>
+      )}
+      {result.chartType !== "glossary_card" && (
+        <div className="border border-miso-border bg-white p-5 sm:p-6">
+          <div className="mb-4">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-miso-muted">
+              Supporting data
+            </p>
+            <h3 className="mt-1 font-display text-lg font-semibold text-miso-navy">
+              {result.chartType === "lmp_series"
+                ? "24-hour LMP curve"
+                : result.chartType === "fuel_mix"
+                  ? "Generation mix"
+                  : "Transmission portfolio"}
+            </h3>
+          </div>
+          <ChartForResult result={result} />
+          <DataTable result={result} />
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-2">
-        {result.proactiveFollowUps.map((followUp) => (
+        {result.proactiveFollowUps
+          .filter((followUp) =>
+            relevantActions[result.chartType].includes(followUp.action),
+          )
+          .map((followUp) => (
           <button
             key={`${followUp.action}:${followUp.label}:${JSON.stringify(followUp.params)}`}
             type="button"

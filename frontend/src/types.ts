@@ -4,6 +4,15 @@ export type AudienceMode =
   | "Public / Media"
   | "State Regulator";
 
+export const HUB_OPTIONS = [
+  "INDIANA.HUB",
+  "ILLINOIS.HUB",
+  "MICHIGAN.HUB",
+  "MINN.HUB",
+  "LOUISIANA.HUB",
+  "TEXAS.HUB",
+] as const;
+
 export type KpiColor = "sky" | "slate" | "red" | "emerald" | "amber" | "purple";
 export type Kpi = { label: string; value: string; color: KpiColor };
 export type FollowUp = {
@@ -50,7 +59,7 @@ export type ComparisonResponse = {
   compareType: "hubs" | "fuels" | "plans";
   items: string[];
   title: string;
-  metricsSummary: HubMetricSummary[];
+  metricsSummary: Array<HubMetricSummary | Record<string, unknown>>;
   series: ComparisonSeriesPoint[];
   sourceCitation: string;
 };

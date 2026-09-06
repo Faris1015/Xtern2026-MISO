@@ -10,10 +10,14 @@ import { RefreshCw } from "lucide-react";
 import OmniSearch from "./components/OmniSearch";
 import SessionRadar from "./components/SessionRadar";
 import misoLogo from "./assets/miso-logo.png";
-import type { AudienceMode, FollowUp, SearchResponse } from "./types";
+import {
+  HUB_OPTIONS,
+  type AudienceMode,
+  type FollowUp,
+  type SearchResponse,
+} from "./types";
 
-// Deliberately kept local for the hackathon demo. Deployment configuration is out of scope.
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 const KnowledgeCanvas = lazy(() => import("./components/KnowledgeCanvas"));
 const ComparisonMatrix = lazy(() => import("./components/ComparisonMatrix"));
 
@@ -33,6 +37,10 @@ export default function App() {
   const [isSearching, setIsSearching] = useState(false);
   const [requestedHubs, setRequestedHubs] = useState<string[] | null>(null);
   const [showComparison, setShowComparison] = useState(false);
+  const [comparisonType, setComparisonType] = useState<
+    "hubs" | "fuels" | "plans"
+  >("hubs");
+  const [comparisonItems, setComparisonItems] = useState<string[] | null>(null);
   const searchController = useRef<AbortController | null>(null);
   const requestVersion = useRef(0);
 
@@ -79,11 +87,17 @@ export default function App() {
         Array.isArray(followUp.params.hubs)
       ) {
         const validHubs = followUp.params.hubs.filter(
-          (hub): hub is string => typeof hub === "string",
+          (hub): hub is string =>
+            typeof hub === "string" &&
+            HUB_OPTIONS.includes(
+              hub.toUpperCase() as (typeof HUB_OPTIONS)[number],
+            ),
         );
         if (validHubs.length >= 2) {
           setShowComparison(true);
+          setComparisonType("hubs");
           setRequestedHubs(validHubs);
+          setComparisonItems(validHubs);
           window.setTimeout(
             () =>
               document
@@ -94,9 +108,53 @@ export default function App() {
           return;
         }
       }
+      if (
+        followUp.action === "compare_fuels" ||
+        followUp.action === "compare_plans"
+      ) {
+        const key = followUp.action === "compare_fuels" ? "fuels" : "plans";
+        const rawItems = followUp.params[key];
+        if (!Array.isArray(rawItems)) {
+          void search(followUpQuery(followUp));
+          return;
+        }
+        const items = rawItems.filter(
+          (item): item is string => typeof item === "string",
+        );
+        setShowComparison(true);
+        setComparisonType(
+          followUp.action === "compare_fuels" ? "fuels" : "plans",
+        );
+        setComparisonItems(items);
+        setRequestedHubs(null);
+        window.setTimeout(
+          () =>
+            document
+              .getElementById("hub-comparison")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+          100,
+        );
+        return;
+      }
       void search(followUpQuery(followUp));
     },
     [search],
+  );
+
+  const changeComparisonType = useCallback(
+    (type: "hubs" | "fuels" | "plans") => {
+      setComparisonType(type);
+      setComparisonItems(
+        type === "fuels"
+          ? ["Solar", "Wind"]
+          : type === "plans"
+            ? ["mtep_local", "lrtp_regional"]
+            : null,
+      );
+      setRequestedHubs(null);
+      setShowComparison(true);
+    },
+    [],
   );
 
   return (
@@ -175,7 +233,11 @@ export default function App() {
             Need to compare locations?{" "}
             <button
               type="button"
-              onClick={() => setShowComparison(true)}
+              onClick={() => {
+                setComparisonType("hubs");
+                setComparisonItems(null);
+                setShowComparison(true);
+              }}
               className="font-semibold text-miso-sky underline"
             >
               Compare hub price curves
@@ -193,7 +255,11 @@ export default function App() {
             <ComparisonMatrix
               apiBase={API_BASE}
               requestedHubs={requestedHubs}
+              comparisonType={comparisonType}
+              requestedItems={comparisonItems}
               onRequestedHubsHandled={() => setRequestedHubs(null)}
+              onComparisonTypeChange={changeComparisonType}
+              onClose={() => setShowComparison(false)}
             />
           </Suspense>
         )}
