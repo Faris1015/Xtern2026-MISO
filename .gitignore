@@ -1,34 +1,14 @@
 # Python
 __pycache__/
 *.py[cod]
-<<<<<<< HEAD
+*$py.class
+*.so
+.Python
 *.egg-info/
 .venv/
 venv/
 env/
-
-# Environment / secrets
-.env
-.env.*
-!.env.example
-
-# Editors / OS
-.idea/
-.vscode/
-.DS_Store
-
-# Node (frontend)
-node_modules/
-dist/
-build/
-=======
-*$py.class
-*.so
-.Python
-env/
-venv/
 ENV/
-.venv/
 
 # Testing & Coverage
 .coverage
@@ -37,17 +17,23 @@ htmlcov/
 
 # Node / Frontend
 node_modules/
+frontend/node_modules/
 dist/
+frontend/dist/
 build/
 .next/
 *.log
+.vite/
+coverage/
+*.tsbuildinfo
 
-# Environments
+# Environments / secrets
 .env
-.env.local
+.env.*
+!.env.example
 
-# OS
+# Editors / OS
+.idea/
+.vscode/
 .DS_Store
 Thumbs.db
-
->>>>>>> main

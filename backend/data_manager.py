@@ -360,7 +360,6 @@ class DataManager:
         if glossary_file.exists():
             try:
                 with open(glossary_file, "r", encoding="utf-8") as f:
-                    self.glossary = json.load(f)
                     loaded = json.load(f)
                 if isinstance(loaded, dict) and "terms" in loaded and isinstance(loaded["terms"], list):
                     parsed_terms: Dict[str, Dict[str, Any]] = {}

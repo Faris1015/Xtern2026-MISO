@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "meta": {
     "version": "0.1.0",
     "last_updated": "2026-09-05",
@@ -9,28 +8,6 @@
       "https://cdn.misoenergy.org/Corp%20Fact%20Sheet%20July%202025706040.pdf"
     ]
   },
-  "generation_mix": {
-    "as_of": "2025-07",
-    "basis": "MISO July 2025 Fact Sheet",
-    "shares": [
-      { "fuel": "Natural Gas", "pct": 40 },
-      { "fuel": "Coal", "pct": 26 },
-      { "fuel": "Wind", "pct": 15 },
-      { "fuel": "Nuclear", "pct": 14 },
-      { "fuel": "Solar", "pct": 3 },
-      { "fuel": "Hydro", "pct": 2 }
-    ]
-  },
-  "records": [
-    { "metric": "Wind Peak Output", "value_gw": 25.6, "date": "2024-01-12", "source": "MISO July 2025 Fact Sheet" },
-    {"metric": "Solar Peak Output", "value_gw": 13.4, "date": "2025-05-31", "source": "MISO July 2025 Fact Sheet" },
-    { "metric": "All Time Demand Peak", "value_gw": 127.1, "date": "2011-07-20", "source": "MISO July 2025 Fact Sheet"}
-
-  ],
-  "system_facts": {
-    "installed_capacity_gw": 203, "annual_production_mwh": 638000000, "transmission_line_miles": 77000 ,
-    "population_served": 45000000, "states_served": 15
-=======
   "reportTitle": "MISO Fact Sheet Baseline",
   "effectiveDate": "July 2025",
   "generationMix": [
@@ -71,6 +48,18 @@
       "installedGw": 4.0
     }
   ],
+  "generation_mix": {
+    "as_of": "2025-07",
+    "basis": "MISO July 2025 Fact Sheet",
+    "shares": [
+      { "fuel": "Natural Gas", "pct": 40 },
+      { "fuel": "Coal", "pct": 26 },
+      { "fuel": "Wind", "pct": 15 },
+      { "fuel": "Nuclear", "pct": 14 },
+      { "fuel": "Solar", "pct": 3 },
+      { "fuel": "Hydro", "pct": 2 }
+    ]
+  },
   "recordPeaks": {
     "windPeak": {
       "valueGw": 25.6,
@@ -91,11 +80,22 @@
       "description": "Coincident peak load across 15 US states and Manitoba"
     }
   },
+  "records": [
+    { "metric": "Wind Peak Output", "value_gw": 25.6, "date": "2024-01-12", "source": "MISO July 2025 Fact Sheet" },
+    { "metric": "Solar Peak Output", "value_gw": 13.4, "date": "2025-05-31", "source": "MISO July 2025 Fact Sheet" },
+    { "metric": "All Time Demand Peak", "value_gw": 127.1, "date": "2011-07-20", "source": "MISO July 2025 Fact Sheet" }
+  ],
   "footprintMetrics": {
     "installedCapacityGw": 203.0,
     "annualProductionMwh": "638M MWh",
     "transmissionMiles": 77000,
     "populationServed": "45 Million"
->>>>>>> main
+  },
+  "system_facts": {
+    "installed_capacity_gw": 203,
+    "annual_production_mwh": 638000000,
+    "transmission_line_miles": 77000,
+    "population_served": 45000000,
+    "states_served": 15
   }
 }
