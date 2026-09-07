@@ -13,8 +13,28 @@ export const HUB_OPTIONS = [
   "TEXAS.HUB",
 ] as const;
 
-export type KpiColor = "sky" | "slate" | "red" | "emerald" | "amber" | "purple";
-export type Kpi = { label: string; value: string; color: KpiColor };
+export type HubId = (typeof HUB_OPTIONS)[number];
+export type ComparisonType = "hubs" | "fuels" | "plans";
+export type ChartType =
+  | "lmp_series"
+  | "fuel_mix"
+  | "transmission_bar"
+  | "glossary_card";
+
+export type KpiColor =
+  | "sky"
+  | "slate"
+  | "red"
+  | "emerald"
+  | "amber"
+  | "purple";
+
+export type Kpi = {
+  label: string;
+  value: string;
+  color: KpiColor;
+};
+
 export type FollowUp = {
   label: string;
   action: string;
@@ -40,29 +60,70 @@ export type FuelPoint = {
   color?: string;
 };
 
-export type SearchResponse = {
+export type TransmissionPoint = {
+  id: string;
+  categoryName: string;
+  projectsCount: number;
+  miles: number;
+  investmentEst: string;
+  focus: string;
+};
+
+export type GlossaryPoint = {
+  acronym?: string;
+  term: string;
+  category: string;
+  eli5: string;
+  technical: string;
+  formula?: string;
+  related?: unknown[];
+  source?: string;
+};
+
+type SearchResponseBase<
+  TChart extends ChartType,
+  TData,
+  THub extends string | null,
+> = {
   query: string;
   directAnswer: string;
   sourceCitation: string;
   kpis: Kpi[];
-  chartType: "lmp_series" | "fuel_mix" | "transmission_bar" | "glossary_card";
-  hubId: string | null;
-  data:
-    | HourlyPoint[]
-    | FuelPoint[]
-    | Array<Record<string, unknown>>
-    | Record<string, unknown>;
+  chartType: TChart;
+  hubId: THub;
+  data: TData;
   proactiveFollowUps: FollowUp[];
 };
 
-export type ComparisonResponse = {
-  compareType: "hubs" | "fuels" | "plans";
-  items: string[];
-  title: string;
-  metricsSummary: Array<HubMetricSummary | Record<string, unknown>>;
-  series: ComparisonSeriesPoint[];
-  sourceCitation: string;
-};
+export type HubSearchResponse = SearchResponseBase<
+  "lmp_series",
+  HourlyPoint[],
+  string
+>;
+
+export type FuelSearchResponse = SearchResponseBase<
+  "fuel_mix",
+  FuelPoint[],
+  null
+>;
+
+export type TransmissionSearchResponse = SearchResponseBase<
+  "transmission_bar",
+  TransmissionPoint[],
+  null
+>;
+
+export type GlossarySearchResponse = SearchResponseBase<
+  "glossary_card",
+  GlossaryPoint,
+  null
+>;
+
+export type SearchResponse =
+  | HubSearchResponse
+  | FuelSearchResponse
+  | TransmissionSearchResponse
+  | GlossarySearchResponse;
 
 export type HubMetricSummary = {
   hubId: string;
@@ -75,17 +136,108 @@ export type HubMetricSummary = {
   volume: string;
 };
 
-export type ComparisonSeriesPoint = {
+export type HubComparisonPoint = {
   hourEnding: number;
   intervalLabel: string;
   [key: string]: string | number;
 };
 
+export type FuelMetricSummary = {
+  fuel: string;
+  percentage: number;
+  peakRecord: string;
+  role: string;
+};
+
+export type FuelComparisonPoint = {
+  fuel: string;
+  percentage: number;
+  installedGw: number;
+};
+
+export type PlanMetricSummary = {
+  category: string;
+  projects: number;
+  miles: string;
+  investment: string;
+  focus: string;
+};
+
+export type PlanComparisonPoint = {
+  category: string;
+  projects: number;
+  miles: number;
+};
+
+type ComparisonResponseBase<TType extends ComparisonType> = {
+  compareType: TType;
+  items: string[];
+  title: string;
+  sourceCitation: string;
+};
+
+export type HubComparisonResponse = ComparisonResponseBase<"hubs"> & {
+  metricsSummary: HubMetricSummary[];
+  series: HubComparisonPoint[];
+};
+
+export type FuelComparisonResponse = ComparisonResponseBase<"fuels"> & {
+  metricsSummary: FuelMetricSummary[];
+  series: FuelComparisonPoint[];
+};
+
+export type PlanComparisonResponse = ComparisonResponseBase<"plans"> & {
+  metricsSummary: PlanMetricSummary[];
+  series: PlanComparisonPoint[];
+};
+
+export type ComparisonResponse =
+  | HubComparisonResponse
+  | FuelComparisonResponse
+  | PlanComparisonResponse;
+
+export type HubSummary = {
+  realTimeAvg: number;
+  dayAheadAvg: number;
+  peakHour: string;
+  peakPrice: number;
+  peakHE: number;
+  totalVolumeMwh: number;
+  formattedVolume: string;
+};
+
+export type HubPayload = {
+  hubId: string;
+  hubName: string;
+  region: string;
+  summary: HubSummary;
+  hourly: HourlyPoint[];
+};
+
+export type PeakRecord = {
+  valueGw: number;
+  date: string;
+  time: string;
+  description: string;
+};
+
+export type RecentPeaks = {
+  windPeak: PeakRecord;
+  solarPeak: PeakRecord;
+  allTimeDemandRecord: PeakRecord;
+};
+
+export type SessionQuickStartChip = {
+  label: string;
+  query: string;
+  type: string;
+};
+
 export type SessionPrefetchResponse = {
   sessionContext: string;
   timestamp: string;
-  featuredHub: Record<string, unknown>;
+  featuredHub: HubPayload;
   generationMixSummary: FuelPoint[];
-  recentPeaks: Record<string, unknown>;
-  quickStartChips: Array<{ label: string; query: string; type: string }>;
+  recentPeaks: RecentPeaks;
+  quickStartChips: SessionQuickStartChip[];
 };
