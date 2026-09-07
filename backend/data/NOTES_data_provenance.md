@@ -42,6 +42,22 @@ discrepancy here.
 
 **Taxonomy:** The Fact Sheet itself frames MTEP24 as Local MTEP + Regional LRTP + Interregional JTIQ, so Issue #5's three-way split matches MISO's published table.
 
+**⚠️ Open conflict (2026-09-05):** branch `feature/issue-2-pdf-briefing-generator`
+(commit `0e8fc3f`, not yet merged to `main`) already has its own
+`backend/data/mtep_projects.json`, built for the PDF-briefing generator, with a
+different schema than this file's README contract:
+- Top level: `report` / `categories` / `totalProjects` / `totalMiles` (vs. this
+  file's `meta` / `portfolios`).
+- Per-project fields: `categoryName`, `projectsCount`, `miles`, `investmentEst`,
+  `focus` (vs. `name`, `project_count`, `line_miles`, `scope`, `notes`).
+- **Dollar figures disagree with the board-release numbers above:** that file has
+  LRTP `investmentEst: "$10.3B"` and JTIQ `investmentEst: "$1.2B"`, vs. $21.8B and
+  $1.6B cited here from the Dec 2024 board-approval release. Source of the other
+  branch's numbers is not cited in that commit.
+- Needs a team decision before both branches merge: which schema is canonical, and
+  which dollar figures are correct. Raised with PM / Member 1 (Faris169) on
+  2026-09-05.
+
 ---
 
 ## `crosswalk.json`

@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "version": "0.1.0",
+    "last_updated": "2026-09-05",
+    "basis": "MTEP24 / LRTP Tranche 2.1",
+    "data_type": "verified",
+    "source": [
+      "https://cdn.misoenergy.org/Corp%20Fact%20Sheet%20July%202025706040.pdf",
+      "https://www.misoenergy.org/meet-miso/media-center/2024/miso-board-approves-historic-transmission-plan-to-strengthen-grid-reliability/"
+    ]
+  },
+  "portfolios": [
+    {
+      "id": "lrtp",
+      "name": "Long Range Transmission Planning (LRTP)",
+      "project_count": 24,
+      "line_miles": 3631,
+      "scope": "Regional",
+      "notes": "Tranche 2.1 — $21.8B, 765 kV backbone, in service 2032–2034."
+    },
+    {
+      "id": "local_mtep",
+      "name": "Local MISO Transmission Expansion Plan",
+      "project_count": 459,
+      "line_miles": 932,
+      "scope": "Local",
+      "notes": "Reliability driven local upgrades approved in MTEP24."
+    },
+
+    {"id": "jtiq",
+      "name": "Joint Targeted Interconnection Queue (JTIQ)",
+      "project_count": 5,
+      "line_miles": 490,
+      "scope": "Interregional",
+      "notes": "$1.6B, 28 GW enabled on the MISO/SPP seam."
+    }
+  ]
+}
