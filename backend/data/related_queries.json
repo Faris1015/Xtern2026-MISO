@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "version": "0.1.0",
+    "last_updated": "2026-09-08"
+  },
+  "nodes": [
+    {
+      "id": "indiana_hub",
+      "match": {
+        "keywords": [
+          "indiana hub",
+          "indiana.hub",
+          "in hub"
+        ],
+        "entity_type": "market_hub"
+      },
+      "canonical_entity": "INDIANA.HUB",
+      "follow_ups": [
+        {
+          "label": "Compare Indiana vs. Michigan",
+          "action": "compare",
+          "params": { "entities": ["INDIANA.HUB", "MICHIGAN.HUB"], "metric": "real_time_lmp" }
+        },
+        {
+          "label": "Download hourly CSV",
+          "action": "download",
+          "params": { "dataset": "market_hubs", "entity": "INDIANA.HUB", "format": "csv" }
+        }
+      ]
+    },
+    {
+      "id": "lmp_term",
+      "match": {
+        "keywords": ["lmp", "locational marginal price"],
+        "entity_type": "glossary_term"
+      },
+      "canonical_entity": "LMP",
+      "follow_ups": [
+        {
+          "label": "Define LMP",
+          "action": "define",
+          "params": { "term": "LMP" }
+        },
+        {
+          "label": "View Indiana Hub LMP trend",
+          "action": "chart",
+          "params": { "dataset": "market_hubs", "entity": "INDIANA.HUB", "metric": "real_time_lmp" }
+        }
+      ]
+    },
+    {
+      "id": "fuel_mix_query",
+      "match": {
+        "keywords": [
+          "fuel mix",
+          "generation mix",
+          "energy mix"
+        ],
+        "entity_type": "fuel_mix"
+      },
+      "canonical_entity": "MISO_GENERATION_MIX",
+      "follow_ups": [
+        {
+          "label": "Chart generation mix by fuel",
+          "action": "chart",
+          "params": { "dataset": "fuel_peaks", "field": "generation_mix.shares" }
+        },
+        {
+          "label": "View wind & solar peak records",
+          "action": "open_report",
+          "params": { "dataset": "fuel_peaks", "field": "records" }
+        }
+      ]
+    }
+  ]
+}
