@@ -72,5 +72,211 @@
         }
       ]
     }
+  ],
+  "indiana hub": [
+    {
+      "label": "Compare Indiana vs. Michigan Hub",
+      "action": "compare_hubs",
+      "params": {
+        "hubs": [
+          "INDIANA.HUB",
+          "MICHIGAN.HUB"
+        ]
+      }
+    },
+    {
+      "label": "Show Day-Ahead Price Spread",
+      "action": "show_spread",
+      "params": {
+        "hub": "INDIANA.HUB"
+      }
+    },
+    {
+      "label": "Download Hourly CSV Dataset",
+      "action": "download_csv",
+      "params": {
+        "hub": "INDIANA.HUB"
+      }
+    },
+    {
+      "label": "Download 1-Page PDF Briefing",
+      "action": "generate_briefing",
+      "params": {
+        "hub": "INDIANA.HUB"
+      }
+    }
+  ],
+  "michigan hub": [
+    {
+      "label": "Compare Michigan vs. Indiana Hub",
+      "action": "compare_hubs",
+      "params": {
+        "hubs": [
+          "MICHIGAN.HUB",
+          "INDIANA.HUB"
+        ]
+      }
+    },
+    {
+      "label": "Inspect Congestion & Losses",
+      "action": "show_components",
+      "params": {
+        "hub": "MICHIGAN.HUB"
+      }
+    },
+    {
+      "label": "Download 1-Page PDF Briefing",
+      "action": "generate_briefing",
+      "params": {
+        "hub": "MICHIGAN.HUB"
+      }
+    }
+  ],
+  "solar peak": [
+    {
+      "label": "Compare Solar vs. Wind Growth",
+      "action": "compare_fuels",
+      "params": {
+        "fuels": [
+          "Solar",
+          "Wind"
+        ]
+      }
+    },
+    {
+      "label": "View Active Solar in Queue",
+      "action": "view_queue",
+      "params": {
+        "fuel": "Solar"
+      }
+    },
+    {
+      "label": "Download Fact Sheet",
+      "action": "download_factsheet",
+      "params": {
+        "topic": "solar"
+      }
+    }
+  ],
+  "wind peak": [
+    {
+      "label": "Compare Wind vs. Natural Gas",
+      "action": "compare_fuels",
+      "params": {
+        "fuels": [
+          "Wind",
+          "Natural Gas"
+        ]
+      }
+    },
+    {
+      "label": "Inspect Wind Curtailment Trends",
+      "action": "view_curtailment",
+      "params": {
+        "fuel": "Wind"
+      }
+    },
+    {
+      "label": "Download Fact Sheet",
+      "action": "download_factsheet",
+      "params": {
+        "topic": "wind"
+      }
+    }
+  ],
+  "fuel mix": [
+    {
+      "label": "Compare Renewable vs. Thermal",
+      "action": "compare_fuels",
+      "params": {
+        "fuels": [
+          "Wind",
+          "Gas"
+        ]
+      }
+    },
+    {
+      "label": "View Historical Record Peaks",
+      "action": "view_peaks",
+      "params": {}
+    },
+    {
+      "label": "Download Generation Mix CSV",
+      "action": "download_csv",
+      "params": {
+        "type": "generation"
+      }
+    }
+  ],
+  "mtep24": [
+    {
+      "label": "View LRTP Tranche 2 Miles",
+      "action": "view_lrtp",
+      "params": {
+        "tranche": 2
+      }
+    },
+    {
+      "label": "Compare Local vs. Regional Transmission",
+      "action": "compare_plans",
+      "params": {
+        "plans": [
+          "mtep_local",
+          "lrtp_regional"
+        ]
+      }
+    },
+    {
+      "label": "Download MTEP Summary",
+      "action": "download_summary",
+      "params": {
+        "report": "MTEP24"
+      }
+    }
+  ],
+  "lrtp": [
+    {
+      "label": "Compare LRTP vs. JTIQ Seam Projects",
+      "action": "compare_plans",
+      "params": {
+        "plans": [
+          "lrtp_regional",
+          "jtiq_interregional"
+        ]
+      }
+    },
+    {
+      "label": "View Transmission Miles by Voltage",
+      "action": "view_transmission_miles",
+      "params": {}
+    },
+    {
+      "label": "Download LRTP Fact Sheet",
+      "action": "download_factsheet",
+      "params": {
+        "topic": "lrtp"
+      }
+    }
+  ],
+  "cone": [
+    {
+      "label": "Explain Capacity Auction (PRA) Rules",
+      "action": "view_glossary",
+      "params": {
+        "term": "PRA"
+      }
+    },
+    {
+      "label": "View Local Resource Zones (LRZ)",
+      "action": "view_zones",
+      "params": {}
+    },
+    {
+      "label": "Download Planning Resource Auction Guide",
+      "action": "download_guide",
+      "params": {
+        "topic": "cone"
+      }
+    }
   ]
 }

@@ -34,5 +34,34 @@
       "scope": "Interregional",
       "notes": "$1.6B, 28 GW enabled on the MISO/SPP seam."
     }
-  ]
+  ],
+  "report": "MISO Transmission Expansion Plan (MTEP24 & LRTP)",
+  "categories": [
+    {
+      "id": "mtep_local",
+      "categoryName": "Local MTEP Projects",
+      "projectsCount": 459,
+      "miles": 932,
+      "investmentEst": "$4.1B",
+      "focus": "Local reliability, aging asset replacement, and baseline interconnection"
+    },
+    {
+      "id": "lrtp_regional",
+      "categoryName": "Regional LRTP (Long Range Transmission Planning)",
+      "projectsCount": 24,
+      "miles": 3631,
+      "investmentEst": "$10.3B",
+      "focus": "Tranche 1 & 2 regional backbone lines connecting high-yield renewables to load centers"
+    },
+    {
+      "id": "jtiq_interregional",
+      "categoryName": "Interregional JTIQ (Joint Targeted Interconnection Queue)",
+      "projectsCount": 5,
+      "miles": 490,
+      "investmentEst": "$1.2B",
+      "focus": "SPP-MISO seam congestion relief and collaborative interregional capacity"
+    }
+  ],
+  "totalProjects": 488,
+  "totalMiles": 5053
 }
