@@ -10,6 +10,8 @@ import {
   Legend,
   Line,
   LineChart,
+  Pie,
+  PieChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -66,6 +68,7 @@ const SOURCE_DIRECTORY: Record<ChartType, { title: string; url: string }> = {
 
 type LmpChartMode = "prices" | "spread" | "components";
 type TransmissionMetric = "projectsCount" | "miles";
+type FuelChartMode = "donut" | "bar";
 
 type Props = {
   apiBase: string;
@@ -396,14 +399,66 @@ function LmpChart({
 
 function FuelMixChart({
   result,
+  mode = "donut",
 }: {
   result: Extract<SearchResponse, { chartType: "fuel_mix" }>;
+  mode?: FuelChartMode;
 }) {
+  if (mode === "donut") {
+    return (
+      <div
+        className="h-[340px]"
+        role="img"
+        aria-label="Generation fuel mix donut chart"
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart margin={{ top: 8, right: 18, bottom: 8, left: 18 }}>
+            <Tooltip
+              contentStyle={CHART_TOOLTIP_STYLE}
+              formatter={(value: unknown, name: unknown) => [
+                formatPercent(value),
+                String(name),
+              ]}
+            />
+            <Legend
+              verticalAlign="bottom"
+              height={36}
+              formatter={(value: string) => (
+                <span style={{ color: MISO_THEME.ink, fontSize: "12px", fontWeight: 600 }}>
+                  {value}
+                </span>
+              )}
+            />
+            <Pie
+              data={result.data}
+              dataKey="percentage"
+              nameKey="fuel"
+              cx="50%"
+              cy="45%"
+              innerRadius={65}
+              outerRadius={105}
+              paddingAngle={3}
+              stroke="#ffffff"
+              strokeWidth={2}
+            >
+              {result.data.map((item, index) => (
+                <Cell
+                  key={item.fuel}
+                  fill={item.color ?? CHART_SERIES[index % CHART_SERIES.length]}
+                />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
   return (
     <div
       className="h-[340px]"
       role="img"
-      aria-label="Generation fuel mix chart"
+      aria-label="Generation fuel mix bar chart"
     >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
@@ -465,25 +520,27 @@ function TransmissionChart({
   result: Extract<SearchResponse, { chartType: "transmission_bar" }>;
   metric: TransmissionMetric;
 }) {
+  const isProjects = metric === "projectsCount";
   const data = result.data.map((item) => ({
     ...item,
     displayName: shortPlanLabel(item.categoryName),
   }));
-  const isProjects = metric === "projectsCount";
 
   return (
     <div
-      className="h-[310px]"
+      className="h-[340px]"
       role="img"
-      aria-label={`Transmission portfolio comparison by ${
-        isProjects ? "projects" : "line miles"
-      }`}
+      aria-label={
+        isProjects
+          ? "Transmission projects by category chart"
+          : "Transmission line miles by category chart"
+      }
     >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
           layout="vertical"
-          margin={{ top: 8, right: 72, bottom: 4, left: 20 }}
+          margin={{ top: 8, right: 64, bottom: 4, left: 16 }}
         >
           <CartesianGrid horizontal={false} stroke={MISO_THEME.grid} />
           <XAxis
@@ -531,16 +588,18 @@ function ChartForResult({
   result,
   lmpChartMode,
   transmissionMetric,
+  fuelChartMode,
 }: {
   result: SearchResponse;
   lmpChartMode: LmpChartMode;
   transmissionMetric: TransmissionMetric;
+  fuelChartMode: FuelChartMode;
 }) {
   if (result.chartType === "lmp_series") {
     return <LmpChart result={result} mode={lmpChartMode} />;
   }
   if (result.chartType === "fuel_mix") {
-    return <FuelMixChart result={result} />;
+    return <FuelMixChart result={result} mode={fuelChartMode} />;
   }
   if (result.chartType === "transmission_bar") {
     return <TransmissionChart result={result} metric={transmissionMetric} />;
@@ -755,13 +814,18 @@ function chartHeading(
   result: SearchResponse,
   lmpChartMode: LmpChartMode,
   transmissionMetric: TransmissionMetric,
+  fuelChartMode: FuelChartMode,
 ) {
   if (result.chartType === "lmp_series") {
     if (lmpChartMode === "spread") return "24-hour RT–DA price spread";
     if (lmpChartMode === "components") return "24-hour LMP components";
     return "24-hour LMP price curve";
   }
-  if (result.chartType === "fuel_mix") return "Generation mix share";
+  if (result.chartType === "fuel_mix") {
+    return fuelChartMode === "donut"
+      ? "Generation fuel mix on margin"
+      : "Generation fuel mix share";
+  }
   return transmissionMetric === "projectsCount"
     ? "Transmission projects by portfolio"
     : "Transmission line miles by portfolio";
@@ -783,10 +847,12 @@ export default function KnowledgeCanvas({
   const [lmpChartMode, setLmpChartMode] = useState<LmpChartMode>("prices");
   const [transmissionMetric, setTransmissionMetric] =
     useState<TransmissionMetric>("projectsCount");
+  const [fuelChartMode, setFuelChartMode] = useState<FuelChartMode>("donut");
 
   useEffect(() => {
     setLmpChartMode("prices");
     setTransmissionMetric("projectsCount");
+    setFuelChartMode("donut");
   }, [result]);
 
   const visibleFollowUps = useMemo(() => {
@@ -962,7 +1028,12 @@ export default function KnowledgeCanvas({
               <div>
                 <p className="miso-eyebrow">Analysis</p>
                 <h3 className="mt-1 text-lg font-bold text-miso-navy">
-                  {chartHeading(result, lmpChartMode, transmissionMetric)}
+                  {chartHeading(
+                    result,
+                    lmpChartMode,
+                    transmissionMetric,
+                    fuelChartMode,
+                  )}
                 </h3>
               </div>
 
@@ -996,6 +1067,35 @@ export default function KnowledgeCanvas({
                       </button>
                     );
                   })}
+                </div>
+              )}
+
+              {result.chartType === "fuel_mix" && (
+                <div
+                  className="flex gap-2"
+                  role="group"
+                  aria-label="Fuel mix chart view"
+                >
+                  <button
+                    type="button"
+                    aria-pressed={fuelChartMode === "donut"}
+                    onClick={() => setFuelChartMode("donut")}
+                    className={`miso-segment ${
+                      fuelChartMode === "donut" ? "miso-segment-active" : ""
+                    }`}
+                  >
+                    Donut chart
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={fuelChartMode === "bar"}
+                    onClick={() => setFuelChartMode("bar")}
+                    className={`miso-segment ${
+                      fuelChartMode === "bar" ? "miso-segment-active" : ""
+                    }`}
+                  >
+                    Bar chart
+                  </button>
                 </div>
               )}
 
@@ -1037,6 +1137,7 @@ export default function KnowledgeCanvas({
               result={result}
               lmpChartMode={lmpChartMode}
               transmissionMetric={transmissionMetric}
+              fuelChartMode={fuelChartMode}
             />
 
             {result.chartType === "lmp_series" && (
