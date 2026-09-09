@@ -8,6 +8,7 @@ import {
 } from "react";
 import { ExternalLink, GitCompareArrows, HelpCircle, X } from "lucide-react";
 import OmniSearch from "./components/OmniSearch";
+import AudioBriefing from "./components/AudioBriefing";
 import SessionRadar from "./components/SessionRadar";
 import GuidedTour from "./components/GuidedTour";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -307,6 +308,11 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            <AudioBriefing
+              audienceMode={audienceMode}
+              onAudienceModeChange={handleAudienceModeChange}
+            />
+
             <button
               type="button"
               onClick={handleOpenTour}
