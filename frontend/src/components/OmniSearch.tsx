@@ -196,7 +196,27 @@ export default function OmniSearch({
           </label>
         </div>
 
-        <div ref={rootRef} data-tour="search-input-area" className="relative mt-6">
+        <div
+          ref={rootRef}
+          data-tour="search-input-area"
+          className="relative mt-6"
+          onBlur={(event) => {
+            if (
+              !event.currentTarget.contains(event.relatedTarget as Node | null)
+            ) {
+              setOpen(false);
+              setActiveIndex(-1);
+            }
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape" && open) {
+              event.preventDefault();
+              setOpen(false);
+              setActiveIndex(-1);
+              inputRef.current?.focus();
+            }
+          }}
+        >
           <div
             className={`flex items-center gap-3 border bg-white px-4 py-3 transition ${
               open
@@ -286,7 +306,14 @@ export default function OmniSearch({
           </p>
 
           {open && (
-            <div className="absolute z-30 mt-2 w-full overflow-hidden border border-miso-border bg-white shadow-panel">
+            <div
+              className="absolute z-30 mt-2 w-full overflow-hidden border border-miso-border bg-white shadow-panel"
+              onMouseDown={(event) => {
+                if (event.target !== inputRef.current) {
+                  event.preventDefault();
+                }
+              }}
+            >
               <div
                 className="flex gap-1 border-b border-miso-border bg-miso-card px-3 py-2"
                 aria-label="Filter suggestions"
