@@ -6,11 +6,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { ExternalLink, GitCompareArrows, HelpCircle, X } from "lucide-react";
+import { BookOpen, ExternalLink, GitCompareArrows, HelpCircle, X } from "lucide-react";
 import OmniSearch from "./components/OmniSearch";
 import AudioBriefing from "./components/AudioBriefing";
 import SessionRadar from "./components/SessionRadar";
 import GuidedTour from "./components/GuidedTour";
+import JargonHUD from "./components/JargonHUD";
 import ErrorBoundary from "./components/ErrorBoundary";
 import misoLogo from "./assets/miso-logo.png";
 import { parseSearchResponse } from "./api/guards";
@@ -75,6 +76,7 @@ export default function App() {
       return false;
     }
   });
+  const [isJargonHudOpen, setIsJargonHudOpen] = useState(false);
   const searchController = useRef<AbortController | null>(null);
   const lastQueryRef = useRef("");
   const requestVersion = useRef(0);
@@ -90,6 +92,17 @@ export default function App() {
 
   const handleOpenTour = useCallback(() => {
     setIsTourOpen(true);
+  }, []);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setIsJargonHudOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, []);
 
   useEffect(() => () => searchController.current?.abort(), []);
@@ -317,6 +330,19 @@ export default function App() {
 
             <button
               type="button"
+              onClick={() => setIsJargonHudOpen(true)}
+              aria-label="Open MISO Jargon HUD (Acronym dictionary)"
+              className="miso-button-secondary text-xs sm:text-sm flex items-center gap-1.5"
+            >
+              <BookOpen size={16} className="text-miso-sky" aria-hidden="true" />
+              <span>Jargon HUD</span>
+              <kbd className="hidden md:inline-block rounded bg-miso-soft px-1.5 py-0.5 text-[10px] font-semibold text-miso-muted border border-miso-border">
+                Ctrl+J
+              </kbd>
+            </button>
+
+            <button
+              type="button"
               onClick={handleOpenTour}
               aria-label="Start interactive guided tour"
               className="miso-button-secondary text-xs sm:text-sm"
@@ -449,6 +475,14 @@ export default function App() {
           <div className="flex items-center gap-4">
             <button
               type="button"
+              onClick={() => setIsJargonHudOpen(true)}
+              className="text-miso-slate underline-offset-2 hover:text-miso-sky hover:underline transition font-semibold"
+            >
+              Jargon HUD
+            </button>
+            <span aria-hidden="true">·</span>
+            <button
+              type="button"
               onClick={handleOpenTour}
               className="text-miso-slate underline-offset-2 hover:text-miso-sky hover:underline transition font-semibold"
             >
@@ -466,6 +500,12 @@ export default function App() {
         audienceMode={audienceMode}
         onAudienceModeChange={handleAudienceModeChange}
         onTriggerSampleSearch={(sampleQuery) => void search(sampleQuery)}
+      />
+
+      <JargonHUD
+        isOpen={isJargonHudOpen}
+        onClose={() => setIsJargonHudOpen(false)}
+        onSelectTerm={(term) => void search(term)}
       />
       </div>
     </GlossaryProvider>
