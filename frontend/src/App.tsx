@@ -6,9 +6,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { ExternalLink, GitCompareArrows, X } from "lucide-react";
+import { ExternalLink, GitCompareArrows, HelpCircle, X } from "lucide-react";
 import OmniSearch from "./components/OmniSearch";
+import AudioBriefing from "./components/AudioBriefing";
 import SessionRadar from "./components/SessionRadar";
+import GuidedTour from "./components/GuidedTour";
 import ErrorBoundary from "./components/ErrorBoundary";
 import misoLogo from "./assets/miso-logo.png";
 import { parseSearchResponse } from "./api/guards";
@@ -20,6 +22,7 @@ import {
   type SearchResponse,
   type SessionQuickStartChip,
 } from "./types";
+import { GlossaryProvider } from "./context/GlossaryContext";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 const KnowledgeCanvas = lazy(() => import("./components/KnowledgeCanvas"));
@@ -65,9 +68,29 @@ export default function App() {
   const [showComparison, setShowComparison] = useState(false);
   const [comparisonType, setComparisonType] = useState<ComparisonType>("hubs");
   const [comparisonItems, setComparisonItems] = useState<string[] | null>(null);
+  const [isTourOpen, setIsTourOpen] = useState(() => {
+    try {
+      return !localStorage.getItem("miso_omnisearch_tour_completed");
+    } catch {
+      return false;
+    }
+  });
   const searchController = useRef<AbortController | null>(null);
   const lastQueryRef = useRef("");
   const requestVersion = useRef(0);
+
+  const handleCloseTour = useCallback(() => {
+    setIsTourOpen(false);
+    try {
+      localStorage.setItem("miso_omnisearch_tour_completed", "true");
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleOpenTour = useCallback(() => {
+    setIsTourOpen(true);
+  }, []);
 
   useEffect(() => () => searchController.current?.abort(), []);
 
@@ -250,10 +273,11 @@ export default function App() {
   const comparisonResetKey = `${comparisonType}:${comparisonItems?.join("|") ?? "default"}:${requestedHubs?.join("|") ?? "none"}`;
 
   return (
-    <div className="miso-omnisearch min-h-screen bg-canvas">
-      <a className="skip-link" href="#main-content">
-        Skip to main content
-      </a>
+    <GlossaryProvider apiBase={API_BASE} onSearchTerm={(q) => void search(q)}>
+      <div className="miso-omnisearch min-h-screen bg-canvas">
+        <a className="skip-link" href="#main-content">
+          Skip to main content
+        </a>
 
       <div className="bg-miso-navy text-white">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-8 py-2 text-xs">
@@ -285,23 +309,41 @@ export default function App() {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (showComparison) {
-                setShowComparison(false);
-                return;
-              }
-              setComparisonType("hubs");
-              setComparisonItems(null);
-              setShowComparison(true);
-              scrollToComparison();
-            }}
-            className="miso-button-secondary"
-          >
-            <GitCompareArrows size={16} aria-hidden="true" />
-            {showComparison ? "Close comparison" : "Comparison workspace"}
-          </button>
+          <div className="flex items-center gap-3">
+            <AudioBriefing
+              audienceMode={audienceMode}
+              onAudienceModeChange={handleAudienceModeChange}
+            />
+
+            <button
+              type="button"
+              onClick={handleOpenTour}
+              aria-label="Start interactive guided tour"
+              className="miso-button-secondary text-xs sm:text-sm"
+            >
+              <HelpCircle size={16} className="text-miso-sky" aria-hidden="true" />
+              Guided Tour
+            </button>
+
+            <button
+              type="button"
+              data-tour="comparison-btn"
+              onClick={() => {
+                if (showComparison) {
+                  setShowComparison(false);
+                  return;
+                }
+                setComparisonType("hubs");
+                setComparisonItems(null);
+                setShowComparison(true);
+                scrollToComparison();
+              }}
+              className="miso-button-secondary text-xs sm:text-sm"
+            >
+              <GitCompareArrows size={16} aria-hidden="true" />
+              {showComparison ? "Close comparison" : "Comparison workspace"}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -404,9 +446,28 @@ export default function App() {
       <footer className="mt-10 border-t border-miso-border bg-white">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-8 py-5 text-xs text-miso-muted">
           <span>MISO OmniSearch · Xtern Fall 2026</span>
-          <span>Search · Compare · Export</span>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={handleOpenTour}
+              className="text-miso-slate underline-offset-2 hover:text-miso-sky hover:underline transition font-semibold"
+            >
+              Interactive Guide
+            </button>
+            <span aria-hidden="true">·</span>
+            <span>Search · Compare · Export</span>
+          </div>
         </div>
       </footer>
-    </div>
+
+      <GuidedTour
+        isOpen={isTourOpen}
+        onClose={handleCloseTour}
+        audienceMode={audienceMode}
+        onAudienceModeChange={handleAudienceModeChange}
+        onTriggerSampleSearch={(sampleQuery) => void search(sampleQuery)}
+      />
+      </div>
+    </GlossaryProvider>
   );
 }

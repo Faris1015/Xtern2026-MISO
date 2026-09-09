@@ -34,6 +34,7 @@ import type {
   SearchResponse,
 } from "../types";
 import { CHART_SERIES, CHART_TOOLTIP_STYLE, MISO_THEME } from "../theme";
+import { GlossaryHighlight } from "./GlossaryHighlight";
 
 const kpiColors: Record<KpiColor, string> = {
   sky: MISO_THEME.blue,
@@ -181,12 +182,14 @@ function MetricRail({ result }: { result: SearchResponse }) {
     <dl className="grid grid-cols-4 divide-x divide-miso-border border-b border-miso-border bg-miso-card">
       {result.kpis.map((kpi) => (
         <div key={kpi.label} className="px-5 py-4">
-          <dt className="miso-metric-label">{kpi.label}</dt>
+          <dt className="miso-metric-label">
+            <GlossaryHighlight text={kpi.label} />
+          </dt>
           <dd
             className="mt-1 text-lg font-bold tabular-nums"
             style={{ color: kpiColors[kpi.color] }}
           >
-            {kpi.value}
+            <GlossaryHighlight text={kpi.value} />
           </dd>
         </div>
       ))}
@@ -639,7 +642,7 @@ function HourlyDataDetails({
                   scope="col"
                   className="border-b border-miso-border px-3 py-2 font-semibold"
                 >
-                  {heading}
+                  <GlossaryHighlight text={heading} />
                 </th>
               ))}
             </tr>
@@ -717,7 +720,7 @@ function GlossaryReference({ result }: { result: GlossarySearchResponse }) {
           Plain-language explanation
         </h3>
         <p className="mt-2 max-w-4xl text-base leading-8 text-miso-slate">
-          {result.data.eli5}
+          <GlossaryHighlight text={result.data.eli5} />
         </p>
       </section>
 
@@ -730,7 +733,7 @@ function GlossaryReference({ result }: { result: GlossarySearchResponse }) {
             Technical detail
           </h3>
           <p className="mt-2 text-sm leading-7 text-miso-muted">
-            {result.data.technical}
+            <GlossaryHighlight text={result.data.technical} />
           </p>
         </section>
 
@@ -873,7 +876,7 @@ export default function KnowledgeCanvas({
 
   if (!result) {
     return (
-      <section className="miso-panel border-dashed px-8 py-10 text-center">
+      <section data-tour="knowledge-canvas" className="miso-panel border-dashed px-8 py-10 text-center">
         <h2 className="text-xl font-bold text-miso-navy">
           Search results will appear here
         </h2>
@@ -939,7 +942,7 @@ export default function KnowledgeCanvas({
   };
 
   const actionSidebar = (
-    <aside className="border-t border-miso-border bg-miso-card p-5 xl:border-l xl:border-t-0 xl:p-6">
+    <aside data-tour="export-sidebar" className="border-t border-miso-border bg-miso-card p-5 xl:border-l xl:border-t-0 xl:p-6">
       <SourceEvidence result={result} audienceMode={audienceMode} />
 
       {(visibleFollowUps.length > 0 || activeHubId) && (
@@ -993,6 +996,7 @@ export default function KnowledgeCanvas({
   if (result.chartType === "glossary_card") {
     return (
       <section
+        data-tour="knowledge-canvas"
         aria-live="polite"
         className="miso-panel overflow-hidden border-t-4 border-t-miso-sky"
       >
@@ -1006,6 +1010,7 @@ export default function KnowledgeCanvas({
 
   return (
     <section
+      data-tour="knowledge-canvas"
       aria-live="polite"
       className="miso-panel overflow-hidden border-t-4 border-t-miso-sky"
     >
@@ -1017,7 +1022,9 @@ export default function KnowledgeCanvas({
               {result.query}
             </h2>
             <p className="mt-4 max-w-5xl whitespace-pre-line text-sm leading-7 text-miso-slate">
-              {result.directAnswer.replace(/[*`]/g, "")}
+              <GlossaryHighlight
+                text={result.directAnswer.replace(/[*`]/g, "")}
+              />
             </p>
           </header>
 

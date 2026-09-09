@@ -80,6 +80,17 @@ export type GlossaryPoint = {
   source?: string;
 };
 
+export type GlossaryItem = {
+  acronym: string;
+  term: string;
+  category: string;
+  eli5: string;
+  technical: string;
+  formula?: string;
+  related?: unknown[];
+  source?: string;
+};
+
 type SearchResponseBase<
   TChart extends ChartType,
   TData,

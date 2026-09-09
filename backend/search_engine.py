@@ -90,25 +90,30 @@ class SearchEngine:
             if glossary_match:
                 return self._build_glossary_response(query, glossary_match, persona)
 
-        # 2. Check for Specific Hub Intent (e.g. "Indiana Hub LMP", "Michigan Hub")
+        # 2. Check for exact standalone Glossary Acronym match (e.g. user typed "LMP", "CONE", "PRA", "LRTP")
+        if q_norm.upper() in self.dm.glossary:
+            entry = self.dm.glossary[q_norm.upper()]
+            return self._build_glossary_response(query, {"acronym": q_norm.upper(), **entry}, persona)
+
+        # 3. Check for Specific Hub Intent (e.g. "Indiana Hub LMP", "Michigan Hub")
         hub_match = self._match_hub(q_norm)
         if hub_match:
             return self._build_hub_response(query, hub_match, persona)
 
-        # 3. Check for Fuel Mix / Generation / Peak Intent
+        # 4. Check for Fuel Mix / Generation / Peak Intent
         if any(term in q_norm for term in ["fuel", "solar", "wind", "coal", "gas", "nuclear", "peak", "demand", "mix", "generation"]):
             return self._build_fuel_response(query, q_norm, persona)
 
-        # 4. Check for Transmission / MTEP / LRTP / Seam Intent
+        # 5. Check for Transmission / MTEP / LRTP / Seam Intent
         if any(term in q_norm for term in ["mtep", "lrtp", "jtiq", "transmission", "lines", "miles", "grid expansion"]):
             return self._build_transmission_response(query, q_norm, persona)
 
-        # 5. Check for standalone Glossary / Acronym match (e.g. query is "CONE" or "PRA")
+        # 6. Check for partial Glossary / Acronym match
         glossary_match = self._match_glossary(q_norm)
         if glossary_match:
             return self._build_glossary_response(query, glossary_match, persona)
 
-        # 6. Default / Fallback: Indiana Hub Market Pricing
+        # 7. Default / Fallback: Indiana Hub Market Pricing
         return self._build_hub_response(query, "INDIANA.HUB", persona, is_fallback=True)
 
     def _match_hub(self, q_norm: str) -> Optional[str]:
