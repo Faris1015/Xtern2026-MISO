@@ -9,7 +9,7 @@ export default {
       colors: {
         miso: {
           navy: "#0B2E4F",
-          sky: "#0082CA",
+          sky: "#0074b3", // Darkened to comply with WCAG AA,
           cyan: "#5BC2E7",
           emerald: "#347A3A",
           slate: "#203746",
