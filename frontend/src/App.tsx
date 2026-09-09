@@ -102,7 +102,7 @@ export default function App() {
     ];
   });
   const searchController = useRef<AbortController | null>(null);
-  const lastQueryRef = useRef("");
+  const [lastQuery, setLastQuery] = useState("");
   const requestVersion = useRef(0);
 
   const handleToggleStar = useCallback((queryToToggle: string) => {
@@ -172,7 +172,7 @@ export default function App() {
       if (!cleanQuery) return;
 
       const selectedAudience = audienceOverride ?? audienceMode;
-      lastQueryRef.current = cleanQuery;
+      setLastQuery(cleanQuery);
       searchController.current?.abort();
       const controller = new AbortController();
       const version = ++requestVersion.current;
@@ -257,7 +257,7 @@ export default function App() {
     (nextAudience: AudienceMode) => {
       if (nextAudience === audienceMode) return;
 
-      const queryToRefresh = result?.query ?? lastQueryRef.current;
+      const queryToRefresh = result?.query ?? lastQuery;
       setAudienceMode(nextAudience);
 
       if (queryToRefresh) {
@@ -265,7 +265,7 @@ export default function App() {
         void search(queryToRefresh, nextAudience);
       }
     },
-    [audienceMode, result, search],
+    [audienceMode, lastQuery, result, search],
   );
 
   const handleFollowUp = useCallback(
@@ -487,7 +487,7 @@ export default function App() {
         />
 
         <SearchHistoryFavorites
-          currentQuery={result?.query ?? lastQueryRef.current}
+          currentQuery={result?.query ?? lastQuery}
           onSelectQuery={(q) => void search(q)}
         />
 
