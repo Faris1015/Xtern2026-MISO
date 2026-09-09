@@ -68,7 +68,7 @@ Xtern2026-MISO/
 ### 🐳 1. Docker Compose (Recommended - Fullstack in 1 Command)
 ```bash
 # Build and run both backend and frontend
-docker compose up --build
+docker compose up --watch
 ```
 - **Web Application**: `http://localhost:3000`
 - **Backend API Docs**: `http://localhost:8000/docs`
