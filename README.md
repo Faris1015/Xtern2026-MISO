@@ -117,7 +117,7 @@ This repository includes a continuous integration and deployment workflow in `.g
 1. In the **Komodo UI**, create a new Stack for `miso-omnisearch`.
 2. Link it to this repository or use `docker-compose.prod.yml`.
 3. In Stack Settings, enable the **Webhook** and copy the generated Webhook URL.
-4. In GitHub (**Settings > Secrets and variables > Actions**), add:
+4. In GitHub (**Settings > Secrets and variables > Actions**), add as secrets:
    - `KOMODO_WEBHOOK_URL`: Your Komodo stack webhook URL (e.g. `https://komodo.yourdomain.com/listener/github/stack/miso-omnisearch`)
    - `KOMODO_WEBHOOK_SECRET` *(optional)*: Secret token if configured in Komodo.
 
