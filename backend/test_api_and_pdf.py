@@ -171,6 +171,39 @@ class TestMISOBackendQA(unittest.TestCase):
                     f"Spillover detected on hub {h} with persona '{p}' (page count = {len(doc)})"
                 )
 
+    # -----------------------------------------------------------------------
+    # Issue #1 & #6: Glossary & Single Source of Truth
+    # -----------------------------------------------------------------------
+    def test_16_glossary_all(self):
+        resp = self.client.get("/api/glossary")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertGreaterEqual(len(data), 68)
+        self.assertIn("LMP", data)
+        self.assertIn("CONE", data)
+        self.assertEqual(data["LMP"]["acronym"], "LMP")
+        self.assertIn("Locational Marginal Price", data["LMP"]["term"])
+        self.assertTrue(bool(data["LMP"]["eli5"]))
+
+    def test_17_glossary_single_term(self):
+        resp = self.client.get("/api/glossary/LMP")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["acronym"], "LMP")
+        self.assertEqual(data["term"], "Locational Marginal Price")
+
+        # Non-existent term returns 404
+        resp_404 = self.client.get("/api/glossary/NON_EXISTENT_XYZ")
+        self.assertEqual(resp_404.status_code, 404)
+
+    def test_18_search_exact_acronym(self):
+        # Querying exact acronym "LMP" must route to glossary card, not fallback hub
+        resp = self.client.get("/api/search?q=LMP")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["chartType"], "glossary_card")
+        self.assertIn("Locational Marginal Price", data["directAnswer"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

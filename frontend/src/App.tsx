@@ -22,6 +22,7 @@ import {
   type SearchResponse,
   type SessionQuickStartChip,
 } from "./types";
+import { GlossaryProvider } from "./context/GlossaryContext";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 const KnowledgeCanvas = lazy(() => import("./components/KnowledgeCanvas"));
@@ -272,10 +273,11 @@ export default function App() {
   const comparisonResetKey = `${comparisonType}:${comparisonItems?.join("|") ?? "default"}:${requestedHubs?.join("|") ?? "none"}`;
 
   return (
-    <div className="miso-omnisearch min-h-screen bg-canvas">
-      <a className="skip-link" href="#main-content">
-        Skip to main content
-      </a>
+    <GlossaryProvider apiBase={API_BASE} onSearchTerm={(q) => void search(q)}>
+      <div className="miso-omnisearch min-h-screen bg-canvas">
+        <a className="skip-link" href="#main-content">
+          Skip to main content
+        </a>
 
       <div className="bg-miso-navy text-white">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-8 py-2 text-xs">
@@ -465,6 +467,7 @@ export default function App() {
         onAudienceModeChange={handleAudienceModeChange}
         onTriggerSampleSearch={(sampleQuery) => void search(sampleQuery)}
       />
-    </div>
+      </div>
+    </GlossaryProvider>
   );
 }

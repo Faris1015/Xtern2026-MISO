@@ -74,10 +74,34 @@ async def root() -> Dict[str, Any]:
             "search": "/api/search?q={query}&persona={persona}",
             "sessionPrefetch": "/api/session-prefetch",
             "compare": "/api/compare?type={hubs|fuels|plans}&items={id1,id2}",
+            "glossary": "/api/glossary",
             "generateBriefing": "POST /api/generate-briefing",
             "documentation": "/docs",
         },
     }
+
+
+@app.get(
+    "/api/glossary",
+    summary="MISO Glossary & Acronym Dictionary (Single Source of Truth)",
+    description="Returns the authoritative dictionary of MISO acronyms, plain-language ELI5 explanations, and technical definitions.",
+    tags=["Glossary"],
+)
+async def api_glossary() -> Dict[str, Any]:
+    return data_manager.get_all_glossary_terms()
+
+
+@app.get(
+    "/api/glossary/{term}",
+    summary="Get Single Glossary Acronym/Term",
+    description="Returns details and explanations for a specific MISO acronym or term.",
+    tags=["Glossary"],
+)
+async def api_glossary_term(term: str) -> Dict[str, Any]:
+    entry = data_manager.get_glossary_term(term)
+    if not entry:
+        raise HTTPException(status_code=404, detail=f"Glossary term '{term}' not found.")
+    return entry
 
 
 @app.get(

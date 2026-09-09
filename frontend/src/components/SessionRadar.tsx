@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { parseSessionPrefetchResponse } from "../api/guards";
 import type { SessionPrefetchResponse, SessionQuickStartChip } from "../types";
+import { GlossaryHighlight } from "./GlossaryHighlight";
 
 type Props = {
   apiBase: string;
@@ -153,9 +154,11 @@ export default function SessionRadar({ apiBase, onSelectChip }: Props) {
                   Continue from {featuredHub.hubName}
                 </h2>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-miso-muted">
-                  {contextSummary(payload.sessionContext)} Key hub and system
-                  indicators are prepared for the next step in the research
-                  flow.
+                  <GlossaryHighlight
+                    text={contextSummary(payload.sessionContext)}
+                  />{" "}
+                  Key hub and system indicators are prepared for the next step in
+                  the research flow.
                 </p>
               </div>
             </div>
@@ -183,9 +186,11 @@ export default function SessionRadar({ apiBase, onSelectChip }: Props) {
               ["Cleared volume", summary.formattedVolume],
             ].map(([label, value]) => (
               <div key={label} className="px-4 py-3">
-                <dt className="miso-metric-label">{label}</dt>
+                <dt className="miso-metric-label">
+                  <GlossaryHighlight text={label} />
+                </dt>
                 <dd className="mt-1 text-sm font-bold tabular-nums text-miso-navy">
-                  {value}
+                  <GlossaryHighlight text={value} />
                 </dd>
               </div>
             ))}

@@ -9,6 +9,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { AudienceMode } from "../types";
+import { useGlossary } from "../context/GlossaryContext";
 
 type Category =
   | "Market Pricing"
@@ -18,52 +19,45 @@ type Category =
 
 type Suggestion = {
   label: string;
+  searchQuery?: string;
   category: Category;
   icon: typeof Database;
+  acronym?: string;
+  term?: string;
 };
 
-const suggestions: Suggestion[] = [
-  { label: "Indiana Hub LMPs", category: "Market Pricing", icon: Database },
-  { label: "Illinois Hub LMPs", category: "Market Pricing", icon: Database },
-  { label: "Michigan Hub Spreads", category: "Market Pricing", icon: Database },
-  { label: "Minnesota Hub LMPs", category: "Market Pricing", icon: Database },
-  { label: "Louisiana Hub LMPs", category: "Market Pricing", icon: Database },
-  { label: "Texas Hub LMPs", category: "Market Pricing", icon: Database },
-  { label: "Solar Peak Record", category: "Generation & Peaks", icon: Zap },
-  { label: "Wind Peak Record", category: "Generation & Peaks", icon: Zap },
-  { label: "Current Fuel Mix", category: "Generation & Peaks", icon: Zap },
+const STATIC_SUGGESTIONS: Suggestion[] = [
+  { label: "Indiana Hub LMPs", searchQuery: "Indiana Hub LMP", category: "Market Pricing", icon: Database },
+  { label: "Illinois Hub LMPs", searchQuery: "Illinois Hub LMP", category: "Market Pricing", icon: Database },
+  { label: "Michigan Hub Spreads", searchQuery: "Michigan Hub", category: "Market Pricing", icon: Database },
+  { label: "Minnesota Hub LMPs", searchQuery: "Minnesota Hub", category: "Market Pricing", icon: Database },
+  { label: "Louisiana Hub LMPs", searchQuery: "Louisiana Hub", category: "Market Pricing", icon: Database },
+  { label: "Texas Hub LMPs", searchQuery: "Texas Hub", category: "Market Pricing", icon: Database },
+  { label: "Solar Peak Record", searchQuery: "Solar Peak Record", category: "Generation & Peaks", icon: Zap },
+  { label: "Wind Peak Record", searchQuery: "Wind Peak Record", category: "Generation & Peaks", icon: Zap },
+  { label: "Current Fuel Mix", searchQuery: "Current Fuel Mix", category: "Generation & Peaks", icon: Zap },
   {
     label: "MTEP24 LRTP Tranche 2",
+    searchQuery: "MTEP24 LRTP Tranche 2",
     category: "Transmission Planning",
     icon: Database,
   },
   {
     label: "JTIQ Seam Upgrades",
+    searchQuery: "JTIQ Seam Upgrades",
     category: "Transmission Planning",
     icon: Database,
   },
-  ...[
-    "LMP",
-    "CONE",
-    "PRA",
-    "MTEP",
-    "LRTP",
-    "JTIQ",
-    "DPP",
-    "LOLE",
-    "OASIS",
-    "FTR",
-  ].map((acronym) => ({
-    label: `What is ${acronym}?`,
-    category: "Jargon Acronyms" as Category,
-    icon: BookOpen,
-  })),
 ];
 
-const categories = [
+const CATEGORY_LIST = [
   "All",
-  ...Array.from(new Set(suggestions.map(({ category }) => category))),
+  "Market Pricing",
+  "Generation & Peaks",
+  "Transmission Planning",
+  "Jargon Acronyms",
 ];
+
 const listboxId = "miso-search-suggestions";
 
 type Props = {
@@ -79,6 +73,7 @@ export default function OmniSearch({
   onSearch,
   isSearching,
 }: Props) {
+  const { glossary } = useGlossary();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -86,16 +81,33 @@ export default function OmniSearch({
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
+  const allSuggestions = useMemo<Suggestion[]>(() => {
+    const glossarySuggestions: Suggestion[] = Object.values(glossary).map(
+      (item) => ({
+        label: `What is ${item.acronym}? (${item.term})`,
+        searchQuery: `What is ${item.acronym}?`,
+        category: "Jargon Acronyms" as Category,
+        icon: BookOpen,
+        acronym: item.acronym,
+        term: item.term,
+      }),
+    );
+    return [...STATIC_SUGGESTIONS, ...glossarySuggestions];
+  }, [glossary]);
+
   const matches = useMemo(() => {
     const term = query.trim().toLowerCase();
-    return suggestions.filter(
+    return allSuggestions.filter(
       (item) =>
         (category === "All" || item.category === category) &&
         (!term ||
           item.label.toLowerCase().includes(term) ||
+          (item.searchQuery && item.searchQuery.toLowerCase().includes(term)) ||
+          (item.acronym && item.acronym.toLowerCase().includes(term)) ||
+          (item.term && item.term.toLowerCase().includes(term)) ||
           item.category.toLowerCase().includes(term)),
     );
-  }, [category, query]);
+  }, [allSuggestions, category, query]);
 
   useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => {
@@ -255,7 +267,7 @@ export default function OmniSearch({
                   event.preventDefault();
                   submit(
                     activeIndex >= 0
-                      ? (matches[activeIndex]?.label ?? query)
+                      ? (matches[activeIndex]?.searchQuery ?? matches[activeIndex]?.label ?? query)
                       : query,
                   );
                 } else if (event.key === "Escape") {
@@ -318,7 +330,7 @@ export default function OmniSearch({
                 className="flex gap-1 border-b border-miso-border bg-miso-card px-3 py-2"
                 aria-label="Filter suggestions"
               >
-                {categories.map((item) => (
+                {CATEGORY_LIST.map((item) => (
                   <button
                     key={item}
                     type="button"
@@ -352,7 +364,7 @@ export default function OmniSearch({
                         aria-selected={active}
                         onPointerMove={() => setActiveIndex(index)}
                         onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => submit(item.label)}
+                        onClick={() => submit(item.searchQuery ?? item.label)}
                         className={`flex cursor-pointer items-center gap-3 border-l-4 px-4 py-3 text-left transition ${
                           active
                             ? "border-miso-sky bg-miso-soft text-miso-navy"

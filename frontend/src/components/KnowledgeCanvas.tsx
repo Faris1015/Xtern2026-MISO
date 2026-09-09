@@ -34,6 +34,7 @@ import type {
   SearchResponse,
 } from "../types";
 import { CHART_SERIES, CHART_TOOLTIP_STYLE, MISO_THEME } from "../theme";
+import { GlossaryHighlight } from "./GlossaryHighlight";
 
 const kpiColors: Record<KpiColor, string> = {
   sky: MISO_THEME.blue,
@@ -181,12 +182,14 @@ function MetricRail({ result }: { result: SearchResponse }) {
     <dl className="grid grid-cols-4 divide-x divide-miso-border border-b border-miso-border bg-miso-card">
       {result.kpis.map((kpi) => (
         <div key={kpi.label} className="px-5 py-4">
-          <dt className="miso-metric-label">{kpi.label}</dt>
+          <dt className="miso-metric-label">
+            <GlossaryHighlight text={kpi.label} />
+          </dt>
           <dd
             className="mt-1 text-lg font-bold tabular-nums"
             style={{ color: kpiColors[kpi.color] }}
           >
-            {kpi.value}
+            <GlossaryHighlight text={kpi.value} />
           </dd>
         </div>
       ))}
@@ -639,7 +642,7 @@ function HourlyDataDetails({
                   scope="col"
                   className="border-b border-miso-border px-3 py-2 font-semibold"
                 >
-                  {heading}
+                  <GlossaryHighlight text={heading} />
                 </th>
               ))}
             </tr>
@@ -717,7 +720,7 @@ function GlossaryReference({ result }: { result: GlossarySearchResponse }) {
           Plain-language explanation
         </h3>
         <p className="mt-2 max-w-4xl text-base leading-8 text-miso-slate">
-          {result.data.eli5}
+          <GlossaryHighlight text={result.data.eli5} />
         </p>
       </section>
 
@@ -730,7 +733,7 @@ function GlossaryReference({ result }: { result: GlossarySearchResponse }) {
             Technical detail
           </h3>
           <p className="mt-2 text-sm leading-7 text-miso-muted">
-            {result.data.technical}
+            <GlossaryHighlight text={result.data.technical} />
           </p>
         </section>
 
@@ -1019,7 +1022,9 @@ export default function KnowledgeCanvas({
               {result.query}
             </h2>
             <p className="mt-4 max-w-5xl whitespace-pre-line text-sm leading-7 text-miso-slate">
-              {result.directAnswer.replace(/[*`]/g, "")}
+              <GlossaryHighlight
+                text={result.directAnswer.replace(/[*`]/g, "")}
+              />
             </p>
           </header>
 

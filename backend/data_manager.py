@@ -387,6 +387,44 @@ class DataManager:
             with open(glossary_file, "w", encoding="utf-8") as f:
                 json.dump(self.glossary, f, indent=2)
 
+        # Ensure essential grid units are available for non-technical users
+        energy_units = {
+            "MW": {
+                "term": "Megawatt",
+                "category": "Grid Units",
+                "eli5": "A unit of electrical power equal to 1,000,000 watts, roughly enough to power 750 to 1,000 average homes.",
+                "technical": "Unit of instantaneous real electrical power (10^6 watts or 1,000 kilowatts) used to measure generation capacity and substation load.",
+                "formula": "1 MW = 1,000 kW = 1,000,000 W",
+                "related": ["MWh", "GW", "LMP"],
+                "source": "https://www.eia.gov/tools/glossary/",
+            },
+            "MWh": {
+                "term": "Megawatt-Hour",
+                "category": "Grid Units",
+                "eli5": "A unit of electrical energy representing one megawatt of power produced or consumed continuously for one hour. Wholesale power prices are quoted in $/MWh.",
+                "technical": "Unit of electrical work or energy equal to one megawatt of power sustained over one hour (3.6 gigajoules), standard settlement unit for wholesale energy markets.",
+                "formula": "Energy (MWh) = Power (MW) × Time (Hours)",
+                "related": ["MW", "GW", "LMP"],
+                "source": "https://www.eia.gov/tools/glossary/",
+            },
+            "GW": {
+                "term": "Gigawatt",
+                "category": "Grid Units",
+                "eli5": "A unit of electrical power equal to 1,000 megawatts (1 billion watts), used to describe regional peak demand and large power plant capacity across entire states.",
+                "technical": "Unit of electrical power equal to 10^9 watts (1,000 MW). MISO's all-time footprint peak demand is 127.1 GW.",
+                "formula": "1 GW = 1,000 MW = 1,000,000 kW",
+                "related": ["MW", "MWh", "Peak"],
+                "source": "https://www.eia.gov/tools/glossary/",
+            },
+        }
+        for u_key, u_val in energy_units.items():
+            if u_key not in self.glossary:
+                self.glossary[u_key] = u_val
+
+        for k, item in self.glossary.items():
+            if "acronym" not in item:
+                item["acronym"] = k
+
     def get_hub(self, hub_id: str) -> Optional[Dict[str, Any]]:
         """Finds hub by key (e.g. 'INDIANA.HUB' or 'INDIANA' or 'MICHIGAN')."""
         clean_id = hub_id.upper().strip()
@@ -415,9 +453,22 @@ class DataManager:
             {"label": "Download 1-Page PDF Fact Sheet", "action": "generate_briefing", "params": {"hub": "INDIANA.HUB"}}
         ]
 
+    def get_all_glossary_terms(self) -> Dict[str, Dict[str, Any]]:
+        """Returns all glossary entries with acronym field guaranteed."""
+        return {
+            acronym: {
+                "acronym": entry.get("acronym", acronym),
+                **entry,
+            }
+            for acronym, entry in self.glossary.items()
+        }
+
     def get_glossary_term(self, term: str) -> Optional[Dict[str, Any]]:
         clean_term = term.upper().strip()
-        return self.glossary.get(clean_term)
+        entry = self.glossary.get(clean_term)
+        if entry:
+            return {"acronym": entry.get("acronym", clean_term), **entry}
+        return None
 
 
 # Global singleton instance

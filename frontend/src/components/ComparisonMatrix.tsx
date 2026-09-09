@@ -27,6 +27,7 @@ import {
   type HubId,
 } from "../types";
 import { CHART_SERIES, CHART_TOOLTIP_STYLE, MISO_THEME } from "../theme";
+import { GlossaryHighlight } from "./GlossaryHighlight";
 
 const PLAN_CATEGORY_BY_ID: Record<string, string> = {
   mtep_local: "Local MTEP Projects",
@@ -545,7 +546,7 @@ export default function ComparisonMatrix({
                           scope="col"
                           className="px-4 py-3 font-semibold"
                         >
-                          {heading}
+                          <GlossaryHighlight text={heading} />
                         </th>
                       ))}
                     </tr>
@@ -564,19 +565,25 @@ export default function ComparisonMatrix({
                             {summary.name}
                           </th>
                           <td className="border-b border-miso-border px-4 py-3 tabular-nums">
-                            ${summary.realTimeAvg.toFixed(2)}/MWh
+                            <GlossaryHighlight
+                              text={`$${summary.realTimeAvg.toFixed(2)}/MWh`}
+                            />
                           </td>
                           <td className="border-b border-miso-border px-4 py-3 tabular-nums">
-                            ${summary.dayAheadAvg.toFixed(2)}/MWh
+                            <GlossaryHighlight
+                              text={`$${summary.dayAheadAvg.toFixed(2)}/MWh`}
+                            />
                           </td>
                           <td className="border-b border-miso-border px-4 py-3 tabular-nums">
-                            ${summary.spreadAvg.toFixed(2)}/MWh
+                            <GlossaryHighlight
+                              text={`$${summary.spreadAvg.toFixed(2)}/MWh`}
+                            />
                           </td>
                           <td className="border-b border-miso-border px-4 py-3 tabular-nums">
                             {summary.peakHour}
                           </td>
                           <td className="border-b border-miso-border px-4 py-3 tabular-nums">
-                            {summary.volume}
+                            <GlossaryHighlight text={summary.volume} />
                           </td>
                         </tr>
                       ))}
