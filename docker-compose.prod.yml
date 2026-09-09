@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_REPO:-miso-omnisearch}/backend:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_REPO:-faris1015/xtern2026-miso}/backend:${IMAGE_TAG:-latest}
     container_name: miso-backend
     ports:
       - "${BACKEND_PORT:-8000}:8000"
@@ -17,7 +17,7 @@ services:
       - miso-net
 
   frontend:
-    image: ${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_REPO:-miso-omnisearch}/frontend:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_REPO:-faris1015/xtern2026-miso}/frontend:${IMAGE_TAG:-latest}
     container_name: miso-frontend
     ports:
       - "${FRONTEND_PORT:-3000}:3000"

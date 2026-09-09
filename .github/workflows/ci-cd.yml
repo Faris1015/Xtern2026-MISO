@@ -13,10 +13,6 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE_NAME: ${{ github.repository_owner }}/${{ github.repository }}/backend
-  FRONTEND_IMAGE_NAME: ${{ github.repository_owner }}/${{ github.repository }}/frontend
-  BACKEND_IMAGE_NAME: ${{ github.repository }}/backend
-  FRONTEND_IMAGE_NAME: ${{ github.repository }}/frontend
 
 jobs:
   # -------------------------------------------------------------------------
@@ -154,49 +150,18 @@ jobs:
           echo "Initiating deployment to Komodo orchestrator..."
 
           if [ -n "$KOMODO_WEBHOOK_URL" ]; then
-          # Sanitize inputs by trimming whitespace, carriage returns, and quotes
-          CLEAN_WEBHOOK_URL=$(echo "$KOMODO_WEBHOOK_URL" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//')
-          CLEAN_WEBHOOK_SECRET=$(echo "$KOMODO_WEBHOOK_SECRET" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//')
-          CLEAN_HOST=$(echo "$KOMODO_HOST" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//' -e 's/\/$//')
-          CLEAN_API_KEY=$(echo "$KOMODO_API_KEY" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//')
-          CLEAN_API_SECRET=$(echo "$KOMODO_API_SECRET" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//')
-          CLEAN_STACK_NAME=$(echo "$KOMODO_STACK_NAME" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//')
-
-          if [ -n "$CLEAN_WEBHOOK_URL" ] && [[ "$CLEAN_WEBHOOK_URL" =~ ^https?:// ]]; then
             echo "Triggering Komodo Stack redeployment via Webhook..."
             AUTH_HEADER=""
             if [ -n "$KOMODO_WEBHOOK_SECRET" ]; then
               AUTH_HEADER="-H \"X-Komodo-Secret: $KOMODO_WEBHOOK_SECRET\""
-            CURL_ARGS=(
-              -s -S
-              -w "\nHTTP_STATUS:%{http_code}"
-              -X POST "$CLEAN_WEBHOOK_URL"
-              -H "Content-Type: application/json"
-            )
-            if [ -n "$CLEAN_WEBHOOK_SECRET" ]; then
-              CURL_ARGS+=(-H "X-Komodo-Secret: $CLEAN_WEBHOOK_SECRET")
             fi
-            
+
             RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$KOMODO_WEBHOOK_URL" \
               -H "Content-Type: application/json" \
               ${AUTH_HEADER} \
               -d "{\"event\":\"push\",\"ref\":\"${{ github.ref }}\",\"sha\":\"${{ github.sha }}\"}")
-            
-            CURL_ARGS+=(-d "{\"event\":\"push\",\"ref\":\"${{ github.ref }}\",\"sha\":\"${{ github.sha }}\"}")
-
-            set +e
-            RESPONSE=$(curl "${CURL_ARGS[@]}" 2>&1)
-            CURL_EXIT=$?
-            set -e
-
-            if [ $CURL_EXIT -ne 0 ]; then
-              echo "::warning::Komodo webhook request failed (curl exit code $CURL_EXIT): $RESPONSE"
-              echo "Continuing workflow since Docker build and image publication succeeded."
-              exit 0
-            fi
 
             HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d':' -f2)
-            BODY=$(echo "$RESPONSE" | grep -v "HTTP_STATUS:")
             echo "Komodo webhook response code: $HTTP_CODE"
 
             if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
@@ -204,44 +169,19 @@ jobs:
             else
               echo "⚠️ Komodo webhook responded with status $HTTP_CODE: $RESPONSE"
               exit 1
-              echo "::warning::Komodo webhook responded with non-2xx status $HTTP_CODE: $BODY"
             fi
 
           elif [ -n "$KOMODO_HOST" ] && [ -n "$KOMODO_API_KEY" ]; then
-          elif [ -n "$CLEAN_HOST" ] && [ -n "$CLEAN_API_KEY" ] && [[ "$CLEAN_HOST" =~ ^https?:// ]]; then
             echo "Triggering Komodo Stack redeployment via Komodo API..."
             CLEAN_HOST="${KOMODO_HOST%/}"
-            
+
             RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$CLEAN_HOST/api/v1/deploy-stack" \
               -H "Content-Type: application/json" \
               -H "X-Api-Key: $KOMODO_API_KEY" \
               -H "X-Api-Secret: $KOMODO_API_SECRET" \
               -d "{\"stack\":\"$KOMODO_STACK_NAME\"}")
-            CURL_ARGS=(
-              -s -S
-              -w "\nHTTP_STATUS:%{http_code}"
-              -X POST "$CLEAN_HOST/api/v1/deploy-stack"
-              -H "Content-Type: application/json"
-              -H "X-Api-Key: $CLEAN_API_KEY"
-              -d "{\"stack\":\"$CLEAN_STACK_NAME\"}"
-            )
-            if [ -n "$CLEAN_API_SECRET" ]; then
-              CURL_ARGS+=(-H "X-Api-Secret: $CLEAN_API_SECRET")
-            fi
-
-            set +e
-            RESPONSE=$(curl "${CURL_ARGS[@]}" 2>&1)
-            CURL_EXIT=$?
-            set -e
-
-            if [ $CURL_EXIT -ne 0 ]; then
-              echo "::warning::Komodo API request failed (curl exit code $CURL_EXIT): $RESPONSE"
-              echo "Continuing workflow since Docker build and image publication succeeded."
-              exit 0
-            fi
 
             HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d':' -f2)
-            BODY=$(echo "$RESPONSE" | grep -v "HTTP_STATUS:")
             echo "Komodo API response code: $HTTP_CODE"
 
             if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
@@ -249,7 +189,6 @@ jobs:
             else
               echo "⚠️ Komodo API responded with status $HTTP_CODE: $RESPONSE"
               exit 1
-              echo "::warning::Komodo API responded with non-2xx status $HTTP_CODE: $BODY"
             fi
 
           else
@@ -259,6 +198,4 @@ jobs:
             echo "  - (Optional) KOMODO_WEBHOOK_SECRET"
             echo "Or API authentication:"
             echo "  - KOMODO_HOST, KOMODO_API_KEY, KOMODO_API_SECRET, KOMODO_STACK_NAME"
-            echo "ℹ️ No valid Komodo deployment URL or API configured."
-            echo "To enable automated deployments, configure repository secrets with a valid URL starting with http:// or https://"
           fi
