@@ -34,16 +34,25 @@ This issue builds an **LLM Semantic Intent Classifier & Entity Extractor** in `b
    * For complex, unclassified queries that would otherwise fall back to the default Indiana Hub, call `llm_service.classify_intent_and_entities()`.
    * Route execution directly to `_build_hub_response`, `_build_fuel_response`, or `_build_transmission_response` based on the structured classification.
 
+3. **Out-of-Scope Error Checking & Query Guidance (Non-MISO Queries):**
+   * Classify queries unrelated to MISO, power grids, or wholesale energy (e.g. *"recipe for pasta"*, *"who won the Super Bowl"*, *"Apple stock price"*) as `intent: "out_of_scope"`.
+   * When `intent == "out_of_scope"`, do **not** silently dump baseline Indiana Hub pricing. Instead, return a helpful, structured error guidance response:
+     * **Direct Answer:** *"It looks like your question isn't related to MISO's bulk power system, wholesale electricity markets, or regional grid planning. MISO OmniSearch is dedicated to MISO public energy data."*
+     * **Reformulation Advice:** Explains how to phrase queries effectively for MISO data (e.g., searching for commercial hubs like Indiana or Michigan, peak generation records, transmission portfolios like LRTP, or acronyms like CONE).
+     * **Proactive Recovery Chips:** Suggests 3 valid starter queries (*"Show Indiana Hub Real-Time LMP"*, *"Explore Fuel Generation Mix"*, *"Look up MISO Acronyms in Jargon HUD"*).
+   * **Deterministic Offline Fallback:** Even when the LLM is offline, if a query contains zero energy/grid keywords (e.g. `lmp`, `price`, `hub`, `fuel`, `wind`, `solar`, `peak`, `grid`, `mtep`, `cone`, `miso`), trigger this guidance card instead of misleading market data.
+
 ---
 
 ## ✅ Acceptance Criteria
-* [ ] Queries with typos, colloquial regional terms (e.g. *"Detroit energy costs"* $\to$ `MICHIGAN.HUB`, *"Twin Cities power rates"* $\to$ `MINN.HUB`) correctly resolve to the right hub.
+* [ ] Queries with typos or colloquial regional terms (e.g. *"Detroit energy costs"* $\to$ `MICHIGAN.HUB`, *"Twin Cities power rates"* $\to$ `MINN.HUB`) correctly resolve to the right hub.
 * [ ] Multi-intent queries (e.g. *"Compare wind generation vs solar"* or *"Indiana vs Michigan"*) route directly to the comparison engine.
+* [ ] **Error Checking & Domain Guardrail:** Asking queries unrelated to MISO returns a polite, constructive error message telling the user what was wrong and offering 3 clickable suggestions to redirect their search, instead of showing confusing electricity prices.
 * [ ] Sub-500ms execution latency for classified queries.
 * [ ] When the LLM service is offline or unkeyed, fallback regex continues to handle all standard searches seamlessly.
 
 ---
 
 ## 🤖 Copy-Paste LLM Prompt (For Member 1 & Member 3)
-> *"Act as a Natural Language Processing & Backend Engineer. We want to add a fast Semantic Intent Classifier to MISO OmniSearch. Implement `classify_intent_and_entities()` in `backend/llm_service.py` that parses unstructured energy queries into structured JSON entities (`intent`, `hub_id`, `compare_items`, `metric`, `suggested_persona`). Wire this into `backend/search_engine.py` as a smart routing layer before any fallback is reached."*
+> *"Act as a Natural Language Processing & Backend Engineer. We want to add a fast Semantic Intent Classifier with Domain Error Checking to MISO OmniSearch. Implement `classify_intent_and_entities()` in `backend/llm_service.py` that parses unstructured queries into structured JSON entities (`intent`, `hub_id`, `compare_items`, `metric`, `suggested_persona`). If a user asks something unrelated to MISO or energy (intent == 'out_of_scope'), return an informative guidance response explaining that OmniSearch is dedicated to MISO grid data, with actionable tips and starter chips on how to change what they typed. Wire this into `backend/search_engine.py`."*
 
