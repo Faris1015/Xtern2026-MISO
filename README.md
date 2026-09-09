@@ -65,20 +65,65 @@ Xtern2026-MISO/
 
 ## ⚡ Quickstart
 
-### 1. Backend Setup
+### 🐳 1. Docker Compose (Recommended - Fullstack in 1 Command)
+```bash
+# Build and run both backend and frontend
+docker compose up --build
+```
+- **Web Application**: `http://localhost:3000`
+- **Backend API Docs**: `http://localhost:8000/docs`
+- **Root Healthcheck**: `http://localhost:8000/`
+
+To stop the containers:
+```bash
+docker compose down
+```
+
+---
+
+### 💻 2. Local Development (Without Docker)
+
+#### Backend Setup
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\activate   # On Windows (or source venv/bin/activate on macOS/Linux)
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 API Documentation: `http://localhost:8000/docs`
 
-### 2. Frontend Setup
+#### Frontend Setup
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 Web Application: `http://localhost:3000`
+
+---
+
+## 🦎 Komodo Deployment & CI/CD Pipeline
+
+This repository includes a continuous integration and deployment workflow in `.github/workflows/ci-cd.yml` that:
+1. Runs FastAPI backend unit tests & verifies 1-page PDF generation budget.
+2. Lints and builds the React frontend production bundle.
+3. Packages and publishes Docker images to **GitHub Container Registry (`ghcr.io`)**.
+4. Automatically triggers deployment on your **Komodo** orchestrator.
+
+### Setting Up Komodo
+
+#### Option A: Webhook Deployment (Recommended)
+1. In the **Komodo UI**, create a new Stack for `miso-omnisearch`.
+2. Link it to this repository or use `docker-compose.prod.yml`.
+3. In Stack Settings, enable the **Webhook** and copy the generated Webhook URL.
+4. In GitHub (**Settings > Secrets and variables > Actions**), add:
+   - `KOMODO_WEBHOOK_URL`: Your Komodo stack webhook URL (e.g. `https://komodo.yourdomain.com/listener/github/stack/miso-omnisearch`)
+   - `KOMODO_WEBHOOK_SECRET` *(optional)*: Secret token if configured in Komodo.
+
+#### Option B: Komodo Core API Deployment
+Configure the following GitHub secrets:
+- `KOMODO_HOST`: `https://komodo.yourdomain.com`
+- `KOMODO_API_KEY`: Your Komodo API key
+- `KOMODO_API_SECRET`: Your Komodo API secret
+- `KOMODO_STACK_NAME`: `miso-omnisearch` (or your stack name)
