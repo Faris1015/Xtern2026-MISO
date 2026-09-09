@@ -443,9 +443,21 @@ class DataManager:
 
     def get_related_queries(self, key: str) -> List[Dict[str, Any]]:
         clean_key = key.lower().strip()
-        for k, items in self.related_queries.items():
-            if k in clean_key or clean_key in k:
-                return items
+        # 1. Match against structured intent graph nodes first
+        if isinstance(self.related_queries, dict) and "nodes" in self.related_queries:
+            for node in self.related_queries["nodes"]:
+                keywords = node.get("match", {}).get("keywords", [])
+                if any(kw in clean_key for kw in keywords):
+                    return node.get("follow_ups", [])
+
+        # 2. Match against legacy query keyword keys
+        if isinstance(self.related_queries, dict):
+            for k, items in self.related_queries.items():
+                if k in ("meta", "nodes"):
+                    continue
+                if isinstance(items, list) and (k in clean_key or clean_key in k):
+                    return items
+
         # Default follow ups if no direct match
         return [
             {"label": "Compare Indiana vs. Michigan Hub", "action": "compare_hubs", "params": {"hubs": ["INDIANA.HUB", "MICHIGAN.HUB"]}},

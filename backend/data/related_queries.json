@@ -19,19 +19,32 @@
         {
           "label": "Compare Indiana vs. Michigan",
           "action": "compare",
-          "params": { "entities": ["INDIANA.HUB", "MICHIGAN.HUB"], "metric": "real_time_lmp" }
+          "params": {
+            "entities": [
+              "INDIANA.HUB",
+              "MICHIGAN.HUB"
+            ],
+            "metric": "real_time_lmp"
+          }
         },
         {
           "label": "Download hourly CSV",
           "action": "download",
-          "params": { "dataset": "market_hubs", "entity": "INDIANA.HUB", "format": "csv" }
+          "params": {
+            "dataset": "market_hubs",
+            "entity": "INDIANA.HUB",
+            "format": "csv"
+          }
         }
       ]
     },
     {
       "id": "lmp_term",
       "match": {
-        "keywords": ["lmp", "locational marginal price"],
+        "keywords": [
+          "lmp",
+          "locational marginal price"
+        ],
         "entity_type": "glossary_term"
       },
       "canonical_entity": "LMP",
@@ -39,12 +52,18 @@
         {
           "label": "Define LMP",
           "action": "define",
-          "params": { "term": "LMP" }
+          "params": {
+            "term": "LMP"
+          }
         },
         {
           "label": "View Indiana Hub LMP trend",
           "action": "chart",
-          "params": { "dataset": "market_hubs", "entity": "INDIANA.HUB", "metric": "real_time_lmp" }
+          "params": {
+            "dataset": "market_hubs",
+            "entity": "INDIANA.HUB",
+            "metric": "real_time_lmp"
+          }
         }
       ]
     },
@@ -63,12 +82,132 @@
         {
           "label": "Chart generation mix by fuel",
           "action": "chart",
-          "params": { "dataset": "fuel_peaks", "field": "generation_mix.shares" }
+          "params": {
+            "dataset": "fuel_peaks",
+            "field": "generation_mix.shares"
+          }
         },
         {
           "label": "View wind & solar peak records",
           "action": "open_report",
-          "params": { "dataset": "fuel_peaks", "field": "records" }
+          "params": {
+            "dataset": "fuel_peaks",
+            "field": "records"
+          }
+        }
+      ]
+    },
+    {
+      "id": "iccp_telemetry",
+      "match": {
+        "keywords": [
+          "iccp",
+          "telemetry",
+          "ems data",
+          "scada",
+          "operational telemetry"
+        ],
+        "entity_type": "telemetry"
+      },
+      "canonical_entity": "ICCP_EMS",
+      "follow_ups": [
+        {
+          "label": "Explain ICCP Telemetry Protocol",
+          "action": "define",
+          "params": {
+            "term": "ICCP"
+          }
+        },
+        {
+          "label": "Explore EMS Control Room System",
+          "action": "define",
+          "params": {
+            "term": "EMS"
+          }
+        },
+        {
+          "label": "View Transmission Owner (TO) Scope",
+          "action": "define",
+          "params": {
+            "term": "TO"
+          }
+        }
+      ]
+    },
+    {
+      "id": "interconnection_cod",
+      "match": {
+        "keywords": [
+          "cod",
+          "commercial operation date",
+          "interconnection testing",
+          "pre-cod",
+          "synchronization"
+        ],
+        "entity_type": "interconnection"
+      },
+      "canonical_entity": "INTERCONNECTION_COD",
+      "follow_ups": [
+        {
+          "label": "What is Commercial Operation Date (COD)?",
+          "action": "define",
+          "params": {
+            "term": "COD"
+          }
+        },
+        {
+          "label": "Check DPP Interconnection Queue",
+          "action": "define",
+          "params": {
+            "term": "DPP"
+          }
+        },
+        {
+          "label": "View Wind & Solar Generation Baseline",
+          "action": "chart",
+          "params": {
+            "dataset": "fuel_peaks",
+            "field": "generation_mix"
+          }
+        }
+      ]
+    },
+    {
+      "id": "api_migration_crosswalk",
+      "match": {
+        "keywords": [
+          "data exchange api",
+          "api migration",
+          "discontinued reports",
+          "legacy reports",
+          "rt_lmp_final.csv",
+          "da_expost_lmp.csv",
+          "csv migration"
+        ],
+        "entity_type": "api_guidance"
+      },
+      "canonical_entity": "DATA_EXCHANGE_CROSSWALK",
+      "follow_ups": [
+        {
+          "label": "Hour Ending (HE) vs UTC Timezones",
+          "action": "define",
+          "params": {
+            "term": "HE"
+          }
+        },
+        {
+          "label": "CPNode vs Hub Pricing Hierarchy",
+          "action": "define",
+          "params": {
+            "term": "CPNODE"
+          }
+        },
+        {
+          "label": "Download 1-Page PDF Fact Sheet",
+          "action": "generate_briefing",
+          "params": {
+            "hub": "INDIANA.HUB"
+          }
         }
       ]
     }
@@ -276,6 +415,145 @@
       "action": "download_guide",
       "params": {
         "topic": "cone"
+      }
+    }
+  ],
+  "iccp": [
+    {
+      "label": "Explain ICCP Telemetry Protocol",
+      "action": "define",
+      "params": {
+        "term": "ICCP"
+      }
+    },
+    {
+      "label": "Explore EMS Control Room System",
+      "action": "define",
+      "params": {
+        "term": "EMS"
+      }
+    },
+    {
+      "label": "View Transmission Owner (TO) Scope",
+      "action": "define",
+      "params": {
+        "term": "TO"
+      }
+    }
+  ],
+  "telemetry": [
+    {
+      "label": "Explain ICCP Telemetry Protocol",
+      "action": "define",
+      "params": {
+        "term": "ICCP"
+      }
+    },
+    {
+      "label": "Explore EMS Control Room System",
+      "action": "define",
+      "params": {
+        "term": "EMS"
+      }
+    },
+    {
+      "label": "View Transmission Owner (TO) Scope",
+      "action": "define",
+      "params": {
+        "term": "TO"
+      }
+    }
+  ],
+  "ems": [
+    {
+      "label": "Explain ICCP Telemetry Protocol",
+      "action": "define",
+      "params": {
+        "term": "ICCP"
+      }
+    },
+    {
+      "label": "Explore EMS Control Room System",
+      "action": "define",
+      "params": {
+        "term": "EMS"
+      }
+    },
+    {
+      "label": "View Transmission Owner (TO) Scope",
+      "action": "define",
+      "params": {
+        "term": "TO"
+      }
+    }
+  ],
+  "cod": [
+    {
+      "label": "What is Commercial Operation Date (COD)?",
+      "action": "define",
+      "params": {
+        "term": "COD"
+      }
+    },
+    {
+      "label": "Check DPP Interconnection Queue",
+      "action": "define",
+      "params": {
+        "term": "DPP"
+      }
+    },
+    {
+      "label": "View Wind & Solar Generation Baseline",
+      "action": "chart",
+      "params": {
+        "dataset": "fuel_peaks",
+        "field": "generation_mix"
+      }
+    }
+  ],
+  "data exchange": [
+    {
+      "label": "Hour Ending (HE) vs UTC Timezones",
+      "action": "define",
+      "params": {
+        "term": "HE"
+      }
+    },
+    {
+      "label": "CPNode vs Hub Pricing Hierarchy",
+      "action": "define",
+      "params": {
+        "term": "CPNODE"
+      }
+    },
+    {
+      "label": "Download 1-Page PDF Fact Sheet",
+      "action": "generate_briefing",
+      "params": {
+        "hub": "INDIANA.HUB"
+      }
+    }
+  ],
+  "api migration": [
+    {
+      "label": "Hour Ending (HE) vs UTC Timezones",
+      "action": "define",
+      "params": {
+        "term": "HE"
+      }
+    },
+    {
+      "label": "CPNode vs Hub Pricing Hierarchy",
+      "action": "define",
+      "params": {
+        "term": "CPNODE"
+      }
+    },
+    {
+      "label": "Download 1-Page PDF Fact Sheet",
+      "action": "generate_briefing",
+      "params": {
+        "hub": "INDIANA.HUB"
       }
     }
   ]

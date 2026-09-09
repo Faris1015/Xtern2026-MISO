@@ -204,6 +204,34 @@ class TestMISOBackendQA(unittest.TestCase):
         self.assertEqual(data["chartType"], "glossary_card")
         self.assertIn("Locational Marginal Price", data["directAnswer"])
 
+    # -----------------------------------------------------------------------
+    # MISO Staff Operational Personas & Telemetry Terms (ICCP, EMS, COD, etc.)
+    # -----------------------------------------------------------------------
+    def test_19_staff_acronyms_and_telemetry(self):
+        staff_terms = ["ICCP", "EMS", "COD", "NIC", "MP", "TO", "IC"]
+        for term in staff_terms:
+            resp = self.client.get(f"/api/glossary/{term}")
+            self.assertEqual(resp.status_code, 200, f"Glossary term {term} failed to resolve")
+            data = resp.json()
+            self.assertEqual(data["acronym"], term)
+            self.assertTrue(len(data["term"]) > 0)
+            self.assertTrue(len(data["eli5"]) > 0)
+
+        # Exact acronym search routing for ICCP and COD
+        resp_iccp = self.client.get("/api/search?q=ICCP")
+        self.assertEqual(resp_iccp.status_code, 200)
+        self.assertEqual(resp_iccp.json()["chartType"], "glossary_card")
+
+        resp_cod = self.client.get("/api/search?q=What is COD?")
+        self.assertEqual(resp_cod.status_code, 200)
+        self.assertEqual(resp_cod.json()["chartType"], "glossary_card")
+
+        # Telemetry query returns ICCP/EMS follow-ups
+        resp_telemetry = self.client.get("/api/search?q=telemetry")
+        self.assertEqual(resp_telemetry.status_code, 200)
+        labels = [f["label"] for f in resp_telemetry.json()["proactiveFollowUps"]]
+        self.assertTrue(any("ICCP" in l for l in labels))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

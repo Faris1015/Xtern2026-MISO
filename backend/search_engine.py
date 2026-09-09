@@ -184,7 +184,10 @@ class SearchEngine:
             KpiCard(label="Volume", value=summary["formattedVolume"], color="emerald"),
         ]
 
-        follow_ups_raw = self.dm.get_related_queries(hub_id.replace(".HUB", "").lower())
+        if is_fallback:
+            follow_ups_raw = self.dm.get_related_queries(raw_query)
+        else:
+            follow_ups_raw = self.dm.get_related_queries(hub_id.replace(".HUB", "").lower())
         follow_ups = [FollowUpAction(**f) for f in follow_ups_raw]
 
         return SearchResponse(

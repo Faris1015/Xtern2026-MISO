@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "0.1.0",
-    "last_updated": "2026-09-03",
+    "last_updated": "2026-09-09",
     "term_count": 68,
     "maintainer": "Member 3 (Data Lead)",
     "issue": "#6",
@@ -14,7 +14,14 @@
     ],
     "notes": "ELI5 definitions are written for the General Public persona. Technical definitions target the Market/Power Trader and Municipal Utility personas. Cross-checked against MISO Business Practice Manuals and the EIA glossary; see NOTES_data_provenance.md for any uncertain entries."
   },
-  "categories": ["Markets", "Planning", "Reliability", "Interconnection", "Operations", "Governance"],
+  "categories": [
+    "Markets",
+    "Planning",
+    "Reliability",
+    "Interconnection",
+    "Operations",
+    "Governance"
+  ],
   "terms": [
     {
       "acronym": "MISO",
@@ -22,7 +29,12 @@
       "category": "Governance",
       "eli5": "The not-for-profit organization that runs the high-voltage power grid and wholesale electricity markets across 15 U.S. states and the Canadian province of Manitoba.",
       "technical": "A FERC-regulated Regional Transmission Organization (RTO) that provides open-access transmission service, centralized security-constrained economic dispatch, and forward resource-adequacy functions for a ~45-million-person footprint from headquarters in Carmel, Indiana.",
-      "related": ["RTO", "ISO", "FERC", "OMS"],
+      "related": [
+        "RTO",
+        "ISO",
+        "FERC",
+        "OMS"
+      ],
       "source": "https://www.misoenergy.org/about/"
     },
     {
@@ -31,7 +43,11 @@
       "category": "Governance",
       "eli5": "An independent operator that coordinates the movement of electricity across a large multi-state region so utilities don't each run their own grid in isolation.",
       "technical": "An entity certified by FERC under Order No. 2000 to operate the transmission system, administer wholesale markets, and perform regional planning across multiple utility service territories, meeting independence and scope characteristics beyond those of a stand-alone ISO.",
-      "related": ["ISO", "MISO", "FERC"],
+      "related": [
+        "ISO",
+        "MISO",
+        "FERC"
+      ],
       "source": "https://www.ferc.gov/power-sales-and-markets/rtos-and-isos"
     },
     {
@@ -40,7 +56,11 @@
       "category": "Governance",
       "eli5": "An independent, not-for-profit organization that controls a region's power grid and makes sure supply and demand stay balanced without favoring any one company.",
       "technical": "An independent entity that operates the transmission grid and balances generation and load in real time under FERC oversight; an RTO is an ISO that also satisfies FERC's regional scope and governance requirements.",
-      "related": ["RTO", "MISO", "BA"],
+      "related": [
+        "RTO",
+        "MISO",
+        "BA"
+      ],
       "source": "https://www.ferc.gov/power-sales-and-markets/rtos-and-isos"
     },
     {
@@ -49,7 +69,11 @@
       "category": "Governance",
       "eli5": "The U.S. federal agency that regulates interstate electricity sales, wholesale power prices, and the rules that grid operators like MISO must follow.",
       "technical": "The independent federal commission with jurisdiction over wholesale electric rates, transmission service, RTO/ISO tariffs and market rules, and mandatory reliability standards under the Federal Power Act.",
-      "related": ["NERC", "MISO", "OATT"],
+      "related": [
+        "NERC",
+        "MISO",
+        "OATT"
+      ],
       "source": "https://www.ferc.gov/"
     },
     {
@@ -58,7 +82,11 @@
       "category": "Reliability",
       "eli5": "The organization that writes and enforces the mandatory reliability rules for the North American power grid.",
       "technical": "The FERC-designated Electric Reliability Organization that develops and enforces Reliability Standards for the bulk power system across North America, with regional entities delegating audit and compliance functions.",
-      "related": ["FERC", "BA", "NAI"],
+      "related": [
+        "FERC",
+        "BA",
+        "NAI"
+      ],
       "source": "https://www.nerc.com/"
     },
     {
@@ -67,7 +95,11 @@
       "category": "Governance",
       "eli5": "A group made up of the state utility regulators in MISO's footprint that coordinates their positions on MISO policy.",
       "technical": "A non-profit self-governing organization of state regulatory commissions with jurisdiction over entities in the MISO region, providing collective state input on resource adequacy, cost allocation, and transmission planning; co-publishes the annual OMS-MISO Survey.",
-      "related": ["MISO", "PRA", "PRM"],
+      "related": [
+        "MISO",
+        "PRA",
+        "PRM"
+      ],
       "source": "https://www.misostates.org/"
     },
     {
@@ -76,7 +108,11 @@
       "category": "Governance",
       "eli5": "An outside watchdog that checks MISO's electricity markets for manipulation, flawed rules, or players with too much power.",
       "technical": "The external market-monitoring function (Potomac Economics for MISO) that evaluates market power, market design flaws, and conduct under FERC-approved market-monitoring and mitigation provisions, publishing the annual State of the Market report.",
-      "related": ["LMP", "RSG", "FERC"],
+      "related": [
+        "LMP",
+        "RSG",
+        "FERC"
+      ],
       "source": "https://www.potomaceconomics.com/markets-monitored/miso/"
     },
     {
@@ -84,8 +120,11 @@
       "name": "Business Practice Manual",
       "category": "Governance",
       "eli5": "MISO's detailed rule books that spell out exactly how each market and operations process works, day to day.",
-      "technical": "The set of FERC-referenced manuals that document the implementation of the MISO Tariff — covering energy and operating reserve markets, market settlements, resource adequacy, transmission planning, and more.",
-      "related": ["OATT", "MISO"],
+      "technical": "The set of FERC-referenced manuals that document the implementation of the MISO Tariff \u2014 covering energy and operating reserve markets, market settlements, resource adequacy, transmission planning, and more.",
+      "related": [
+        "OATT",
+        "MISO"
+      ],
       "source": "https://www.misoenergy.org/stakeholder-engagement/business-practice-manuals-bpms/"
     },
     {
@@ -94,7 +133,11 @@
       "category": "Governance",
       "eli5": "The master rate schedule that says anyone can use MISO's transmission lines on equal terms, and what it costs.",
       "technical": "The FERC-approved tariff governing non-discriminatory access to the MISO transmission system, including market rules, transmission service products, interconnection procedures, and cost-allocation methodologies.",
-      "related": ["BPM", "NITS", "ATC"],
+      "related": [
+        "BPM",
+        "NITS",
+        "ATC"
+      ],
       "source": "https://www.misoenergy.org/legal/tariff/"
     },
     {
@@ -104,8 +147,16 @@
       "eli5": "The price of electricity at one specific spot on the grid at one moment. It differs by location because of congestion and losses on the power lines.",
       "technical": "The marginal cost to serve the next MW of load at a specific pricing node, equal to the system marginal energy component plus the marginal congestion component plus the marginal loss component; set by security-constrained economic dispatch.",
       "unit": "USD/MWh",
-      "related": ["MEC", "MCC", "MLC", "SCED", "CPNODE"],
-      "see_also": ["crosswalk:lmp_total"],
+      "related": [
+        "MEC",
+        "MCC",
+        "MLC",
+        "SCED",
+        "CPNODE"
+      ],
+      "see_also": [
+        "crosswalk:lmp_total"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -115,8 +166,14 @@
       "eli5": "The part of the electricity price that reflects the cost of producing one more unit of power somewhere on the system, before congestion and losses.",
       "technical": "The system-wide reference component of LMP representing the marginal cost of energy at the load-weighted or reference bus, common to every node before congestion and loss adjustments.",
       "unit": "USD/MWh",
-      "related": ["LMP", "MCC", "MLC"],
-      "see_also": ["crosswalk:energy_component"],
+      "related": [
+        "LMP",
+        "MCC",
+        "MLC"
+      ],
+      "see_also": [
+        "crosswalk:energy_component"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -126,8 +183,15 @@
       "eli5": "The part of the price caused by power lines being full, so cheaper power can't reach where it's needed.",
       "technical": "The component of LMP reflecting the marginal cost of transmission congestion at a node relative to the reference bus, derived from binding constraint shadow prices and shift factors; can be positive or negative.",
       "unit": "USD/MWh",
-      "related": ["LMP", "MEC", "FTR", "ARR"],
-      "see_also": ["crosswalk:cong_comp"],
+      "related": [
+        "LMP",
+        "MEC",
+        "FTR",
+        "ARR"
+      ],
+      "see_also": [
+        "crosswalk:cong_comp"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -137,8 +201,14 @@
       "eli5": "The part of the price that accounts for electricity lost as heat while it travels along the wires.",
       "technical": "The component of LMP representing the marginal cost of real power losses at a node relative to the reference bus, computed from marginal loss factors; positive at electrically distant load, negative near generation.",
       "unit": "USD/MWh",
-      "related": ["LMP", "MEC", "MCC"],
-      "see_also": ["crosswalk:loss_comp"],
+      "related": [
+        "LMP",
+        "MEC",
+        "MCC"
+      ],
+      "see_also": [
+        "crosswalk:loss_comp"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -147,8 +217,15 @@
       "category": "Markets",
       "eli5": "A market held the day before, where buyers and sellers lock in electricity prices and quantities for each hour of tomorrow.",
       "technical": "A financially binding forward market that clears hourly energy and operating-reserve schedules for the next operating day via security-constrained unit commitment and dispatch, producing day-ahead LMPs and MCPs.",
-      "related": ["RT", "SCUC", "LMP", "MCP"],
-      "see_also": ["crosswalk:da_lmp"],
+      "related": [
+        "RT",
+        "SCUC",
+        "LMP",
+        "MCP"
+      ],
+      "see_also": [
+        "crosswalk:da_lmp"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -157,8 +234,15 @@
       "category": "Markets",
       "eli5": "The market that runs right now, adjusting prices every few minutes to match actual electricity use as it happens.",
       "technical": "The spot balancing market that dispatches resources every 5 minutes through security-constrained economic dispatch, settling deviations from day-ahead positions at real-time LMPs and ex-post operating-reserve MCPs.",
-      "related": ["DA", "SCED", "LMP", "ExPost"],
-      "see_also": ["crosswalk:rt_lmp"],
+      "related": [
+        "DA",
+        "SCED",
+        "LMP",
+        "ExPost"
+      ],
+      "see_also": [
+        "crosswalk:rt_lmp"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -167,7 +251,11 @@
       "category": "Operations",
       "eli5": "The computer process that decides, every few minutes, which power plants to run and how hard, to meet demand at the lowest cost without overloading any line.",
       "technical": "The real-time optimization that dispatches online resources at 5-minute intervals to minimize production cost subject to transmission and reserve constraints, setting real-time LMPs from the solution's marginal values.",
-      "related": ["SCUC", "RT", "LMP"],
+      "related": [
+        "SCUC",
+        "RT",
+        "LMP"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -176,7 +264,11 @@
       "category": "Operations",
       "eli5": "The planning step that picks which power plants to turn on ahead of time so there's enough supply for the next day.",
       "technical": "The mixed-integer optimization that determines the on/off commitment and hourly schedules of resources for the day-ahead market and reliability assessments, respecting startup/shutdown, ramp, minimum-run, and transmission-security constraints.",
-      "related": ["SCED", "DA", "RAC"],
+      "related": [
+        "SCED",
+        "DA",
+        "RAC"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -185,27 +277,41 @@
       "category": "Operations",
       "eli5": "A check MISO runs after the day-ahead market to commit extra plants if the forecast shows tomorrow could fall short.",
       "technical": "Post-day-ahead SCUC runs (forward and intra-day) that commit additional capacity based on updated load forecasts and resource availability to ensure reliability, with associated make-whole (RSG) payments.",
-      "related": ["SCUC", "RSG", "DA"],
+      "related": [
+        "SCUC",
+        "RSG",
+        "DA"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
       "acronym": "MCP",
       "name": "Market Clearing Price",
       "category": "Markets",
-      "eli5": "The single price at which supply meets demand in a market — here, usually the price paid for backup/reserve power products.",
+      "eli5": "The single price at which supply meets demand in a market \u2014 here, usually the price paid for backup/reserve power products.",
       "technical": "The marginal clearing price for a co-optimized ancillary-services product (e.g., regulation, spinning reserve, supplemental reserve, short-term reserve) at a given interval, reflecting the marginal cost plus opportunity cost of providing that product.",
       "unit": "USD/MWh",
-      "related": ["ASM", "LMP", "REG"],
-      "see_also": ["crosswalk:asm_mcp"],
+      "related": [
+        "ASM",
+        "LMP",
+        "REG"
+      ],
+      "see_also": [
+        "crosswalk:asm_mcp"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
       "acronym": "ASM",
       "name": "Ancillary Services Market",
       "category": "Markets",
-      "eli5": "The market for grid support services — like keeping frequency steady and holding reserves in case a plant trips offline.",
+      "eli5": "The market for grid support services \u2014 like keeping frequency steady and holding reserves in case a plant trips offline.",
       "technical": "The market, co-optimized with energy, that procures regulating reserve, spinning reserve, supplemental reserve, and short-term reserve, clearing each product at its interval MCP subject to deliverability and zonal requirements.",
-      "related": ["MCP", "REG", "SCED"],
+      "related": [
+        "MCP",
+        "REG",
+        "SCED"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -215,7 +321,11 @@
       "eli5": "Extra payments MISO makes to power plants it asked to run for reliability when market prices alone didn't cover their costs.",
       "technical": "Make-whole uplift payments ensuring resources committed or dispatched by MISO recover their as-offered commitment and dispatch costs; allocated to market participants via day-ahead and real-time RSG distribution mechanisms.",
       "unit": "USD",
-      "related": ["RAC", "SCUC", "IMM"],
+      "related": [
+        "RAC",
+        "SCUC",
+        "IMM"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -225,7 +335,11 @@
       "eli5": "A financial contract that pays its holder when the grid is congested between two points, letting them hedge congestion costs.",
       "technical": "A financial instrument entitling the holder to the day-ahead marginal congestion difference (or obligating payment) between a source and sink over a term, allocated from ARRs and traded in MISO's annual and monthly FTR auctions.",
       "unit": "USD/MWh",
-      "related": ["ARR", "MCC", "OASIS"],
+      "related": [
+        "ARR",
+        "MCC",
+        "OASIS"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -235,7 +349,11 @@
       "eli5": "An entitlement given to transmission customers that returns to them a share of the money raised in MISO's congestion-right auctions.",
       "technical": "An allocation right, assigned to eligible transmission service based on historical usage and capacity, that entitles the holder to a pro-rata share of FTR auction revenues or to self-convert to FTRs.",
       "unit": "USD",
-      "related": ["FTR", "MCC", "NITS"],
+      "related": [
+        "FTR",
+        "MCC",
+        "NITS"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -244,7 +362,12 @@
       "category": "Operations",
       "eli5": "The public website where transmission capacity is posted and customers request to reserve space to move power.",
       "technical": "The FERC-mandated electronic system for posting available transfer capability, processing transmission service requests, and publishing transmission-related data and business rules on a non-discriminatory basis.",
-      "related": ["ATC", "TSR", "NITS", "OATT"],
+      "related": [
+        "ATC",
+        "TSR",
+        "NITS",
+        "OATT"
+      ],
       "source": "https://www.oasis.oati.com/"
     },
     {
@@ -254,7 +377,11 @@
       "eli5": "How much more electricity the grid can safely carry between two areas beyond what's already committed.",
       "technical": "Total transfer capability less existing transmission commitments, capacity benefit margin, and transmission reliability margin, calculated and posted on OASIS to evaluate transmission service requests.",
       "unit": "MW",
-      "related": ["OASIS", "TSR", "TRM"],
+      "related": [
+        "OASIS",
+        "TSR",
+        "TRM"
+      ],
       "source": "https://www.oasis.oati.com/"
     },
     {
@@ -264,7 +391,11 @@
       "eli5": "A formal request to reserve room on the transmission system to move power from one place to another.",
       "technical": "A request submitted through OASIS for point-to-point or network transmission service specifying source, sink, path, duration, and MW, evaluated against ATC and OATT priority rules.",
       "unit": "MW",
-      "related": ["ATC", "OASIS", "NITS"],
+      "related": [
+        "ATC",
+        "OASIS",
+        "NITS"
+      ],
       "source": "https://www.oasis.oati.com/"
     },
     {
@@ -273,26 +404,40 @@
       "category": "Operations",
       "eli5": "The type of transmission service utilities buy to serve all of their customers' demand from their whole portfolio of power plants.",
       "technical": "Network transmission service under the OATT that allows a load-serving entity to integrate, plan, and economically dispatch its network resources to serve network load, with charges based on load ratio share.",
-      "related": ["OATT", "ARR", "LSE"],
+      "related": [
+        "OATT",
+        "ARR",
+        "LSE"
+      ],
       "source": "https://www.misoenergy.org/legal/tariff/"
     },
     {
       "acronym": "CPNODE",
       "name": "Commercial Pricing Node",
       "category": "Markets",
-      "eli5": "A named location on the grid where an electricity price is published and settlements happen — it can be a single point or an average of several.",
+      "eli5": "A named location on the grid where an electricity price is published and settlements happen \u2014 it can be a single point or an average of several.",
       "technical": "A settlement location defined as a single elemental pricing node or a defined aggregation (hub, load zone, interface) whose LMP is the weighted average of its constituent EPNodes.",
-      "related": ["EPNODE", "HUB", "LMP", "LOADZONE"],
-      "see_also": ["crosswalk:node_name"],
+      "related": [
+        "EPNODE",
+        "HUB",
+        "LMP",
+        "LOADZONE"
+      ],
+      "see_also": [
+        "crosswalk:node_name"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
       "acronym": "EPNODE",
       "name": "Elemental Pricing Node",
       "category": "Markets",
-      "eli5": "The most basic single point on the grid model — usually a generator bus or a load bus — where a raw price is calculated.",
+      "eli5": "The most basic single point on the grid model \u2014 usually a generator bus or a load bus \u2014 where a raw price is calculated.",
       "technical": "The atomic bus-level location in the network model at which an LMP is solved; CPNodes are built as fixed or load-weighted aggregations of EPNodes.",
-      "related": ["CPNODE", "LMP"],
+      "related": [
+        "CPNODE",
+        "LMP"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -301,8 +446,15 @@
       "category": "Markets",
       "eli5": "A well-known reference location (like 'Indiana Hub') used as a benchmark price for trading electricity contracts.",
       "technical": "A fixed-weight aggregation of EPNodes designed to provide a liquid, congestion-representative reference price for bilateral trading and financial products; MISO publishes hubs such as INDIANA.HUB, MICHIGAN.HUB, MINN.HUB, and ILLINOIS.HUB.",
-      "related": ["CPNODE", "LMP", "DA", "RT"],
-      "see_also": ["crosswalk:node_name"],
+      "related": [
+        "CPNODE",
+        "LMP",
+        "DA",
+        "RT"
+      ],
+      "see_also": [
+        "crosswalk:node_name"
+      ],
       "source": "https://www.misoenergy.org/markets-and-operations/real-time--market-data/market-reports/"
     },
     {
@@ -311,8 +463,15 @@
       "category": "Planning",
       "eli5": "MISO's yearly plan that identifies which new transmission lines and upgrades the region needs and who pays for them.",
       "technical": "The annual regional transmission planning process producing a board-approved portfolio of reliability, market-efficiency, generator-interconnection, and policy-driven projects, with cost allocation per Attachment FF of the Tariff.",
-      "related": ["LRTP", "JTIQ", "MEP", "GIP"],
-      "see_also": ["crosswalk:mtep_report"],
+      "related": [
+        "LRTP",
+        "JTIQ",
+        "MEP",
+        "GIP"
+      ],
+      "see_also": [
+        "crosswalk:mtep_report"
+      ],
       "source": "https://www.misoenergy.org/planning/transmission-planning/"
     },
     {
@@ -321,7 +480,11 @@
       "category": "Planning",
       "eli5": "A multi-decade MISO initiative to build a backbone of large transmission lines for the shift toward more wind, solar, and electrification.",
       "technical": "A scenario-based planning effort within MTEP that develops multi-value 345 kV and 765 kV portfolios in staged tranches to address the fleet transition, evaluated against a broad benefits framework with regional cost allocation.",
-      "related": ["MTEP", "MVP", "Tranche"],
+      "related": [
+        "MTEP",
+        "MVP",
+        "Tranche"
+      ],
       "source": "https://www.misoenergy.org/planning/long-range-transmission-planning/"
     },
     {
@@ -330,16 +493,25 @@
       "category": "Planning",
       "eli5": "A joint MISO-and-SPP effort to build shared transmission upgrades along their common border so new generators on both sides can connect more cheaply.",
       "technical": "An interregional planning framework between MISO and SPP that proactively identifies and cost-allocates a portfolio of seam-area network upgrades to reduce interconnection costs for the generator queues of both RTOs.",
-      "related": ["MTEP", "SPP", "GIP", "POI"],
+      "related": [
+        "MTEP",
+        "SPP",
+        "GIP",
+        "POI"
+      ],
       "source": "https://www.misoenergy.org/planning/interregional-planning/"
     },
     {
       "acronym": "MVP",
       "name": "Multi-Value Project",
       "category": "Planning",
-      "eli5": "A transmission project justified by delivering several kinds of benefits at once — reliability, lower costs, and enabling public-policy goals — and paid for across the whole region.",
+      "eli5": "A transmission project justified by delivering several kinds of benefits at once \u2014 reliability, lower costs, and enabling public-policy goals \u2014 and paid for across the whole region.",
       "technical": "An MTEP project classification whose benefits span multiple categories and whose costs are allocated region-wide (postage-stamp on load) under the Tariff, subject to a benefit-to-cost screening threshold.",
-      "related": ["MTEP", "LRTP", "MEP"],
+      "related": [
+        "MTEP",
+        "LRTP",
+        "MEP"
+      ],
       "source": "https://www.misoenergy.org/planning/transmission-planning/"
     },
     {
@@ -348,7 +520,11 @@
       "category": "Planning",
       "eli5": "A transmission upgrade built mainly because it lowers congestion costs enough to save customers more than it costs.",
       "technical": "An economically driven MTEP project that relieves congestion or losses, evaluated on an adjusted production cost benefit-to-cost ratio, with costs allocated between benefiting zones per the Tariff.",
-      "related": ["MTEP", "MVP", "MCC"],
+      "related": [
+        "MTEP",
+        "MVP",
+        "MCC"
+      ],
       "source": "https://www.misoenergy.org/planning/transmission-planning/"
     },
     {
@@ -357,7 +533,13 @@
       "category": "Interconnection",
       "eli5": "The step-by-step study process a new power plant must go through to connect to MISO's grid.",
       "technical": "The Tariff-governed queue process (Definitive Planning Phase studies I, II, and III, followed by facilities construction) that evaluates the network impact of proposed generation and assigns interconnection facility and network upgrade costs.",
-      "related": ["DPP", "GIA", "POI", "NRIS", "ERIS"],
+      "related": [
+        "DPP",
+        "GIA",
+        "POI",
+        "NRIS",
+        "ERIS"
+      ],
       "source": "https://www.misoenergy.org/planning/generator-interconnection/"
     },
     {
@@ -366,7 +548,11 @@
       "category": "Interconnection",
       "eli5": "The main study stage of MISO's generator connection queue, where projects are grouped and studied together to figure out grid upgrades and costs.",
       "technical": "The clustered study phase of the generator interconnection queue consisting of sequential decision points and system-impact and facilities studies, culminating in a Generator Interconnection Agreement.",
-      "related": ["GIP", "GIA", "POI"],
+      "related": [
+        "GIP",
+        "GIA",
+        "POI"
+      ],
       "source": "https://www.misoenergy.org/planning/generator-interconnection/"
     },
     {
@@ -375,7 +561,13 @@
       "category": "Interconnection",
       "eli5": "The signed contract between a power-plant developer, MISO, and the local transmission owner that sets the terms and costs for connecting the plant.",
       "technical": "The executed (or FERC-filed unexecuted) agreement establishing the terms, cost responsibility, milestones, and interconnection service level (ERIS/NRIS) for a generating facility's connection to the transmission system.",
-      "related": ["DPP", "GIP", "POI", "ERIS", "NRIS"],
+      "related": [
+        "DPP",
+        "GIP",
+        "POI",
+        "ERIS",
+        "NRIS"
+      ],
       "source": "https://www.misoenergy.org/planning/generator-interconnection/"
     },
     {
@@ -384,7 +576,11 @@
       "category": "Interconnection",
       "eli5": "The exact spot on the grid where a new power plant physically plugs in.",
       "technical": "The electrical location where a generating facility's interconnection facilities connect to the transmission provider's system, defining the boundary for ownership, metering, and network-upgrade impact analysis.",
-      "related": ["GIA", "DPP", "JTIQ"],
+      "related": [
+        "GIA",
+        "DPP",
+        "JTIQ"
+      ],
       "source": "https://www.misoenergy.org/planning/generator-interconnection/"
     },
     {
@@ -393,7 +589,11 @@
       "category": "Interconnection",
       "eli5": "A lower-cost way for a generator to connect that lets it sell energy when transmission space is available, but without a guarantee its full output can always get out.",
       "technical": "An interconnection service level allowing a resource to inject energy as transmission capacity permits, requiring only the network upgrades needed for reliable interconnection, not full deliverability.",
-      "related": ["NRIS", "GIA", "POI"],
+      "related": [
+        "NRIS",
+        "GIA",
+        "POI"
+      ],
       "source": "https://www.misoenergy.org/planning/generator-interconnection/"
     },
     {
@@ -402,7 +602,12 @@
       "category": "Interconnection",
       "eli5": "A higher-cost connection option that lets a generator count as firm capacity, with upgrades sized so its full output can reliably reach load.",
       "technical": "An interconnection service level that allows the resource to be designated a network resource, requiring network upgrades sufficient for deliverability under specified system conditions; a prerequisite for full capacity accreditation.",
-      "related": ["ERIS", "GIA", "ZRC", "DLOL"],
+      "related": [
+        "ERIS",
+        "GIA",
+        "ZRC",
+        "DLOL"
+      ],
       "source": "https://www.misoenergy.org/planning/generator-interconnection/"
     },
     {
@@ -412,7 +617,13 @@
       "eli5": "MISO's yearly capacity auction where utilities buy proof that they have enough power plants lined up to cover their customers' peak demand.",
       "technical": "The annual voluntary auction that clears Zonal Resource Credits against each Local Resource Zone's Planning Reserve Margin Requirement, now on a seasonal construct, producing an Auction Clearing Price per zone/season.",
       "unit": "USD/MW-day",
-      "related": ["ZRC", "PRM", "LOLE", "CONE", "LSE"],
+      "related": [
+        "ZRC",
+        "PRM",
+        "LOLE",
+        "CONE",
+        "LSE"
+      ],
       "source": "https://www.misoenergy.org/planning/resource-adequacy/"
     },
     {
@@ -422,17 +633,25 @@
       "eli5": "The cushion of extra generating capacity above expected peak demand that MISO requires so the lights stay on during heat waves and outages.",
       "technical": "The reserve requirement, expressed as a percentage above median peak forecast (PRMR in MW after accounting for load diversity and losses), set annually via a loss-of-load-expectation study targeting the 1-day-in-10-years standard.",
       "unit": "percent",
-      "related": ["LOLE", "PRA", "ZRC"],
+      "related": [
+        "LOLE",
+        "PRA",
+        "ZRC"
+      ],
       "source": "https://www.misoenergy.org/planning/resource-adequacy/"
     },
     {
       "acronym": "LOLE",
       "name": "Loss of Load Expectation",
       "category": "Reliability",
-      "eli5": "A statistical measure of how often the grid is expected to run short of power — the industry target is no more than one day every ten years.",
+      "eli5": "A statistical measure of how often the grid is expected to run short of power \u2014 the industry target is no more than one day every ten years.",
       "technical": "The expected number of days per year in which available capacity is insufficient to meet demand, computed probabilistically over load, forced-outage, and weather uncertainty; the 0.1 days/year criterion anchors the PRM study.",
       "unit": "days/year",
-      "related": ["PRM", "PRA", "ELCC"],
+      "related": [
+        "PRM",
+        "PRA",
+        "ELCC"
+      ],
       "source": "https://www.misoenergy.org/planning/resource-adequacy/"
     },
     {
@@ -442,7 +661,11 @@
       "eli5": "An estimate of what it would cost to build a brand-new power plant, used as a reference point for capacity prices.",
       "technical": "The estimated annualized fixed cost of a reference new peaking resource (typically a combustion turbine), net of expected energy and ancillary-services margins, used to calibrate the capacity demand curve and offer caps.",
       "unit": "USD/MW-day",
-      "related": ["PRA", "ZRC", "PRM"],
+      "related": [
+        "PRA",
+        "ZRC",
+        "PRM"
+      ],
       "source": "https://www.misoenergy.org/planning/resource-adequacy/"
     },
     {
@@ -452,7 +675,12 @@
       "eli5": "The tradable unit that represents one megawatt of accredited, deliverable capacity in a given MISO zone and season.",
       "technical": "The capacity product transacted in the PRA and bilaterally, equal to one MW of Unforced Capacity from an accredited Planning Resource that is deliverable to its Local Resource Zone for the relevant season.",
       "unit": "MW",
-      "related": ["PRA", "PRM", "UCAP", "ELCC"],
+      "related": [
+        "PRA",
+        "PRM",
+        "UCAP",
+        "ELCC"
+      ],
       "source": "https://www.misoenergy.org/planning/resource-adequacy/"
     },
     {
@@ -462,7 +690,12 @@
       "eli5": "A method for crediting wind, solar, and storage based on how much they actually reduce the risk of running short during the hours that matter most.",
       "technical": "The incremental perfectly-firm capacity that a resource (or class) displaces while holding system reliability constant; MISO uses class-level ELCC accreditation for wind, solar, and storage in resource adequacy.",
       "unit": "percent",
-      "related": ["LOLE", "ZRC", "UCAP", "VRE"],
+      "related": [
+        "LOLE",
+        "ZRC",
+        "UCAP",
+        "VRE"
+      ],
       "source": "https://www.misoenergy.org/planning/resource-adequacy/"
     },
     {
@@ -472,7 +705,11 @@
       "eli5": "A power plant's capacity rating after subtracting how often it's typically broken down or unavailable.",
       "technical": "Installed capacity de-rated by a resource's forced outage rate (or by accreditation methods such as SAC/ELCC), representing the capacity value counted toward resource adequacy requirements.",
       "unit": "MW",
-      "related": ["ZRC", "ELCC", "PRA"],
+      "related": [
+        "ZRC",
+        "ELCC",
+        "PRA"
+      ],
       "source": "https://www.misoenergy.org/planning/resource-adequacy/"
     },
     {
@@ -481,7 +718,12 @@
       "category": "Markets",
       "eli5": "Any company or utility responsible for buying power and delivering it to end-use customers.",
       "technical": "An entity obligated to serve retail or wholesale end-use load, carrying the associated resource-adequacy (PRMR) obligation and typically holding NITS and ARR allocations.",
-      "related": ["NITS", "PRA", "LMR", "ARR"],
+      "related": [
+        "NITS",
+        "PRA",
+        "LMR",
+        "ARR"
+      ],
       "source": "https://www.misoenergy.org/planning/resource-adequacy/"
     },
     {
@@ -490,7 +732,11 @@
       "category": "Reliability",
       "eli5": "A large customer or program that agrees to cut its electricity use when MISO calls on it, counting like a power plant for reliability.",
       "technical": "A demand-response or behind-the-meter generation resource registered to provide capacity by curtailing load upon MISO declaration of a Maximum Generation Event or scheduled instruction, subject to accreditation and availability rules.",
-      "related": ["DR", "PRA", "EEM"],
+      "related": [
+        "DR",
+        "PRA",
+        "EEM"
+      ],
       "source": "https://www.misoenergy.org/planning/resource-adequacy/"
     },
     {
@@ -499,7 +745,11 @@
       "category": "Markets",
       "eli5": "Paying electricity users to use less power at certain times instead of paying a plant to make more.",
       "technical": "Resources that reduce or shift consumption in response to price or reliability signals, participating as Demand Response Resources (Type I/II) in energy and ancillary markets or as LMRs in resource adequacy.",
-      "related": ["LMR", "DRR", "ASM"],
+      "related": [
+        "LMR",
+        "DRR",
+        "ASM"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -508,7 +758,12 @@
       "category": "Reliability",
       "eli5": "The entity responsible for keeping electricity supply and demand matched second-by-second within its area.",
       "technical": "The NERC-registered functional entity that integrates resource plans, maintains load-interchange-generation balance within a Balancing Authority Area, and supports Interconnection frequency in real time; MISO is the BA for most of its footprint.",
-      "related": ["ACE", "NAI", "NSI", "NERC"],
+      "related": [
+        "ACE",
+        "NAI",
+        "NSI",
+        "NERC"
+      ],
       "source": "https://www.nerc.com/"
     },
     {
@@ -518,7 +773,12 @@
       "eli5": "A running number that shows whether a control area is generating slightly too much or too little power compared to what it should be.",
       "technical": "The instantaneous difference between actual and scheduled net interchange, corrected for frequency bias and metering error; driven toward zero by automatic generation control.",
       "unit": "MW",
-      "related": ["BA", "NSI", "NAI", "REG"],
+      "related": [
+        "BA",
+        "NSI",
+        "NAI",
+        "REG"
+      ],
       "source": "https://www.nerc.com/"
     },
     {
@@ -528,8 +788,15 @@
       "eli5": "The planned total amount of power scheduled to flow into or out of MISO's area at a given time.",
       "technical": "The algebraic sum of all confirmed interchange schedules across a Balancing Authority Area's tie lines for an interval, used as the interchange target in ACE.",
       "unit": "MW",
-      "related": ["NAI", "ACE", "CTS", "RDT"],
-      "see_also": ["crosswalk:net_sched_interchange"],
+      "related": [
+        "NAI",
+        "ACE",
+        "CTS",
+        "RDT"
+      ],
+      "see_also": [
+        "crosswalk:net_sched_interchange"
+      ],
       "source": "https://www.misoenergy.org/markets-and-operations/real-time--market-data/real-time-displays/"
     },
     {
@@ -539,7 +806,11 @@
       "eli5": "The real, measured amount of power that actually flowed into or out of MISO's area.",
       "technical": "The metered algebraic sum of real power flow across all tie lines of a Balancing Authority Area for an interval; its deviation from NSI contributes to ACE.",
       "unit": "MW",
-      "related": ["NSI", "ACE", "BA"],
+      "related": [
+        "NSI",
+        "ACE",
+        "BA"
+      ],
       "source": "https://www.misoenergy.org/markets-and-operations/real-time--market-data/real-time-displays/"
     },
     {
@@ -548,7 +819,11 @@
       "category": "Operations",
       "eli5": "A method that lets traders schedule power across the MISO-PJM border based on the expected price difference, so power flows the economical direction.",
       "technical": "An interface scheduling mechanism between adjacent RTOs (MISO-PJM) in which interface bids clear against the forecast real-time price spread at 15-minute intervals, improving the efficiency of seam interchange.",
-      "related": ["RDT", "NSI", "PJM"],
+      "related": [
+        "RDT",
+        "NSI",
+        "PJM"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -558,7 +833,11 @@
       "eli5": "The limit on how much power can be moved between MISO's northern (Midwest) and southern regions, which connect only through other utilities' lines.",
       "technical": "The contractual and reliability limit on net scheduled transfer between MISO Midwest/North and MISO South across the SPP-controlled settlement interface, currently governed by a capacity cap on the combined firm and non-firm flow.",
       "unit": "MW",
-      "related": ["NSI", "SPP", "CTS"],
+      "related": [
+        "NSI",
+        "SPP",
+        "CTS"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -568,7 +847,11 @@
       "eli5": "Fast-responding capacity that automatically ramps up and down every few seconds to keep grid frequency exactly right.",
       "technical": "The ancillary-services product providing capacity on automatic generation control to correct short-term ACE, procured in the co-optimized market and cleared at a regulation MCP with a mileage/performance settlement.",
       "unit": "MW",
-      "related": ["ASM", "MCP", "ACE"],
+      "related": [
+        "ASM",
+        "MCP",
+        "ACE"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -578,7 +861,11 @@
       "eli5": "A newer reserve product for capacity that can be online and delivering within about half an hour if the grid gets tight.",
       "technical": "A transmission-constrained operating-reserve product (implemented 2022) procured zonally for resources able to respond within roughly 30 minutes, cleared at its own MCP alongside regulating, spinning, and supplemental reserve.",
       "unit": "MW",
-      "related": ["ASM", "MCP", "RT"],
+      "related": [
+        "ASM",
+        "MCP",
+        "RT"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -587,7 +874,11 @@
       "category": "Planning",
       "eli5": "Power sources like wind and solar whose output rises and falls with the weather and can't be turned up on demand.",
       "technical": "Non-dispatchable renewable resources (primarily wind and solar) whose production follows an exogenous resource profile; accredited for capacity via class ELCC and managed operationally through Dispatchable Intermittent Resource protocols.",
-      "related": ["DIR", "ELCC", "LRTP"],
+      "related": [
+        "DIR",
+        "ELCC",
+        "LRTP"
+      ],
       "source": "https://www.misoenergy.org/planning/resource-adequacy/"
     },
     {
@@ -596,27 +887,41 @@
       "category": "Operations",
       "eli5": "A wind or solar farm set up so MISO's dispatch computer can dial its output down (and back up) like a conventional plant.",
       "technical": "A registration type for intermittent resources that submit a forecast maximum and an offer curve, enabling SCED to dispatch them economically and for congestion management, with LMP-based settlement and curtailment.",
-      "related": ["VRE", "SCED", "LMP"],
+      "related": [
+        "VRE",
+        "SCED",
+        "LMP"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
       "acronym": "EPT",
       "name": "Eastern Prevailing Time",
       "category": "Operations",
-      "eli5": "The clock MISO's markets run on — U.S. Eastern time that follows daylight saving, so it's EST in winter and EDT in summer.",
+      "eli5": "The clock MISO's markets run on \u2014 U.S. Eastern time that follows daylight saving, so it's EST in winter and EDT in summer.",
       "technical": "The time reference for MISO market operations and most legacy market reports (UTC-5 standard, UTC-4 daylight); Data Exchange API payloads use ISO-8601 UTC and must be converted for alignment with legacy 'Hour Ending' fields.",
-      "related": ["HE"],
-      "see_also": ["crosswalk:he"],
+      "related": [
+        "HE"
+      ],
+      "see_also": [
+        "crosswalk:he"
+      ],
       "source": "https://www.misoenergy.org/markets-and-operations/"
     },
     {
       "acronym": "HE",
       "name": "Hour Ending",
       "category": "Operations",
-      "eli5": "A way of labeling an hour by the clock time it finishes — 'HE 1' means the hour from midnight to 1 a.m.",
+      "eli5": "A way of labeling an hour by the clock time it finishes \u2014 'HE 1' means the hour from midnight to 1 a.m.",
       "technical": "The hour-ending convention used throughout MISO market reports: HE n covers the interval (n-1):00 to n:00 EPT, with HE 1..24 spanning the operating day; DST transition days have 23 or 25 hours.",
-      "related": ["EPT", "DA", "RT"],
-      "see_also": ["crosswalk:he"],
+      "related": [
+        "EPT",
+        "DA",
+        "RT"
+      ],
+      "see_also": [
+        "crosswalk:he"
+      ],
       "source": "https://www.misoenergy.org/markets-and-operations/real-time--market-data/market-reports/"
     },
     {
@@ -625,7 +930,11 @@
       "category": "Governance",
       "eli5": "The neighboring grid operator to MISO's west and south; the two share borders and jointly plan some transmission.",
       "technical": "The RTO covering the central U.S. from the Dakotas to Oklahoma; MISO's settlement path between its Midwest and South regions traverses SPP, and the two coordinate through JTIQ and joint operating agreements.",
-      "related": ["JTIQ", "RDT", "RTO"],
+      "related": [
+        "JTIQ",
+        "RDT",
+        "RTO"
+      ],
       "source": "https://www.spp.org/"
     },
     {
@@ -634,7 +943,11 @@
       "category": "Governance",
       "eli5": "The large grid operator directly east of MISO, covering the mid-Atlantic and parts of the Midwest.",
       "technical": "The RTO bordering MISO to the east; the MISO-PJM seam is managed through a Joint Operating Agreement, market-to-market congestion coordination, and Coordinated Transaction Scheduling.",
-      "related": ["CTS", "M2M", "RTO"],
+      "related": [
+        "CTS",
+        "M2M",
+        "RTO"
+      ],
       "source": "https://www.pjm.com/"
     },
     {
@@ -643,7 +956,11 @@
       "category": "Operations",
       "eli5": "A process where MISO and PJM share control of congested lines that sit on their border, redispatching each other's plants and settling the cost between them.",
       "technical": "The FERC-approved procedure under the MISO-PJM JOA for jointly managing flowgates affected by both markets, exchanging shadow prices and market-flow entitlements and settling redispatch obligations at the firm-flow entitlement.",
-      "related": ["PJM", "CTS", "MCC"],
+      "related": [
+        "PJM",
+        "CTS",
+        "MCC"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -652,7 +969,11 @@
       "category": "Reliability",
       "eli5": "An emergency alert MISO issues when it's running out of available power and needs every resource, including load cuts, to keep the grid stable.",
       "technical": "A capacity-emergency declaration (Conservative Operations, then Max Gen Alert/Warning/Event steps) that commits all available resources, deploys LMRs and emergency-range output, invokes emergency energy purchases, and can lead to controlled load shed.",
-      "related": ["LMR", "EEA", "PRM"],
+      "related": [
+        "LMR",
+        "EEA",
+        "PRM"
+      ],
       "source": "https://help.misoenergy.org/knowledgebase"
     },
     {
@@ -661,7 +982,113 @@
       "category": "Reliability",
       "eli5": "A standardized NERC warning level (1, 2, or 3) that tells everyone how serious a power shortage is, with EEA 3 meaning load shedding is imminent or happening.",
       "technical": "The NERC EOP-011 alert scale communicated to the Reliability Coordinator and neighbors: EEA 1 (all resources committed), EEA 2 (load-management and public appeals), EEA 3 (firm load interruption imminent or in progress).",
-      "related": ["MaxGen", "NERC", "LOLE"],
+      "related": [
+        "MaxGen",
+        "NERC",
+        "LOLE"
+      ],
+      "source": "https://www.nerc.com/"
+    },
+    {
+      "acronym": "MP",
+      "name": "Market Participant",
+      "category": "Governance",
+      "eli5": "An entity certified to buy, sell, or schedule energy, capacity, and ancillary services in MISO markets \u2014 including utilities, power plant operators, and energy traders.",
+      "technical": "An entity registered under Tariff Module B that has executed a Market Participant Agreement, meeting financial, credit, and operational qualifications to submit bids/offers and settle in MISO Day-Ahead and Real-Time Energy, Operating Reserve, and Planning Resource Markets.",
+      "related": [
+        "LSE",
+        "GIA",
+        "LMP",
+        "OATT"
+      ],
+      "source": "https://www.misoenergy.org/markets-and-operations/"
+    },
+    {
+      "acronym": "TO",
+      "name": "Transmission Owner",
+      "category": "Planning",
+      "eli5": "A utility or company that owns high-voltage transmission lines, towers, and substations within MISO, responsible for physical line maintenance and operational telemetry.",
+      "technical": "An entity that has executed the MISO Transmission Owners Agreement (TOA), transferring functional control of its transmission facilities to MISO as the regional transmission organization while maintaining physical asset ownership, maintenance responsibilities, and local reliability telemetry via ICCP.",
+      "related": [
+        "MTEP",
+        "LRTP",
+        "ICCP",
+        "EMS"
+      ],
+      "source": "https://www.misoenergy.org/planning/transmission-planning/"
+    },
+    {
+      "acronym": "IC",
+      "name": "Interconnection Customer",
+      "category": "Interconnection",
+      "eli5": "A developer or power company requesting to connect a new power plant (such as a wind farm, solar array, battery system, or gas plant) to MISO's high-voltage power grid.",
+      "technical": "An entity that submits an Interconnection Request under Tariff Attachment X to evaluate, study, construct, and interconnect a generating facility or energy storage resource to the Transmission System through the Definitive Planning Phase (DPP).",
+      "related": [
+        "DPP",
+        "GIA",
+        "COD",
+        "POI",
+        "ERIS",
+        "NRIS"
+      ],
+      "source": "https://www.misoenergy.org/planning/generator-interconnection/"
+    },
+    {
+      "acronym": "COD",
+      "name": "Commercial Operation Date",
+      "category": "Interconnection",
+      "eli5": "The official milestone date when a newly constructed power plant or battery storage site completes all commissioning tests, synchronizes with MISO's grid, and begins selling commercial electricity.",
+      "technical": "The date on which an Interconnection Customer declares that its generating facility has achieved commercial operation pursuant to Tariff Attachment X, following synchronization, telemetry validation against MISO EMS systems, and successful trial operation testing.",
+      "related": [
+        "IC",
+        "GIA",
+        "DPP",
+        "ICCP"
+      ],
+      "source": "https://www.misoenergy.org/planning/generator-interconnection/"
+    },
+    {
+      "acronym": "EMS",
+      "name": "Energy Management System",
+      "category": "Operations",
+      "eli5": "MISO's 24/7 central control room computer platform that monitors power lines, substations, and generator output in real time across 15 states to keep the bulk power grid balanced.",
+      "technical": "A computer-aided SCADA and advanced power application suite used by MISO grid operators to monitor state estimation, real-time power flows, contingency analysis (RTCA), voltage stability, and automated dispatch controls across the bulk electric system.",
+      "related": [
+        "ICCP",
+        "SCED",
+        "ACE",
+        "BA"
+      ],
+      "source": "https://www.misoenergy.org/markets-and-operations/real-time--market-data/"
+    },
+    {
+      "acronym": "ICCP",
+      "name": "Inter-Control Center Communications Protocol",
+      "category": "Operations",
+      "eli5": "A secure digital communication pipeline allowing transmission owners, utilities, and power plants to stream real-time operational measurements (telemetry) directly to MISO control rooms.",
+      "technical": "An international standard (IEC 60870-6 / TASE.2) communications protocol used in utility SCADA networks for exchanging real-time telemetry, breaker states, megawatt output, frequency, and EMS operational data between MISO and external control centers.",
+      "related": [
+        "EMS",
+        "BA",
+        "ACE",
+        "TO"
+      ],
+      "source": "https://help.misoenergy.org/knowledgebase"
+    },
+    {
+      "acronym": "NIC",
+      "name": "Net Interchange Coordinate",
+      "category": "Operations",
+      "eli5": "The real-time calculation and coordination of electrical power flowing across all transmission ties between MISO and neighboring power grids (like PJM and SPP).",
+      "technical": "The coordinated measurement of real-time power exchange across external tie lines used in Balancing Authority Area calculations, compared continuously against Net Scheduled Interchange (NSI) to calculate Area Control Error (ACE) and ensure NERC compliance.",
+      "unit": "MW",
+      "related": [
+        "NSI",
+        "NAI",
+        "ACE",
+        "BA",
+        "M2M"
+      ],
       "source": "https://www.nerc.com/"
     }
   ]
