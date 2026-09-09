@@ -35,6 +35,11 @@ All tasks and ready-to-use LLM prompt templates are documented in:
 | **[Issue #6](.github/issues/ISSUE_06_data_related_queries_graph_crosswalk.md)** | Member 3 (*Data Lead*) | Related-Queries Intent Graph & Legacy Crosswalk |
 | **[Issue #7](.github/issues/ISSUE_07_design_wcag_a11y_voice_briefing.md)** | Member 4 (*UI/UX & A11y*) | Figma Design System, WCAG 2.1 AA Audit & Voice Briefing |
 | **[Issue #8](.github/issues/ISSUE_08_pm_roi_model_pitch_deck_script.md)** | Member 5 (*PM & Pitch*) | CSR Deflection ROI Model, 10–12 Slide Deck & Demo Script |
+| **[Issue #9](.github/issues/ISSUE_09_llm_grounded_persona_synthesizer.md)** | Member 1 (*Lead Backend & AI*) | Grounded LLM Persona Synthesizer & Fallback |
+| **[Issue #10](.github/issues/ISSUE_10_frontend_canvas_copilot_chat.md)** | Member 2 & 1 (*Frontend & Backend*) | "Chat with this Canvas" Copilot Drawer & API |
+| **[Issue #11](.github/issues/ISSUE_11_llm_intent_classifier_query_router.md)** | Member 1 & 3 (*Backend & Data*) | Semantic Intent Classifier & Entity Query Router |
+| **[Issue #12](.github/issues/ISSUE_12_llm_pdf_executive_commentary.md)** | Member 1 & 5 (*Backend & PM*) | AI Executive Commentary for 1-Page PDF Generator |
+| **[Issue #13](.github/issues/ISSUE_13_llm_dynamic_proactive_followups.md)** | Member 3 & 1 (*Data & Backend*) | Context-Aware Dynamic Research Follow-Up Generator |
 
 ---
 

@@ -1,6 +1,6 @@
 # 🚀 MISO OmniSearch: Master Project Roadmap & Task Issues
 
-Welcome to the **MISO OmniSearch** project repository! This document contains the master breakdown of all **8 core project issues** across the 5 specialized team roles.
+Welcome to the **MISO OmniSearch** project repository! This document contains the master breakdown of **13 project issues** (8 core foundation issues + 5 grounded AI/LLM enhancement issues) across the 5 specialized team roles.
 
 Each issue contains detailed technical requirements, file paths, acceptance criteria, and a **pre-crafted LLM Prompt Template** that you can copy and paste directly into your AI assistant (ChatGPT, Claude, Cursor, Copilot, Gemini) to generate your deliverables!
 
@@ -48,8 +48,39 @@ Each issue contains detailed technical requirements, file paths, acceptance crit
 
 ---
 
+## 🤖 AI & LLM Enhancement Roadmap (Issues #9–#13)
+*Grounded intelligence layers that elevate MISO OmniSearch from a deterministic data engine into an enterprise AI platform—with zero hallucinations and graceful fallback.*
+
+* **[Issue #9: Grounded LLM Persona Synthesizer with Zero-Hallucination Guardrails](.github/issues/ISSUE_09_llm_grounded_persona_synthesizer.md)**
+  * *Owner:* Member 1 (Lead Backend & AI)
+  * *Files:* `backend/llm_service.py`, `backend/search_engine.py`, `backend/requirements.txt`, `.env.example`
+  * *Deliverable:* Synthesizes executive direct answers for 4 personas (Trader, Co-op, Regulator, Public) grounded strictly in verified MISO telemetry.
+
+* **[Issue #10: "Chat with this Canvas" Interactive Copilot Drawer & API](.github/issues/ISSUE_10_frontend_canvas_copilot_chat.md)**
+  * *Owner:* Member 2 (Frontend Lead) & Member 1 (Backend)
+  * *Files:* `backend/main.py`, `backend/llm_service.py`, `frontend/src/components/CanvasCopilotDrawer.tsx`, `frontend/src/components/KnowledgeCanvas.tsx`
+  * *Deliverable:* Accessible slide-out chat drawer allowing users to ask spontaneous conversational follow-ups about the active chart.
+
+* **[Issue #11: Semantic Intent Classifier & Entity Extraction Query Router](.github/issues/ISSUE_11_llm_intent_classifier_query_router.md)**
+  * *Owner:* Member 1 (Backend & AI) & Member 3 (Data Lead)
+  * *Files:* `backend/llm_service.py`, `backend/search_engine.py`
+  * *Deliverable:* Extracts target hubs, metrics, and time ranges from complex conversational queries before routing into `data_manager.py`.
+
+* **[Issue #12: AI-Generated Executive Commentary for 1-Click PDF Briefings](.github/issues/ISSUE_12_llm_pdf_executive_commentary.md)**
+  * *Owner:* Member 1 (Backend & AI) & Member 5 (PM & Pitch)
+  * *Files:* `backend/pdf_generator.py`, `backend/llm_service.py`
+  * *Deliverable:* Generates a 55-word executive market commentary paragraph in the 1-page PDF fact sheet with strict spatial budgeting.
+
+* **[Issue #13: Context-Aware Dynamic Research Follow-Up Generator](.github/issues/ISSUE_13_llm_dynamic_proactive_followups.md)**
+  * *Owner:* Member 3 (Data Lead) & Member 1 (Backend & AI)
+  * *Files:* `backend/llm_service.py`, `backend/search_engine.py`, `backend/data/related_queries.json`
+  * *Deliverable:* Produces 3 smart, executable follow-up research chips based on the specific query and data returned.
+
+---
+
 ## ⚡ How Teammates Should Use These Issues
 1. Click on your assigned issue above.
 2. Read the **Context** and **Specific Tasks**.
 3. Copy the **🤖 Copy-Paste LLM Prompt** at the bottom of your issue into your AI coding assistant (ChatGPT / Claude / Cursor / Copilot / Gemini).
 4. Review the generated code/documents and commit your changes!
+
