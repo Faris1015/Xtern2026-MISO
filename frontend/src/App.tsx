@@ -12,6 +12,11 @@ import AudioBriefing from "./components/AudioBriefing";
 import SessionRadar from "./components/SessionRadar";
 import GuidedTour from "./components/GuidedTour";
 import JargonHUD from "./components/JargonHUD";
+import GridAlertTicker from "./components/GridAlertTicker";
+import SearchHistoryFavorites, {
+  type StarredItem,
+} from "./components/SearchHistoryFavorites";
+import MisoIntegrationModal from "./components/MisoIntegrationModal";
 import ErrorBoundary from "./components/ErrorBoundary";
 import misoLogo from "./assets/miso-logo.png";
 import { parseSearchResponse } from "./api/guards";
@@ -77,9 +82,63 @@ export default function App() {
     }
   });
   const [isJargonHudOpen, setIsJargonHudOpen] = useState(false);
+  const [isIntegrationModalOpen, setIsIntegrationModalOpen] = useState(false);
+  const [starredQueries, setStarredQueries] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem("miso_omnisearch_starred");
+      if (stored) {
+        const parsed: StarredItem[] = JSON.parse(stored);
+        return parsed.map((item) => item.query.toLowerCase());
+      }
+    } catch {
+      // fallback
+    }
+    return [
+      "indiana hub lmp",
+      "michigan hub lmp",
+      "texas hub lmp",
+      "current fuel mix",
+      "lrtp transmission lines",
+    ];
+  });
   const searchController = useRef<AbortController | null>(null);
   const lastQueryRef = useRef("");
   const requestVersion = useRef(0);
+
+  const handleToggleStar = useCallback((queryToToggle: string) => {
+    const clean = queryToToggle.trim();
+    if (!clean) return;
+    try {
+      const stored = localStorage.getItem("miso_omnisearch_starred");
+      const currentList: StarredItem[] = stored
+        ? JSON.parse(stored)
+        : [
+            { id: "star-indiana", label: "Indiana Hub", query: "Indiana Hub LMP" },
+            { id: "star-michigan", label: "Michigan Hub", query: "Michigan Hub LMP" },
+            { id: "star-texas", label: "Texas Hub", query: "Texas Hub LMP" },
+            { id: "star-fuel", label: "Fuel Mix", query: "Current Fuel Mix" },
+            { id: "star-lrtp", label: "LRTP Portfolios", query: "LRTP transmission lines" },
+          ];
+      const exists = currentList.some(
+        (item) => item.query.toLowerCase() === clean.toLowerCase(),
+      );
+      let updated: StarredItem[];
+      if (exists) {
+        updated = currentList.filter(
+          (item) => item.query.toLowerCase() !== clean.toLowerCase(),
+        );
+      } else {
+        updated = [
+          ...currentList,
+          { id: `star-${Date.now()}`, label: clean, query: clean },
+        ];
+      }
+      localStorage.setItem("miso_omnisearch_starred", JSON.stringify(updated));
+      setStarredQueries(updated.map((item) => item.query.toLowerCase()));
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const handleCloseTour = useCallback(() => {
     setIsTourOpen(false);
@@ -130,7 +189,13 @@ export default function App() {
 
         const payload: unknown = await response.json();
         const nextResult = parseSearchResponse(payload);
-        if (version === requestVersion.current) setResult(nextResult);
+        if (version === requestVersion.current) {
+          setResult(nextResult);
+          const url = new URL(window.location.href);
+          url.searchParams.set("q", cleanQuery);
+          url.searchParams.set("persona", selectedAudience);
+          window.history.replaceState(null, "", url.toString());
+        }
       } catch (caught: unknown) {
         if (caught instanceof DOMException && caught.name === "AbortError") {
           return;
@@ -148,6 +213,23 @@ export default function App() {
     },
     [audienceMode],
   );
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const initialQuery = params.get("q");
+    const initialPersona = params.get("persona") as AudienceMode | null;
+    if (initialQuery) {
+      if (
+        initialPersona &&
+        ["Power Trader", "Municipal Co-op", "Public / Media", "State Regulator"].includes(
+          initialPersona,
+        )
+      ) {
+        setAudienceMode(initialPersona);
+      }
+      void search(initialQuery, initialPersona ?? undefined);
+    }
+  }, [search]);
 
   const openComparison = useCallback(
     (type: ComparisonType, items: string[]) => {
@@ -308,6 +390,8 @@ export default function App() {
         </div>
       </div>
 
+      <GridAlertTicker apiBase={API_BASE} onSearch={(q) => void search(q)} />
+
       <header className="border-b border-miso-border bg-white">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-8 px-8 py-4">
           <div className="flex items-center gap-4">
@@ -323,6 +407,16 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsIntegrationModalOpen(true)}
+              aria-label="Connect to misoenergy.org website search bar"
+              className="miso-button-secondary text-xs sm:text-sm flex items-center gap-1.5 border-sky-300 text-sky-900 bg-sky-50/70 hover:bg-sky-100"
+            >
+              <span className="text-miso-sky font-bold">⚡</span>
+              <span>Connect to MISO</span>
+            </button>
+
             <AudioBriefing
               audienceMode={audienceMode}
               onAudienceModeChange={handleAudienceModeChange}
@@ -392,6 +486,11 @@ export default function App() {
           isSearching={isSearching}
         />
 
+        <SearchHistoryFavorites
+          currentQuery={result?.query ?? lastQueryRef.current}
+          onSelectQuery={(q) => void search(q)}
+        />
+
         <SessionRadar apiBase={API_BASE} onSelectChip={handleSessionChip} />
 
         {isSearching && (
@@ -439,6 +538,12 @@ export default function App() {
               audienceMode={audienceMode}
               result={result}
               onFollowUp={handleFollowUp}
+              isStarred={
+                result
+                  ? starredQueries.includes(result.query.toLowerCase())
+                  : false
+              }
+              onToggleStar={handleToggleStar}
             />
           </Suspense>
         </ErrorBoundary>
@@ -506,6 +611,12 @@ export default function App() {
         isOpen={isJargonHudOpen}
         onClose={() => setIsJargonHudOpen(false)}
         onSelectTerm={(term) => void search(term)}
+      />
+
+      <MisoIntegrationModal
+        isOpen={isIntegrationModalOpen}
+        onClose={() => setIsIntegrationModalOpen(false)}
+        apiBase={API_BASE}
       />
       </div>
     </GlossaryProvider>

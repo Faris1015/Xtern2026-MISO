@@ -232,6 +232,20 @@ class TestMISOBackendQA(unittest.TestCase):
         labels = [f["label"] for f in resp_telemetry.json()["proactiveFollowUps"]]
         self.assertTrue(any("ICCP" in l for l in labels))
 
+    def test_20_grid_telemetry(self):
+        resp = self.client.get("/api/grid-telemetry")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["forecastedPeakDemandMw"], 107605)
+        self.assertEqual(data["currentDemandMw"], 92893)
+        self.assertEqual(data["marginalEnergyCost"], 45.01)
+        self.assertEqual(data["scheduledNetInterchangeMw"], -4248)
+        self.assertEqual(data["status"], "Normal Operations")
+        self.assertIn("North", data["regions"])
+        self.assertIn("Central", data["regions"])
+        self.assertIn("South", data["regions"])
+        self.assertIn("demand", data["drillDownQueries"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -24,6 +24,7 @@ import {
   Download,
   ExternalLink,
   FileText,
+  Star,
 } from "lucide-react";
 import type {
   AudienceMode,
@@ -76,6 +77,8 @@ type Props = {
   audienceMode: AudienceMode;
   result: SearchResponse | null;
   onFollowUp: (followUp: FollowUp) => void;
+  isStarred?: boolean;
+  onToggleStar?: (query: string) => void;
 };
 
 function formatCurrencyPerMwh(value: unknown) {
@@ -846,6 +849,8 @@ export default function KnowledgeCanvas({
   audienceMode,
   result,
   onFollowUp,
+  isStarred,
+  onToggleStar,
 }: Props) {
   const [lmpChartMode, setLmpChartMode] = useState<LmpChartMode>("prices");
   const [transmissionMetric, setTransmissionMetric] =
@@ -1017,10 +1022,32 @@ export default function KnowledgeCanvas({
       <div className="grid xl:grid-cols-[minmax(0,1fr)_19rem]">
         <div className="min-w-0">
           <header className="border-b border-miso-border p-6 lg:p-8">
-            <p className="miso-eyebrow">{resultCategory(result)}</p>
-            <h2 className="mt-1 text-2xl font-bold tracking-tight text-miso-navy">
-              {result.query}
-            </h2>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="miso-eyebrow">{resultCategory(result)}</p>
+                <h2 className="mt-1 text-2xl font-bold tracking-tight text-miso-navy">
+                  {result.query}
+                </h2>
+              </div>
+              {onToggleStar && (
+                <button
+                  type="button"
+                  onClick={() => onToggleStar(result.query)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border transition cursor-pointer shadow-2xs ${
+                    isStarred
+                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      : "bg-slate-50 hover:bg-amber-50 text-slate-600 hover:text-amber-800 border-slate-300"
+                  }`}
+                  title={isStarred ? "Remove from Starred Hubs" : "Add to Starred Hubs"}
+                >
+                  <Star
+                    size={14}
+                    className={isStarred ? "fill-amber-400 text-amber-500" : ""}
+                  />
+                  <span>{isStarred ? "Starred" : "Star Query"}</span>
+                </button>
+              )}
+            </div>
             <p className="mt-4 max-w-5xl whitespace-pre-line text-sm leading-7 text-miso-slate">
               <GlossaryHighlight
                 text={result.directAnswer.replace(/[*`]/g, "")}

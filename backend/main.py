@@ -137,6 +137,16 @@ async def api_session_prefetch() -> SessionPrefetchResponse:
 
 
 @app.get(
+    "/api/grid-telemetry",
+    summary="Real-Time Grid Telemetry & Operating Conditions",
+    description="Returns live system snapshot (Demand, Forecast Peak, Marginal Energy Cost, Imports/Exports, and Advisory Status).",
+    tags=["Grid Telemetry"],
+)
+async def api_grid_telemetry() -> Dict[str, Any]:
+    return data_manager.get_grid_telemetry()
+
+
+@app.get(
     "/api/compare",
     response_model=ComparisonResponse,
     summary="Multi-Hub / Multi-Fuel / Multi-Plan Comparison",
