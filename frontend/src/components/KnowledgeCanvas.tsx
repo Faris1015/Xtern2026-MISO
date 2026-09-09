@@ -873,7 +873,7 @@ export default function KnowledgeCanvas({
 
   if (!result) {
     return (
-      <section className="miso-panel border-dashed px-8 py-10 text-center">
+      <section data-tour="knowledge-canvas" className="miso-panel border-dashed px-8 py-10 text-center">
         <h2 className="text-xl font-bold text-miso-navy">
           Search results will appear here
         </h2>
@@ -939,7 +939,7 @@ export default function KnowledgeCanvas({
   };
 
   const actionSidebar = (
-    <aside className="border-t border-miso-border bg-miso-card p-5 xl:border-l xl:border-t-0 xl:p-6">
+    <aside data-tour="export-sidebar" className="border-t border-miso-border bg-miso-card p-5 xl:border-l xl:border-t-0 xl:p-6">
       <SourceEvidence result={result} audienceMode={audienceMode} />
 
       {(visibleFollowUps.length > 0 || activeHubId) && (
@@ -993,6 +993,7 @@ export default function KnowledgeCanvas({
   if (result.chartType === "glossary_card") {
     return (
       <section
+        data-tour="knowledge-canvas"
         aria-live="polite"
         className="miso-panel overflow-hidden border-t-4 border-t-miso-sky"
       >
@@ -1006,6 +1007,7 @@ export default function KnowledgeCanvas({
 
   return (
     <section
+      data-tour="knowledge-canvas"
       aria-live="polite"
       className="miso-panel overflow-hidden border-t-4 border-t-miso-sky"
     >

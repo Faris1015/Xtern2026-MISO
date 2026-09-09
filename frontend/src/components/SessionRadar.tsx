@@ -81,6 +81,7 @@ export default function SessionRadar({ apiBase, onSelectChip }: Props) {
   if (loading) {
     return (
       <aside
+        data-tour="session-radar"
         aria-label="Session briefing"
         aria-busy="true"
         className="miso-panel border-l-4 border-l-miso-sky p-5"
@@ -96,6 +97,7 @@ export default function SessionRadar({ apiBase, onSelectChip }: Props) {
   if (error || !payload) {
     return (
       <aside
+        data-tour="session-radar"
         aria-labelledby="session-briefing-heading"
         className="miso-panel border-l-4 border-l-miso-border p-5"
       >
@@ -125,6 +127,7 @@ export default function SessionRadar({ apiBase, onSelectChip }: Props) {
 
   return (
     <aside
+      data-tour="session-radar"
       aria-labelledby="session-briefing-heading"
       className="miso-panel overflow-hidden"
     >

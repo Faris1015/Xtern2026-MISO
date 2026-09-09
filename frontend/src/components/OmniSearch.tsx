@@ -169,7 +169,10 @@ export default function OmniSearch({
             </p>
           </div>
 
-          <label className="relative shrink-0 text-xs font-semibold uppercase tracking-[0.08em] text-miso-muted">
+          <label
+            data-tour="audience-selector"
+            className="relative shrink-0 text-xs font-semibold uppercase tracking-[0.08em] text-miso-muted"
+          >
             Audience
             <span className="relative mt-1 block">
               <select
@@ -193,7 +196,7 @@ export default function OmniSearch({
           </label>
         </div>
 
-        <div ref={rootRef} className="relative mt-6">
+        <div ref={rootRef} data-tour="search-input-area" className="relative mt-6">
           <div
             className={`flex items-center gap-3 border bg-white px-4 py-3 transition ${
               open
