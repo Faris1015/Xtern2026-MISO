@@ -19,7 +19,6 @@ export type ChartType =
   | "lmp_series"
   | "fuel_mix"
   | "transmission_bar"
-  | "glossary_card";
   | "glossary_card"
   | "guidance_card";
 
@@ -150,7 +149,6 @@ export type SearchResponse =
   | HubSearchResponse
   | FuelSearchResponse
   | TransmissionSearchResponse
-  | GlossarySearchResponse;
   | GlossarySearchResponse
   | GuidanceSearchResponse;
 

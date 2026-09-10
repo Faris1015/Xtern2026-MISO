@@ -328,7 +328,6 @@ def generate_market_briefing_pdf(
         display_narrative = narrative
 
     narrative_table = Table(
-        [[Paragraph(narrative, styles["NarrativeText"])]],
         [[Paragraph(display_narrative, styles["NarrativeText"])]],
         colWidths=[usable_width],
         style=[

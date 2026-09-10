@@ -271,7 +271,6 @@ export function parseSearchResponse(value: unknown): SearchResponse {
     default:
       return invalid(
         "search response.chartType",
-        '"lmp_series", "fuel_mix", "transmission_bar", or "glossary_card"',
         '"lmp_series", "fuel_mix", "transmission_bar", "glossary_card", or "guidance_card"',
       );
   }

@@ -7,7 +7,6 @@ Session-Aware Pre-Fetching, Multi-Hub Comparison Engine, and 1-Click PDF Generat
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, Optional
 from typing import Any, Dict, List, Optional
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,7 +32,6 @@ app = FastAPI(
 )
 
 # ---------------------------------------------------------------------------
-# Request Models
 # Request & Response Models
 # ---------------------------------------------------------------------------
 class BriefingRequest(BaseModel):

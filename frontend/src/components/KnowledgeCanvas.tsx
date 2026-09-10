@@ -121,7 +121,6 @@ function briefingUrl(
 }
 
 function resultRows(result: SearchResponse): Array<Record<string, unknown>> {
-  if (result.chartType === "glossary_card") return [];
   if (result.chartType === "glossary_card" || result.chartType === "guidance_card") return [];
   return result.data.map((row) => ({ ...row }));
 }
@@ -191,7 +190,6 @@ function SourceEvidence({
 }
 
 function MetricRail({ result }: { result: SearchResponse }) {
-  if (result.chartType === "glossary_card") return null;
   if (result.chartType === "glossary_card" || result.chartType === "guidance_card") return null;
 
   return (
@@ -1171,29 +1169,6 @@ export default function KnowledgeCanvas({
         className="miso-panel overflow-hidden border-t-4 border-t-miso-sky"
       >
         <div className="grid xl:grid-cols-[minmax(0,1fr)_19rem]">
-          <GlossaryReference result={result} />
-          {actionSidebar}
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section
-      data-tour="knowledge-canvas"
-      aria-live="polite"
-      className="miso-panel overflow-hidden border-t-4 border-t-miso-sky"
-    >
-      <div className="grid xl:grid-cols-[minmax(0,1fr)_19rem]">
-        <div className="min-w-0">
-          <header className="border-b border-miso-border p-6 lg:p-8">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="miso-eyebrow">{resultCategory(result)}</p>
-                <h2 className="mt-1 text-2xl font-bold tracking-tight text-miso-navy">
-                  {result.query}
-                </h2>
-              </div>
           <div className="min-w-0">
             <header className="border-b border-miso-border p-6 lg:p-8">
               <div className="flex items-center justify-between gap-4">

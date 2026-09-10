@@ -37,7 +37,6 @@ class SearchResponse(BaseModel):
     directAnswer: str
     sourceCitation: str
     kpis: List[KpiCard]
-    chartType: str = Field(..., description="lmp_series | fuel_mix | transmission_bar | glossary_card")
     chartType: str = Field(..., description="lmp_series | fuel_mix | transmission_bar | glossary_card | guidance_card")
     hubId: Optional[str] = None
     data: Any = Field(None, description="Direct charting payload aligned for Recharts")
@@ -93,7 +92,6 @@ class SearchEngine:
             if glossary_match:
                 return self._build_glossary_response(query, glossary_match, persona)
 
-        # 2. Check for exact standalone Glossary Acronym match (e.g. user typed "LMP", "CONE", "PRA", "LRTP")
         # 2. Check for exact standalone Glossary Acronym match (e.g. user typed "LMP", "CONE", "PRA", "LRTP", "COD")
         if q_norm.upper() in self.dm.glossary:
             entry = self.dm.glossary[q_norm.upper()]
@@ -117,7 +115,6 @@ class SearchEngine:
         if glossary_match:
             return self._build_glossary_response(query, glossary_match, persona)
 
-        # 7. Default / Fallback: Indiana Hub Market Pricing
         # 7. Semantic Intent Classification & Out-of-Scope Domain Check (Issue #11)
         classification = llm_service.classify_intent_and_entities(query)
         if classification.get("intent") == "out_of_scope":
@@ -221,10 +218,8 @@ class SearchEngine:
                 continue
 
             # Match whole word or exact acronym in query
-            if re.search(r"\b" + re.escape(acronym.lower()) + r"\b", q_norm) or acronym.lower() == q_norm:
             if re.search(r"\b" + re.escape(acr_lower) + r"\b", q_norm) or acr_lower == q_norm:
                 return {"acronym": acronym, **entry}
-            if entry["term"].lower() in q_norm:
             if term_lower in q_norm:
                 return {"acronym": acronym, **entry}
         return None
@@ -235,7 +230,6 @@ class SearchEngine:
         summary = hub["summary"]
         hourly = hub["hourly"]
 
-        # Persona narrative customization
         # Persona narrative customization (baseline template)
         if "trader" in persona.lower():
             narrative = (
@@ -285,7 +279,6 @@ class SearchEngine:
             follow_ups_raw = self.dm.get_related_queries(raw_query)
         else:
             follow_ups_raw = self.dm.get_related_queries(hub_id.replace(".HUB", "").lower())
-        follow_ups = [FollowUpAction(**f) for f in follow_ups_raw]
 
         # Dynamic Follow-Up Actions (Issue #13)
         dynamic_follow_ups = llm_service.generate_proactive_followups(
@@ -299,7 +292,6 @@ class SearchEngine:
 
         return SearchResponse(
             query=raw_query,
-            directAnswer=narrative,
             directAnswer=direct_answer,
             sourceCitation="MISO Data Exchange API (GET /api/v1/markets/realtime/lmp)",
             kpis=kpis,
@@ -364,7 +356,6 @@ class SearchEngine:
         )
 
         follow_ups_raw = self.dm.get_related_queries("solar peak" if "solar" in q_norm else "fuel mix")
-        follow_ups = [FollowUpAction(**f) for f in follow_ups_raw]
         dynamic_follow_ups = llm_service.generate_proactive_followups(
             query=raw_query,
             chart_type="fuel_mix",
@@ -376,7 +367,6 @@ class SearchEngine:
 
         return SearchResponse(
             query=raw_query,
-            directAnswer=narrative,
             directAnswer=direct_answer,
             sourceCitation="MISO Operations & Real-Time Fuel Telemetry (Fact Sheet Baseline July 2025)",
             kpis=kpis,
@@ -425,7 +415,6 @@ class SearchEngine:
         )
 
         follow_ups_raw = self.dm.get_related_queries("mtep24")
-        follow_ups = [FollowUpAction(**f) for f in follow_ups_raw]
         dynamic_follow_ups = llm_service.generate_proactive_followups(
             query=raw_query,
             chart_type="transmission_bar",
@@ -437,7 +426,6 @@ class SearchEngine:
 
         return SearchResponse(
             query=raw_query,
-            directAnswer=narrative,
             directAnswer=direct_answer,
             sourceCitation="MISO Board of Directors Approved MTEP24 & LRTP Filings",
             kpis=kpis,
