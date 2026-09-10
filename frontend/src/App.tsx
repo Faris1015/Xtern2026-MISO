@@ -167,6 +167,10 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, []);
 
+  const audienceModeRef = useRef<AudienceMode>(audienceMode);
+  audienceModeRef.current = audienceMode;
+  const initialSearchLoaded = useRef(false);
+
   useEffect(() => () => searchController.current?.abort(), []);
 
   const search = useCallback(
@@ -174,7 +178,7 @@ export default function App() {
       const cleanQuery = query.trim();
       if (!cleanQuery) return;
 
-      const selectedAudience = audienceOverride ?? audienceMode;
+      const selectedAudience = audienceOverride ?? audienceModeRef.current;
       setLastQuery(cleanQuery);
       searchController.current?.abort();
       const controller = new AbortController();
@@ -214,10 +218,13 @@ export default function App() {
         if (version === requestVersion.current) setIsSearching(false);
       }
     },
-    [audienceMode],
+    [],
   );
 
   useEffect(() => {
+    if (initialSearchLoaded.current) return;
+    initialSearchLoaded.current = true;
+
     const params = new URLSearchParams(window.location.search);
     const initialQuery = params.get("q");
     const initialPersona = params.get("persona") as AudienceMode | null;
@@ -229,6 +236,7 @@ export default function App() {
         )
       ) {
         setAudienceMode(initialPersona);
+        audienceModeRef.current = initialPersona;
       }
       void search(initialQuery, initialPersona ?? undefined);
     }
@@ -258,17 +266,22 @@ export default function App() {
 
   const handleAudienceModeChange = useCallback(
     (nextAudience: AudienceMode) => {
-      if (nextAudience === audienceMode) return;
+      if (nextAudience === audienceModeRef.current) return;
 
       const queryToRefresh = result?.query ?? lastQuery;
       setAudienceMode(nextAudience);
+      audienceModeRef.current = nextAudience;
+
+      const url = new URL(window.location.href);
+      url.searchParams.set("persona", nextAudience);
+      window.history.replaceState(null, "", url.toString());
 
       if (queryToRefresh) {
         setResult(null);
         void search(queryToRefresh, nextAudience);
       }
     },
-    [audienceMode, lastQuery, result, search],
+    [lastQuery, result, search],
   );
 
   const handleFollowUp = useCallback(

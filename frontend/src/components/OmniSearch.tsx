@@ -194,10 +194,10 @@ export default function OmniSearch({
                 }
                 className="min-w-48 appearance-none border border-miso-border bg-white py-2.5 pl-3 pr-9 text-sm font-semibold normal-case tracking-normal text-miso-navy outline-none focus-visible:border-miso-sky focus-visible:ring-2 focus-visible:ring-miso-soft"
               >
-                <option>Power Trader</option>
-                <option>Municipal Co-op</option>
-                <option>Public / Media</option>
-                <option>State Regulator</option>
+                <option value="Power Trader">Power Trader</option>
+                <option value="Municipal Co-op">Municipal Co-op</option>
+                <option value="Public / Media">Public / Media</option>
+                <option value="State Regulator">State Regulator</option>
               </select>
               <ChevronDown
                 size={15}
