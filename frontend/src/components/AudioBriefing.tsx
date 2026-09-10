@@ -44,28 +44,28 @@ const BRIEFING_SCRIPTS: Record<AudienceMode, BriefingScript> = {
     title: "Market & Trading Desk Briefing",
     tagline: "LMP spreads, congestion risks & peak hour forecast",
     targetDurationSeconds: 45,
-    text: "Good morning. This is your 45-second MISO market conditions briefing. Across our 15-state footprint, operational reserves remain strong with total demand tracking near 78 gigawatts. Indiana Hub is clearing at a real-time average of $40.79 per megawatt-hour, with day-ahead spreads widening in hour ending 18. Natural gas anchors generation at 40 percent, followed by coal at 26 percent and wind delivering 15 percent of supply. Interties across the Central and Northern regions show stable transmission throughput with negligible congestion. Ancillary services are fully funded and all reliability margins are satisfied.",
+    text: "Good morning. This is your 45-second Midcontinent Independent System Operator market conditions briefing. Across our 15-state footprint, operational reserves remain strong with total demand tracking near 78 gigawatts. Indiana Hub is clearing at a real-time average of $40.79 per megawatt-hour, with day-ahead spreads widening in hour ending 18. Natural gas anchors generation at 40 percent, followed by coal at 26 percent and wind delivering 15 percent of supply. Interties across the Central and Northern regions show stable transmission throughput with negligible congestion. Ancillary services are fully funded and all reliability margins are satisfied.",
   },
   "Municipal Co-op": {
     id: "Municipal Co-op",
     title: "Co-op & Member Reliability Briefing",
     tagline: "Hedging costs, reserve margins & demand stability",
     targetDurationSeconds: 45,
-    text: "Good morning. This is your 45-second MISO co-op resource and reliability briefing. Coincident peak demand across municipal distribution territories is trending steady at 78 gigawatts. Day-ahead energy schedules reflect an average price of $38.67, providing favorable wholesale cost hedging. Capacity reserve margins currently sit at 18.2 percent, well above the required Planning Reserve Margin. Renewable contributions are led by wind at 15 percent and utility solar at 3 percent. Transmission corridors into load centers remain unconstrained with zero emergency alerts issued.",
+    text: "Good morning. This is your 45-second Midcontinent Independent System Operator co-op resource and reliability briefing. Coincident peak demand across municipal distribution territories is trending steady at 78 gigawatts. Day-ahead energy schedules reflect an average price of $38.67, providing favorable wholesale cost hedging. Capacity reserve margins currently sit at 18.2 percent, well above the required Planning Reserve Margin. Renewable contributions are led by wind at 15 percent and utility solar at 3 percent. Transmission corridors into load centers remain unconstrained with zero emergency alerts issued.",
   },
   "Public / Media": {
     id: "Public / Media",
     title: "Clean Energy & Public Grid Overview",
     tagline: "Zero-carbon generation, regional scope & reliability",
     targetDurationSeconds: 45,
-    text: "Good morning. Here is your 45-second MISO clean energy and grid overview. Today, MISO is reliably powering 45 million people across 15 Midwest states and Manitoba. Current electricity demand is 78 gigawatts. Clean, zero-carbon energy is currently supplying nearly 30 percent of the region's electricity, led by 15 percent wind and 14 percent nuclear power. Natural gas provides 40 percent to ensure continuous grid stability. All regional transmission systems are running smoothly with no weather-related alerts, ensuring dependable power for homes and businesses.",
+    text: "Good morning. Here is your 45-second Midcontinent Independent System Operator clean energy and grid overview. Today, MISO is reliably powering 45 million people across 15 Midwest states and Manitoba. Current electricity demand is 78 gigawatts. Clean, zero-carbon energy is currently supplying nearly 30 percent of the region's electricity, led by 15 percent wind and 14 percent nuclear power. Natural gas provides 40 percent to ensure continuous grid stability. All regional transmission systems are running smoothly with no weather-related alerts, ensuring dependable power for homes and businesses.",
   },
   "State Regulator": {
     id: "State Regulator",
     title: "Regulatory & System Planning Briefing",
     tagline: "Statutory reserves, MTEP metrics & transmission health",
     targetDurationSeconds: 45,
-    text: "Good morning. This is your 45-second MISO regulatory and transmission briefing. Grid reliability metrics remain robust with operating reserves exceeding statutory criteria across all three operational regions. Indiana Hub real-time prices average $40.79 per megawatt-hour. Long-Range Transmission Planning tranche investments continue to reduce regional congestion, with inter-regional transfer capability operating within nominal limits. Generation resource adequacy complies with all MTEP benchmark targets, and fuel diversity maintains resilience against planned summer maintenance outages.",
+    text: "Good morning. This is your 45-second Midcontinent Independent System Operator regulatory and transmission briefing. Grid reliability metrics remain robust with operating reserves exceeding statutory criteria across all three operational regions. Indiana Hub real-time prices average $40.79 per megawatt-hour. Long-Range Transmission Planning tranche investments continue to reduce regional congestion, with inter-regional transfer capability operating within nominal limits. Generation resource adequacy complies with all MTEP benchmark targets, and fuel diversity maintains resilience against planned summer maintenance outages.",
   },
 };
 
@@ -78,7 +78,8 @@ export default function AudioBriefing({
   defaultOpen = false,
 }: AudioBriefingProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const [selectedPersona, setSelectedPersona] = useState<AudienceMode>(audienceMode);
+  const [selectedPersona, setSelectedPersona] =
+    useState<AudienceMode>(audienceMode);
   const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -118,7 +119,10 @@ export default function AudioBriefing({
 
   // Estimated duration adjusted for playback rate
   const estimatedTotalSeconds = useMemo(() => {
-    return Math.max(10, Math.round(activeScript.targetDurationSeconds / playbackRate));
+    return Math.max(
+      10,
+      Math.round(activeScript.targetDurationSeconds / playbackRate),
+    );
   }, [activeScript.targetDurationSeconds, playbackRate]);
 
   // Click outside and Escape key listeners to close the tooltip
@@ -230,7 +234,8 @@ export default function AudioBriefing({
   // Start speech synthesis with Chrome keepalive workaround
   const startSpeech = useCallback(
     (resumeFromChar = 0) => {
-      if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+      if (typeof window === "undefined" || !("speechSynthesis" in window))
+        return;
 
       window.speechSynthesis.cancel();
       clearTimers();
@@ -405,10 +410,22 @@ export default function AudioBriefing({
     if (!isPlaying && elapsedSeconds === 0) return 0;
     if (elapsedSeconds >= estimatedTotalSeconds) return 100;
     if (activeScript.text.length > 0 && currentCharIndex > 0) {
-      return Math.min(100, Math.round((currentCharIndex / activeScript.text.length) * 100));
+      return Math.min(
+        100,
+        Math.round((currentCharIndex / activeScript.text.length) * 100),
+      );
     }
-    return Math.min(100, Math.round((elapsedSeconds / estimatedTotalSeconds) * 100));
-  }, [activeScript.text.length, currentCharIndex, elapsedSeconds, estimatedTotalSeconds, isPlaying]);
+    return Math.min(
+      100,
+      Math.round((elapsedSeconds / estimatedTotalSeconds) * 100),
+    );
+  }, [
+    activeScript.text.length,
+    currentCharIndex,
+    elapsedSeconds,
+    estimatedTotalSeconds,
+    isPlaying,
+  ]);
 
   const { spokenText, currentWord, upcomingText } = useMemo(() => {
     const text = activeScript.text;
@@ -500,7 +517,11 @@ export default function AudioBriefing({
         {isOpen ? (
           <ChevronUp size={13} className="text-miso-muted" aria-hidden="true" />
         ) : (
-          <ChevronDown size={13} className="text-miso-muted" aria-hidden="true" />
+          <ChevronDown
+            size={13}
+            className="text-miso-muted"
+            aria-hidden="true"
+          />
         )}
       </button>
 
@@ -531,7 +552,11 @@ export default function AudioBriefing({
                 <div className="flex items-center gap-1.5">
                   <span className="miso-eyebrow text-[10px]">Market Audio</span>
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-miso-navy">
-                    <Sparkles size={10} className="text-miso-sky" aria-hidden="true" />
+                    <Sparkles
+                      size={10}
+                      className="text-miso-sky"
+                      aria-hidden="true"
+                    />
                     Web Speech API
                   </span>
                 </div>
@@ -573,26 +598,28 @@ export default function AudioBriefing({
             aria-label="Audience briefing focus"
             className="grid grid-cols-4 border-b border-miso-border bg-miso-soft/30 text-[11px]"
           >
-            {(Object.keys(BRIEFING_SCRIPTS) as AudienceMode[]).map((persona) => {
-              const isActive = selectedPersona === persona;
-              return (
-                <button
-                  key={persona}
-                  role="tab"
-                  type="button"
-                  aria-selected={isActive}
-                  onClick={() => handleSelectPersona(persona)}
-                  className={`py-1.5 px-2 text-center font-semibold transition border-b-2 truncate ${
-                    isActive
-                      ? "border-miso-sky text-miso-navy font-bold bg-white"
-                      : "border-transparent text-miso-muted hover:text-miso-navy hover:bg-white/60"
-                  }`}
-                  title={BRIEFING_SCRIPTS[persona].tagline}
-                >
-                  {persona.split(" ")[0]}
-                </button>
-              );
-            })}
+            {(Object.keys(BRIEFING_SCRIPTS) as AudienceMode[]).map(
+              (persona) => {
+                const isActive = selectedPersona === persona;
+                return (
+                  <button
+                    key={persona}
+                    role="tab"
+                    type="button"
+                    aria-selected={isActive}
+                    onClick={() => handleSelectPersona(persona)}
+                    className={`py-1.5 px-2 text-center font-semibold transition border-b-2 truncate ${
+                      isActive
+                        ? "border-miso-sky text-miso-navy font-bold bg-white"
+                        : "border-transparent text-miso-muted hover:text-miso-navy hover:bg-white/60"
+                    }`}
+                    title={BRIEFING_SCRIPTS[persona].tagline}
+                  >
+                    {persona.split(" ")[0]}
+                  </button>
+                );
+              },
+            )}
           </div>
 
           {/* Quick Player Bar */}
@@ -696,7 +723,8 @@ export default function AudioBriefing({
             <div>
               <div className="flex items-center justify-between text-[11px] text-miso-muted font-semibold">
                 <span className="tabular-nums">
-                  {formatTime(elapsedSeconds)} / {formatTime(estimatedTotalSeconds)}
+                  {formatTime(elapsedSeconds)} /{" "}
+                  {formatTime(estimatedTotalSeconds)}
                 </span>
                 <span className="truncate max-w-[220px] text-[11px] text-miso-slate">
                   {isPlaying && !isPaused ? (
@@ -841,7 +869,11 @@ export default function AudioBriefing({
                 >
                   {copied ? (
                     <>
-                      <Check size={12} className="text-miso-emerald" aria-hidden="true" />
+                      <Check
+                        size={12}
+                        className="text-miso-emerald"
+                        aria-hidden="true"
+                      />
                       <span className="text-miso-emerald">Copied</span>
                     </>
                   ) : (
