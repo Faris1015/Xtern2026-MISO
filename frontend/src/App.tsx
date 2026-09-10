@@ -328,8 +328,12 @@ export default function App() {
           return;
         }
 
-        case "search": {
-          const query = stringParameter(followUp, "q");
+        case "search":
+        case "search_query": {
+          const query =
+            stringParameter(followUp, "q") ??
+            stringParameter(followUp, "query") ??
+            followUp.label;
           if (!query) {
             setError("The search action did not include a query");
             return;

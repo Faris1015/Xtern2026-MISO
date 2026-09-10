@@ -2,7 +2,7 @@
   "meta": {
     "version": "0.1.0",
     "last_updated": "2026-09-09",
-    "term_count": 68,
+    "term_count": 95,
     "maintainer": "Member 3 (Data Lead)",
     "issue": "#6",
     "source": [
@@ -20,7 +20,8 @@
     "Reliability",
     "Interconnection",
     "Operations",
-    "Governance"
+    "Governance",
+    "Rulebooks (BPMs)"
   ],
   "terms": [
     {
@@ -113,7 +114,8 @@
         "RSG",
         "FERC"
       ],
-      "source": "https://www.potomaceconomics.com/markets-monitored/miso/"
+      "source": "https://www.potomaceconomics.com/markets-monitored/miso/",
+      "governingBpm": "BPM 009"
     },
     {
       "acronym": "BPM",
@@ -125,7 +127,8 @@
         "OATT",
         "MISO"
       ],
-      "source": "https://www.misoenergy.org/stakeholder-engagement/business-practice-manuals-bpms/"
+      "source": "https://www.misoenergy.org/stakeholder-engagement/business-practice-manuals-bpms/",
+      "governingBpm": "BPM 001 - 031"
     },
     {
       "acronym": "OATT",
@@ -157,7 +160,8 @@
       "see_also": [
         "crosswalk:lmp_total"
       ],
-      "source": "https://help.misoenergy.org/knowledgebase"
+      "source": "https://help.misoenergy.org/knowledgebase",
+      "governingBpm": "BPM 002"
     },
     {
       "acronym": "MEC",
@@ -174,7 +178,8 @@
       "see_also": [
         "crosswalk:energy_component"
       ],
-      "source": "https://help.misoenergy.org/knowledgebase"
+      "source": "https://help.misoenergy.org/knowledgebase",
+      "governingBpm": "BPM 002"
     },
     {
       "acronym": "MCC",
@@ -192,7 +197,8 @@
       "see_also": [
         "crosswalk:cong_comp"
       ],
-      "source": "https://help.misoenergy.org/knowledgebase"
+      "source": "https://help.misoenergy.org/knowledgebase",
+      "governingBpm": "BPM 002"
     },
     {
       "acronym": "MLC",
@@ -209,7 +215,8 @@
       "see_also": [
         "crosswalk:loss_comp"
       ],
-      "source": "https://help.misoenergy.org/knowledgebase"
+      "source": "https://help.misoenergy.org/knowledgebase",
+      "governingBpm": "BPM 002"
     },
     {
       "acronym": "DA",
@@ -256,7 +263,8 @@
         "RT",
         "LMP"
       ],
-      "source": "https://help.misoenergy.org/knowledgebase"
+      "source": "https://help.misoenergy.org/knowledgebase",
+      "governingBpm": "BPM 002"
     },
     {
       "acronym": "SCUC",
@@ -326,7 +334,8 @@
         "SCUC",
         "IMM"
       ],
-      "source": "https://help.misoenergy.org/knowledgebase"
+      "source": "https://help.misoenergy.org/knowledgebase",
+      "governingBpm": "BPM 005"
     },
     {
       "acronym": "FTR",
@@ -340,7 +349,8 @@
         "MCC",
         "OASIS"
       ],
-      "source": "https://help.misoenergy.org/knowledgebase"
+      "source": "https://help.misoenergy.org/knowledgebase",
+      "governingBpm": "BPM 004"
     },
     {
       "acronym": "ARR",
@@ -354,7 +364,8 @@
         "MCC",
         "NITS"
       ],
-      "source": "https://help.misoenergy.org/knowledgebase"
+      "source": "https://help.misoenergy.org/knowledgebase",
+      "governingBpm": "BPM 004"
     },
     {
       "acronym": "OASIS",
@@ -382,7 +393,8 @@
         "TSR",
         "TRM"
       ],
-      "source": "https://www.oasis.oati.com/"
+      "source": "https://www.oasis.oati.com/",
+      "governingBpm": "BPM 013"
     },
     {
       "acronym": "TSR",
@@ -409,7 +421,8 @@
         "ARR",
         "LSE"
       ],
-      "source": "https://www.misoenergy.org/legal/tariff/"
+      "source": "https://www.misoenergy.org/legal/tariff/",
+      "governingBpm": "BPM 013"
     },
     {
       "acronym": "CPNODE",
@@ -426,7 +439,8 @@
       "see_also": [
         "crosswalk:node_name"
       ],
-      "source": "https://help.misoenergy.org/knowledgebase"
+      "source": "https://help.misoenergy.org/knowledgebase",
+      "governingBpm": "BPM 010"
     },
     {
       "acronym": "EPNODE",
@@ -472,7 +486,8 @@
       "see_also": [
         "crosswalk:mtep_report"
       ],
-      "source": "https://www.misoenergy.org/planning/transmission-planning/"
+      "source": "https://www.misoenergy.org/planning/transmission-planning/",
+      "governingBpm": "BPM 020"
     },
     {
       "acronym": "LRTP",
@@ -485,7 +500,8 @@
         "MVP",
         "Tranche"
       ],
-      "source": "https://www.misoenergy.org/planning/long-range-transmission-planning/"
+      "source": "https://www.misoenergy.org/planning/long-range-transmission-planning/",
+      "governingBpm": "BPM 020"
     },
     {
       "acronym": "JTIQ",
@@ -499,7 +515,8 @@
         "GIP",
         "POI"
       ],
-      "source": "https://www.misoenergy.org/planning/interregional-planning/"
+      "source": "https://www.misoenergy.org/planning/interregional-planning/",
+      "governingBpm": "BPM 020"
     },
     {
       "acronym": "MVP",
@@ -512,7 +529,8 @@
         "LRTP",
         "MEP"
       ],
-      "source": "https://www.misoenergy.org/planning/transmission-planning/"
+      "source": "https://www.misoenergy.org/planning/transmission-planning/",
+      "governingBpm": "BPM 020"
     },
     {
       "acronym": "MEP",
@@ -525,7 +543,8 @@
         "MVP",
         "MCC"
       ],
-      "source": "https://www.misoenergy.org/planning/transmission-planning/"
+      "source": "https://www.misoenergy.org/planning/transmission-planning/",
+      "governingBpm": "BPM 020"
     },
     {
       "acronym": "GIP",
@@ -553,7 +572,8 @@
         "GIA",
         "POI"
       ],
-      "source": "https://www.misoenergy.org/planning/generator-interconnection/"
+      "source": "https://www.misoenergy.org/planning/generator-interconnection/",
+      "governingBpm": "BPM 015"
     },
     {
       "acronym": "GIA",
@@ -568,7 +588,8 @@
         "ERIS",
         "NRIS"
       ],
-      "source": "https://www.misoenergy.org/planning/generator-interconnection/"
+      "source": "https://www.misoenergy.org/planning/generator-interconnection/",
+      "governingBpm": "BPM 015"
     },
     {
       "acronym": "POI",
@@ -624,7 +645,8 @@
         "CONE",
         "LSE"
       ],
-      "source": "https://www.misoenergy.org/planning/resource-adequacy/"
+      "source": "https://www.misoenergy.org/planning/resource-adequacy/",
+      "governingBpm": "BPM 011"
     },
     {
       "acronym": "PRM",
@@ -652,7 +674,8 @@
         "PRA",
         "ELCC"
       ],
-      "source": "https://www.misoenergy.org/planning/resource-adequacy/"
+      "source": "https://www.misoenergy.org/planning/resource-adequacy/",
+      "governingBpm": "BPM 011"
     },
     {
       "acronym": "CONE",
@@ -666,7 +689,8 @@
         "ZRC",
         "PRM"
       ],
-      "source": "https://www.misoenergy.org/planning/resource-adequacy/"
+      "source": "https://www.misoenergy.org/planning/resource-adequacy/",
+      "governingBpm": "BPM 011"
     },
     {
       "acronym": "ZRC",
@@ -681,7 +705,8 @@
         "UCAP",
         "ELCC"
       ],
-      "source": "https://www.misoenergy.org/planning/resource-adequacy/"
+      "source": "https://www.misoenergy.org/planning/resource-adequacy/",
+      "governingBpm": "BPM 011"
     },
     {
       "acronym": "ELCC",
@@ -1073,7 +1098,8 @@
         "ACE",
         "TO"
       ],
-      "source": "https://help.misoenergy.org/knowledgebase"
+      "source": "https://help.misoenergy.org/knowledgebase",
+      "governingBpm": "BPM 031"
     },
     {
       "acronym": "NIC",
@@ -1090,6 +1116,226 @@
         "M2M"
       ],
       "source": "https://www.nerc.com/"
+    },
+    {
+      "acronym": "BPM 001",
+      "name": "Market Registration",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 001 for Market Registration details the steps to become a Market Participant (MP) and the administrative processes required to comply with the MISO Tariff, credit requirements, and asset registration.",
+      "technical": "Official MISO Business Practice Manual covering Module B & Module C. Effective date: 06/06/2026. Addresses key questions: How does a company or organization become a MISO Market Participant? | What is the Market Participation Qualification process?",
+      "formula": "Effective: 06/06/2026 (Module B & Module C)",
+      "governingBpm": "BPM 001",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-001%20Market%20Registration49545.zip"
+    },
+    {
+      "acronym": "BPM 002",
+      "name": "Energy and Operating Reserve Markets",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 002 covers the wholesale energy market rules, system design, and operational elements of both MISO's Day-Ahead Energy & Operating Reserve Market and Real-Time Markets, including the mathematical decomposition of Locational Marginal Prices (LMPs) and Ancillary Services.",
+      "technical": "Official MISO Business Practice Manual covering Module C (Energy & Reserves). Effective date: 09/30/2025. Addresses key questions: What are the basic concepts of MISO's Energy and Operating Reserve Markets? | How is the 3-part Locational Marginal Price (LMP = Energy + Congestion + Loss) calculated?",
+      "formula": "Effective: 09/30/2025 (Module C (Energy & Reserves))",
+      "governingBpm": "BPM 002",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-002%20Energy%20and%20Operating%20Reserve%20Markets49546.zip"
+    },
+    {
+      "acronym": "BPM 004",
+      "name": "FTR and ARR",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 004 focuses on guidelines, rules, and business processes for MISO's Financial Transmission Rights (FTR) and Auction Revenue Rights (ARRs). Explains how to participate in annual and monthly auctions to hedge transmission congestion risk.",
+      "technical": "Official MISO Business Practice Manual covering Module C (Section 42-44). Effective date: 07/31/2025. Addresses key questions: What is an Auction Revenue Right (ARR) and Financial Transmission Right (FTR)? | How are ARRs and FTRs acquired, allocated, auctioned, or terminated?",
+      "formula": "Effective: 07/31/2025 (Module C (Section 42-44))",
+      "governingBpm": "BPM 004",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-004%20FTR%20and%20ARR49548.zip"
+    },
+    {
+      "acronym": "BPM 005",
+      "name": "Market Settlements",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 005 covers Market Participant statements, weekly invoicing, and Market Disputes. Accompanied by the Market Settlement Calculation Guide, Post-Operating Processor Calculation Guide, and FERC Electric Quarterly Reporting (EQR) guidelines.",
+      "technical": "Official MISO Business Practice Manual covering Module C (Section 45). Effective date: 07/12/2026. Addresses key questions: What are the financial and reporting responsibilities of the Market Participant? | What are the business rules, timelines, and mathematical formulas for Market Settlements?",
+      "formula": "Effective: 07/12/2026 (Module C (Section 45))",
+      "governingBpm": "BPM 005",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-005%20Market%20Settlements49550.zip"
+    },
+    {
+      "acronym": "BPM 007",
+      "name": "Physical Scheduling",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 007 explains Day-Ahead and Real-Time scheduling rules, the NERC e-tagging process, Spot-in-Market Product transactions, and Ramp Reservation System instructions for power flows across MISO boundaries.",
+      "technical": "Official MISO Business Practice Manual covering Module B & Module C. Effective date: 05/01/2026. Addresses key questions: What are the general rules and timelines for physical interchange scheduling? | What is an Interchange Schedule and how does it interface with neighboring RTOs (PJM, SPP)?",
+      "formula": "Effective: 05/01/2026 (Module B & Module C)",
+      "governingBpm": "BPM 007",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-007%20Physical%20Scheduling49551.zip"
+    },
+    {
+      "acronym": "BPM 008",
+      "name": "Outage Operations",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 008 describes market outage rules for Transmission Owners (TOs) and Generator Owners/Operators (GOs) to coordinate and report planned and unplanned transmission and generation outages across the MISO Reliability Area.",
+      "technical": "Official MISO Business Practice Manual covering Module B & Module C. Effective date: 07/01/2026. Addresses key questions: What are the market and reliability rules for scheduling generation and transmission outages? | What are the mandatory reporting timelines for planned vs. forced/unplanned outages?",
+      "formula": "Effective: 07/01/2026 (Module B & Module C)",
+      "governingBpm": "BPM 008",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-008%20Outage%20Operations49554.zip"
+    },
+    {
+      "acronym": "BPM 009",
+      "name": "Market Monitoring and Mitigation",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 009 explains the role of the Independent Market Monitor (IMM, Potomac Economics) in implementing the market monitoring and mitigation plan, detecting market power abuses, and enforcing conduct and impact thresholds.",
+      "technical": "Official MISO Business Practice Manual covering Module D (Market Monitoring). Effective date: 08/29/2025. Addresses key questions: What are the core monitoring responsibilities and statutory authority of the IMM? | What Market Participant bidding and cost data is routinely reported to the IMM?",
+      "formula": "Effective: 08/29/2025 (Module D (Market Monitoring))",
+      "governingBpm": "BPM 009",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-009%20Market%20Monitoring%20and%20Mitigation49600.zip"
+    },
+    {
+      "acronym": "BPM 010",
+      "name": "Network and Commercial Model",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 010 describes the physical and financial models used in MISO's Energy Management System (EMS) and State Estimator, linking real-time SCADA/ICCP telemetry to commercial pricing nodes (CPNodes) and market hubs.",
+      "technical": "Official MISO Business Practice Manual covering Module C (Section 39). Effective date: 06/30/2025. Addresses key questions: How is the MISO Network Model constructed and validated in the Energy Management System? | What is the difference between a Physical Node (PNode) and Commercial Pricing Node (CPNode)?",
+      "formula": "Effective: 06/30/2025 (Module C (Section 39))",
+      "governingBpm": "BPM 010",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-010%20Network%20and%20Commercial%20Model49556.zip"
+    },
+    {
+      "acronym": "BPM 011",
+      "name": "Resource Adequacy",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 011 addresses MISO's roles and Load Serving Entities' (LSEs) obligations regarding capacity and Resource Adequacy. Covers the Planning Resource Auction (PRA), Planning Reserve Margin Requirements (PRMR), Loss of Load Expectation (LOLE), and Cost of New Entry (CONE).",
+      "technical": "Official MISO Business Practice Manual covering Module E-1 (Resource Adequacy). Effective date: 05/20/2026. Addresses key questions: How does MISO calculate the Planning Reserve Margin Requirement (PRMR) using the 1-day-in-10-years standard? | What are the rules and clearing mechanics of the annual Planning Resource Auction (PRA)?",
+      "formula": "Effective: 05/20/2026 (Module E-1 (Resource Adequacy))",
+      "governingBpm": "BPM 011",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-011%20Resource%20Adequacy49557.zip"
+    },
+    {
+      "acronym": "BPM 012",
+      "name": "Transmission Settlements",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 012 details the monthly financial settlement and billing of transmission services under Module B of the MISO Tariff for Transmission Owners, transmission customers, and wholesale aggregators.",
+      "technical": "Official MISO Business Practice Manual covering Module B (Transmission Service). Effective date: 07/12/2026. Addresses key questions: How are transmission rates calculated and billed under Module B of the Open Access Tariff? | What are the settlement formulas for point-to-point vs. network integration transmission service?",
+      "formula": "Effective: 07/12/2026 (Module B (Transmission Service))",
+      "governingBpm": "BPM 012",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-012%20Transmission%20Settlements49559.zip"
+    },
+    {
+      "acronym": "BPM 013",
+      "name": "Module B - Transmission Service",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 013 establishes business practices for implementing Module B of the MISO Tariff, including Available Transfer Capability (ATC), OASIS reservation procedures, and administration of Grandfathered Transmission Agreements.",
+      "technical": "Official MISO Business Practice Manual covering Module B (OATT). Effective date: 05/01/2026. Addresses key questions: How do transmission customers request and reserve transmission capacity on OASIS? | How is Available Transfer Capability (ATC) calculated across paths and interfaces?",
+      "formula": "Effective: 05/01/2026 (Module B (OATT))",
+      "governingBpm": "BPM 013",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-013%20Module%20B%20Transmission%20Service49561.zip"
+    },
+    {
+      "acronym": "BPM 015",
+      "name": "Generation Interconnection",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 015 governs the 4-stage Generator Interconnection Process under Attachment X of the MISO Tariff, defining queue submission criteria, Definitive Planning Phase (DPP) system impact studies, milestone payments, and generator interconnection agreements (GIA).",
+      "technical": "Official MISO Business Practice Manual covering Attachment X (Interconnection). Effective date: 04/15/2026. Addresses key questions: What are the 4 stages of the MISO Generation Interconnection study process? | What technical data, site control, and milestone deposits (M1, M2) are required to enter the DPP queue?",
+      "formula": "Effective: 04/15/2026 (Attachment X (Interconnection))",
+      "governingBpm": "BPM 015",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-015%20Generation%20Interconnection49565.zip"
+    },
+    {
+      "acronym": "BPM 020",
+      "name": "Transmission Planning",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 020 explains the MISO regional transmission planning process to develop comprehensive expansion plans meeting reliability and economic needs. Details the MISO Transmission Expansion Plan (MTEP) and Long-Range Transmission Planning (LRTP) portfolio cycles.",
+      "technical": "Official MISO Business Practice Manual covering Attachment FF (Transmission Expansion). Effective date: 03/15/2026. Addresses key questions: What is the annual MISO Transmission Expansion Plan (MTEP) cycle and approval process? | How does MISO evaluate and justify Long-Range Transmission Planning (LRTP) multi-billion dollar portfolios?",
+      "formula": "Effective: 03/15/2026 (Attachment FF (Transmission Expansion))",
+      "governingBpm": "BPM 020",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-020%20Transmission%20Planning49575.zip"
+    },
+    {
+      "acronym": "BPM 021",
+      "name": "Transmission Pricing",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 021 provides an overview of the three core categories of prices developed by MISO Transmission Pricing: Base Transmission Service Prices, Ancillary Service Prices, and Local Balancing Authority (LBA) Area Operator Cost Prices.",
+      "technical": "Official MISO Business Practice Manual covering Module B & Attachment O. Effective date: 09/01/2025. Addresses key questions: What are the formulas and inputs used to develop Base Transmission Service Prices? | How are Ancillary Service pricing rates established across pricing zones?",
+      "formula": "Effective: 09/01/2025 (Module B & Attachment O)",
+      "governingBpm": "BPM 021",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-021%20Transmission%20Pricing49577.zip"
+    },
+    {
+      "acronym": "BPM 022",
+      "name": "Blackstart Service",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 022 describes the technical qualifications, testing requirements, and compensation mechanisms for Blackstart Units capable of restarting the transmission grid following a total or partial system blackout.",
+      "technical": "Official MISO Business Practice Manual covering Schedule 33 (Blackstart). Effective date: 06/01/2026. Addresses key questions: What are the physical and technical qualifications to become a certified MISO Blackstart Resource? | How is Blackstart Service compensated under Schedule 33 of the MISO Tariff?",
+      "formula": "Effective: 06/01/2026 (Schedule 33 (Blackstart))",
+      "governingBpm": "BPM 022",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-022%20Blackstart%20Service49579.zip"
+    },
+    {
+      "acronym": "BPM 025",
+      "name": "Operational Forecasting",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 025 defines MISO's operational forecast methodology, inputs, and modeling assumptions for short-term load forecasting, weather sensitivity, and wind and solar renewable generation forecasts.",
+      "technical": "Official MISO Business Practice Manual covering Module C. Effective date: 11/15/2025. Addresses key questions: What forecasting models and meteorological data sources does MISO use to predict system load? | How does MISO forecast utility-scale wind and solar production for Day-Ahead and Real-Time commitment?",
+      "formula": "Effective: 11/15/2025 (Module C)",
+      "governingBpm": "BPM 025",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-025%20Operational%20Forecasting49594.zip"
+    },
+    {
+      "acronym": "BPM 026",
+      "name": "Demand Response",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 026 provides market participants with the rules, design, and operational elements governing Demand Response (DR) resources within MISO's Day-Ahead and Real-Time Energy, Operating Reserve, and Resource Adequacy markets.",
+      "technical": "Official MISO Business Practice Manual covering Module C & Module E-1. Effective date: 11/07/2025. Addresses key questions: What are the types of Demand Response services in MISO (DRR Type I, DRR Type II, EDR)? | Who is eligible to provide Demand Response and how do aggregators register retail customers (ARC)?",
+      "formula": "Effective: 11/07/2025 (Module C & Module E-1)",
+      "governingBpm": "BPM 026",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-026%20Demand%20Response49596.zip"
+    },
+    {
+      "acronym": "BPM 027",
+      "name": "Competitive Transmission Process",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 027 describes MISO's processes under FERC Order 1000 for prequalifying and selecting transmission developers to build, own, operate, and maintain Competitive Transmission Projects that are not subject to a right of first refusal.",
+      "technical": "Official MISO Business Practice Manual covering Attachment FF (FERC Order 1000). Effective date: 03/11/2026. Addresses key questions: How is the competitive transmission developer selection process structured? | Which MTEP and LRTP transmission projects are eligible for competitive bidding under Order 1000?",
+      "formula": "Effective: 03/11/2026 (Attachment FF (FERC Order 1000))",
+      "governingBpm": "BPM 027",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-027%20Competitive%20Transmission%20Process113808.zip"
+    },
+    {
+      "acronym": "BPM 029",
+      "name": "Minimum Project Requirements for Competitive Transmission",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 029 describes MISO's processes for determining minimum technical scope requirements for competitive transmission lines and substations, including voltage ratings, conductor sizing, breaker interrupting ratings, and protection schemes.",
+      "technical": "Official MISO Business Practice Manual covering Attachment FF. Effective date: 03/11/2026. Addresses key questions: How does MISO determine minimum line and equipment load ratings for competitive projects? | What are the minimum substation equipment protection and bus configuration requirements?",
+      "formula": "Effective: 03/11/2026 (Attachment FF)",
+      "governingBpm": "BPM 029",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-029%20Minimum%20Project%20Requirements%20for%20Competitive%20Transmission%20Projects49608.zip"
+    },
+    {
+      "acronym": "BPM 031",
+      "name": "ICCP Data Requirements",
+      "category": "Rulebooks (BPMs)",
+      "eli5": "BPM 031 specifies the Inter-Control Center Communications Protocol (ICCP / IEC 60870-6) real-time data submission standards required of Market Participants and Local Balancing Authorities to stream telemetry to MISO EMS.",
+      "technical": "Official MISO Business Practice Manual covering Module C & Appendix G. Effective date: 03/31/2026. Addresses key questions: What real-time telemetry points (MW, MVAR, status, breaker positions) must be streamed via ICCP? | What are the latency, scan-rate, and redundancy standards for ICCP data links to MISO?",
+      "formula": "Effective: 03/31/2026 (Module C & Appendix G)",
+      "governingBpm": "BPM 031",
+      "related": [],
+      "source": "https://cdn.misoenergy.org/BPM-031%20ICCP%20Data%20Requirements165746.zip"
     }
   ]
 }

@@ -58,7 +58,8 @@ MISO_DOMAIN_TERMS = {
     "mtep", "lrtp", "jtiq", "transmission", "lines", "grid", "congestion", "loss", "energy",
     "mwh", "gw", "mw", "megawatt", "gigawatt", "cone", "pra", "iccp", "tariff", "ferc", "dayahead",
     "realtime", "spread", "arbitrage", "clearing", "reserve", "voltage", "substation", "interconnection",
-    "coop", "co-op", "utility", "generator", "dispatch", "outage", "market", "pricing", "rate"
+    "coop", "co-op", "utility", "generator", "dispatch", "outage", "market", "pricing", "rate",
+    "bpm", "bpms", "rulebook", "rulebooks", "manual", "manuals"
 }
 
 class LLMService:
@@ -328,10 +329,18 @@ FOLLOW_UPS: ["Question 1", "Question 2"]
 
         elif any(w in q_lower for w in ["how", "calculate", "formula", "mechanism"]):
             ans = (
-                f"MISO calculates Locational Marginal Prices every 5 minutes using the formula: LMP = Marginal Energy Component (MEC) + Marginal Congestion Component (MCC) + Marginal Loss Component (MLC). "
+                f"MISO calculates Locational Marginal Prices every 5 minutes using the formula: LMP = Marginal Energy Component (MEC) + Marginal Congestion Component (MCC) + Marginal Loss Component (MLC) as defined in BPM-002 Section 4. "
                 f"Active telemetry for {hub_id} shows overall clearing stability ({kpi_summary})."
             )
             follow_ups = ["Open Jargon HUD (Ctrl+J)", "View 3-Part Component Split"]
+
+        elif any(w in q_lower for w in ["bpm", "rulebook", "rule", "manual", "settlement rule", "interconnection rule", "planning rule"]):
+            ans = (
+                f"MISO grid operations and wholesale electricity markets are governed by official Business Practice Manuals (BPMs) under FERC oversight. "
+                f"For example, Energy and Reserve Market clearing is governed by BPM-002, Resource Adequacy by BPM-011, "
+                f"Generator Interconnection by BPM-015, Market Settlements by BPM-005, and Transmission Planning by BPM-020."
+            )
+            follow_ups = ["Search BPM 002 (Energy Markets)", "Explore BPM 020 (Transmission Planning)"]
 
         else:
             ans = f"Analyzing active telemetry for {hub_id}. Current verified metrics indicate {kpi_summary}. Dispatch conditions remain in normal operating parameters across the MISO region."

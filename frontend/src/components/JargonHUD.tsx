@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
+  FileText,
   Filter,
   Search,
   Sparkles,
@@ -27,6 +28,7 @@ const CATEGORIES = [
   "Operations",
   "Governance",
   "Grid Units",
+  "Rulebooks (BPMs)",
 ] as const;
 
 export default memo(function JargonHUD({ isOpen, onClose, onSelectTerm }: Props) {
@@ -222,6 +224,15 @@ export default memo(function JargonHUD({ isOpen, onClose, onSelectTerm }: Props)
                         <span className="rounded-full bg-miso-soft px-2 py-0.5 text-[10px] font-semibold text-miso-slate border border-miso-border">
                           {item.category}
                         </span>
+                        {item.governingBpm && item.category !== "Rulebooks (BPMs)" && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-200"
+                            title={`Governed by MISO ${item.governingBpm}`}
+                          >
+                            <FileText size={10} className="text-blue-600" />
+                            {item.governingBpm}
+                          </span>
+                        )}
                       </div>
 
                       {/* ELI5 Plain Language */}

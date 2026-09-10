@@ -297,6 +297,9 @@ class DataManager:
         self.mtep_projects: Dict[str, Any] = {}
         self.related_queries: Dict[str, List[Dict[str, Any]]] = {}
         self.glossary: Dict[str, Dict[str, Any]] = {}
+        self.bpms: List[Dict[str, Any]] = []
+        self.bpms_by_id: Dict[str, Dict[str, Any]] = {}
+        self.bpms_by_num: Dict[int, Dict[str, Any]] = {}
         self.initialize_data()
 
     def initialize_data(self) -> None:
@@ -375,6 +378,7 @@ class DataManager:
                                 "formula": item.get("formula", ""),
                                 "related": item.get("related", []),
                                 "source": item.get("source", ""),
+                                "governingBpm": item.get("governingBpm", ""),
                             }
                     self.glossary = parsed_terms
                 elif isinstance(loaded, dict):
@@ -425,6 +429,28 @@ class DataManager:
         for k, item in self.glossary.items():
             if "acronym" not in item:
                 item["acronym"] = k
+
+        # 6. MISO Business Practice Manuals (BPMs)
+        bpms_file = self.data_path / "bpms.json"
+        if bpms_file.exists():
+            try:
+                with open(bpms_file, "r", encoding="utf-8") as f:
+                    loaded_bpms = json.load(f)
+                self.bpms = loaded_bpms.get("manuals", [])
+                for m in self.bpms:
+                    num = m.get("number")
+                    bpm_id = m.get("bpmNumber", "").strip().upper()
+                    if bpm_id:
+                        self.bpms_by_id[bpm_id] = m
+                        self.bpms_by_id[bpm_id.replace(" ", "")] = m
+                    if num is not None:
+                        self.bpms_by_num[num] = m
+                        self.bpms_by_id[f"BPM{num}"] = m
+                        self.bpms_by_id[f"BPM{num:03d}"] = m
+                        self.bpms_by_id[f"BPM {num}"] = m
+                        self.bpms_by_id[f"BPM {num:03d}"] = m
+            except Exception:
+                self.bpms = []
 
     def get_hub(self, hub_id: str) -> Optional[Dict[str, Any]]:
         """Finds hub by key (e.g. 'INDIANA.HUB' or 'INDIANA' or 'MICHIGAN')."""
@@ -496,6 +522,40 @@ class DataManager:
         if entry:
             return {"acronym": entry.get("acronym", clean_term), **entry}
         return None
+
+    def get_bpm(self, identifier: str | int) -> Optional[Dict[str, Any]]:
+        """Finds a Business Practice Manual by ID, number, or title."""
+        if isinstance(identifier, int):
+            return self.bpms_by_num.get(identifier)
+        clean_id = str(identifier).upper().strip()
+        if clean_id in self.bpms_by_id:
+            return self.bpms_by_id[clean_id]
+        no_space = clean_id.replace(" ", "").replace("-", "")
+        if no_space in self.bpms_by_id:
+            return self.bpms_by_id[no_space]
+        import re
+        match = re.search(r"(\d+)", clean_id)
+        if match:
+            num = int(match.group(1))
+            return self.bpms_by_num.get(num)
+        return None
+
+    def get_all_bpms(self) -> List[Dict[str, Any]]:
+        return self.bpms
+
+    def search_bpms(self, query: str) -> List[Dict[str, Any]]:
+        q = query.lower().strip()
+        matches = []
+        for m in self.bpms:
+            if (
+                q in m["bpmNumber"].lower()
+                or q in m["title"].lower()
+                or q in m["category"].lower()
+                or any(q in c.lower() for c in m.get("governedConcepts", []))
+                or any(q in qa.lower() for q in [q] for qa in m.get("questionsAnswered", []))
+            ):
+                matches.append(m)
+        return matches
 
     def get_grid_telemetry(self) -> Dict[str, Any]:
         """Returns grounded live grid telemetry matching MISO Homepage Snapshot metrics."""

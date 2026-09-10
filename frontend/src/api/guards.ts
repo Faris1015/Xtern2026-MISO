@@ -1,4 +1,7 @@
 import type {
+  BpmData,
+  BpmManual,
+  BpmSearchResponse,
   ComparisonResponse,
   FuelComparisonPoint,
   FuelMetricSummary,
@@ -183,6 +186,50 @@ function parseGlossaryPoint(value: unknown, path: string): GlossaryPoint {
     formula: optionalStringValue(object.formula, `${path}.formula`),
     related: Array.isArray(related) ? related : undefined,
     source: optionalStringValue(object.source, `${path}.source`),
+    governingBpm: optionalStringValue(object.governingBpm, `${path}.governingBpm`),
+  };
+}
+
+function parseBpmManual(value: unknown, path: string): BpmManual {
+  const object = objectValue(value, path);
+  const questionsAnswered = object.questionsAnswered;
+  const governedConcepts = object.governedConcepts;
+  const relevantPersonas = object.relevantPersonas;
+
+  return {
+    bpmNumber: stringValue(object.bpmNumber, `${path}.bpmNumber`),
+    number: optionalNumberValue(object.number, `${path}.number`),
+    title: stringValue(object.title, `${path}.title`),
+    category: stringValue(object.category, `${path}.category`),
+    tariffModule: optionalStringValue(object.tariffModule, `${path}.tariffModule`),
+    effectiveDate: stringValue(object.effectiveDate, `${path}.effectiveDate`),
+    summary: stringValue(object.summary, `${path}.summary`),
+    questionsAnswered: Array.isArray(questionsAnswered)
+      ? questionsAnswered.map((q, idx) => stringValue(q, `${path}.questionsAnswered[${idx}]`))
+      : [],
+    governedConcepts: Array.isArray(governedConcepts)
+      ? governedConcepts.map((g, idx) => stringValue(g, `${path}.governedConcepts[${idx}]`))
+      : undefined,
+    relevantPersonas: Array.isArray(relevantPersonas)
+      ? relevantPersonas.map((p, idx) => stringValue(p, `${path}.relevantPersonas[${idx}]`))
+      : undefined,
+    downloadUrl: stringValue(object.downloadUrl, `${path}.downloadUrl`),
+    misoWebUrl: stringValue(object.misoWebUrl, `${path}.misoWebUrl`),
+  };
+}
+
+function parseBpmData(value: unknown, path: string): BpmData {
+  const base = parseBpmManual(value, path);
+  const object = objectValue(value, path);
+  const manuals = object.manuals;
+
+  return {
+    ...base,
+    isCatalog: Boolean(object.isCatalog),
+    manuals: Array.isArray(manuals)
+      ? manuals.map((m, idx) => parseBpmManual(m, `${path}.manuals[${idx}]`))
+      : undefined,
+    allManualsCount: optionalNumberValue(object.allManualsCount, `${path}.allManualsCount`),
   };
 }
 
@@ -271,10 +318,20 @@ export function parseSearchResponse(value: unknown): SearchResponse {
         hubId: null,
         data: (object.data as any) || { suggestedQueries: [], scopeCategories: [] },
       };
+    case "bpm_card":
+      if (hubId !== null) {
+        return invalid("search response.hubId", "null for BPM data");
+      }
+      return {
+        ...common,
+        chartType: "bpm_card",
+        hubId: null,
+        data: parseBpmData(object.data, "search response.data"),
+      };
     default:
       return invalid(
         "search response.chartType",
-        '"lmp_series", "fuel_mix", "transmission_bar", "glossary_card", or "guidance_card"',
+        '"lmp_series", "fuel_mix", "transmission_bar", "glossary_card", "guidance_card", or "bpm_card"',
       );
   }
 }

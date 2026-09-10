@@ -20,7 +20,8 @@ export type ChartType =
   | "fuel_mix"
   | "transmission_bar"
   | "glossary_card"
-  | "guidance_card";
+  | "guidance_card"
+  | "bpm_card";
 
 
 export type KpiColor =
@@ -80,6 +81,7 @@ export type GlossaryPoint = {
   formula?: string;
   related?: unknown[];
   source?: string;
+  governingBpm?: string;
 };
 
 export type GlossaryItem = {
@@ -91,6 +93,7 @@ export type GlossaryItem = {
   formula?: string;
   related?: unknown[];
   source?: string;
+  governingBpm?: string;
 };
 
 type SearchResponseBase<
@@ -148,12 +151,40 @@ export type GlossarySearchResponse = SearchResponseBase<
   null
 >;
 
+export type BpmManual = {
+  bpmNumber: string;
+  number?: number;
+  title: string;
+  category: string;
+  tariffModule?: string;
+  effectiveDate: string;
+  summary: string;
+  questionsAnswered: string[];
+  governedConcepts?: string[];
+  relevantPersonas?: string[];
+  downloadUrl: string;
+  misoWebUrl: string;
+};
+
+export type BpmData = BpmManual & {
+  isCatalog?: boolean;
+  manuals?: BpmManual[];
+  allManualsCount?: number;
+};
+
+export type BpmSearchResponse = SearchResponseBase<
+  "bpm_card",
+  BpmData,
+  null
+>;
+
 export type SearchResponse =
   | HubSearchResponse
   | FuelSearchResponse
   | TransmissionSearchResponse
   | GlossarySearchResponse
-  | GuidanceSearchResponse;
+  | GuidanceSearchResponse
+  | BpmSearchResponse;
 
 
 export type HubMetricSummary = {

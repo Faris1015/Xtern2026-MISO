@@ -37,7 +37,7 @@ class SearchResponse(BaseModel):
     directAnswer: str
     sourceCitation: str
     kpis: List[KpiCard]
-    chartType: str = Field(..., description="lmp_series | fuel_mix | transmission_bar | glossary_card | guidance_card")
+    chartType: str = Field(..., description="lmp_series | fuel_mix | transmission_bar | glossary_card | guidance_card | bpm_card")
     hubId: Optional[str] = None
     data: Any = Field(None, description="Direct charting payload aligned for Recharts")
     proactiveFollowUps: List[FollowUpAction]
@@ -147,6 +147,14 @@ class SearchEngine:
 
     def _execute_search(self, query: str, persona: str = "Power Trader") -> SearchResponse:
         q_norm = normalize(query)
+
+        # 0. Check for explicit MISO Business Practice Manual (BPM) intent
+        bpm_match = self._match_bpm(q_norm, query)
+        if bpm_match:
+            return self._build_bpm_response(query, bpm_match, persona)
+
+        if any(term in q_norm for term in ["bpms", "bpm", "business practice manual", "business practice manuals", "rulebook", "rulebooks"]):
+            return self._build_bpm_directory_response(query, persona)
 
         # 1. Check if user explicitly asked for an acronym / definition ("what is", "explain", "formula", or exact acronym)
         is_definitional = any(term in q_norm for term in ["what is", "define", "definition", "explain", "formula", "meaning", "acronym"])
@@ -756,6 +764,170 @@ Provide a direct, helpful 2-3 sentence answer tailored to a {persona}. Do NOT us
             proactiveFollowUps=follow_ups,
         )
 
+    def _match_bpm(self, q_norm: str, raw_query: str) -> Optional[Dict[str, Any]]:
+        import re
+        # Match explicit BPM references e.g. "BPM 002", "BPM-002", "BPM 2", "BPM-2", "BPM 20", "BPM-020"
+        m = re.search(r"\bbpm\s*[-_]?\s*(\d+)\b", raw_query, re.IGNORECASE)
+        if m:
+            num = int(m.group(1))
+            found = self.dm.get_bpm(num)
+            if found:
+                return found
+
+        # Match common topic queries to their governing BPM
+        topic_mappings = {
+            "market registration": 1,
+            "registration rules": 1,
+            "qualification process": 1,
+            "energy market rules": 2,
+            "operating reserve rules": 2,
+            "day ahead market rules": 2,
+            "real time market rules": 2,
+            "ftr rules": 4,
+            "arr rules": 4,
+            "financial transmission rights": 4,
+            "auction revenue rights": 4,
+            "market settlements": 5,
+            "settlement rules": 5,
+            "settlement disputes": 5,
+            "billing disputes": 5,
+            "weekly invoicing": 5,
+            "physical scheduling": 7,
+            "e-tagging": 7,
+            "interchange scheduling": 7,
+            "outage operations": 8,
+            "outage rules": 8,
+            "crow tool": 8,
+            "market monitoring": 9,
+            "imm rules": 9,
+            "market mitigation": 9,
+            "network model": 10,
+            "commercial model": 10,
+            "cpnode rules": 10,
+            "resource adequacy rules": 11,
+            "planning resource auction": 11,
+            "capacity auction rules": 11,
+            "transmission settlements": 12,
+            "transmission service rules": 13,
+            "generator interconnection rules": 15,
+            "interconnection rules": 15,
+            "interconnection queue rules": 15,
+            "dpp rules": 15,
+            "transmission planning rules": 20,
+            "mtep rules": 20,
+            "lrtp rules": 20,
+            "blackstart rules": 22,
+            "operational forecasting rules": 25,
+            "demand response rules": 26,
+            "competitive transmission rules": 27,
+            "iccp data requirements": 31,
+            "iccp telemetry rules": 31,
+        }
+        for topic, num in topic_mappings.items():
+            if topic in q_norm:
+                return self.dm.get_bpm(num)
+
+        return None
+
+    def _build_bpm_response(self, raw_query: str, bpm: Dict[str, Any], persona: str) -> SearchResponse:
+        bpm_num = bpm["bpmNumber"]
+        title = bpm["title"]
+        effective = bpm["effectiveDate"]
+        module = bpm.get("tariffModule", "Tariff Rulebook")
+        category = bpm.get("category", "Operations & Rules")
+        summary = bpm["summary"]
+        qa_list = bpm.get("questionsAnswered", [])
+        concepts = bpm.get("governedConcepts", [])
+
+        qa_formatted = "\n".join([f"• {q}" for q in qa_list[:3]])
+        narrative = (
+            f"**{bpm_num}: {title}** (Effective: {effective})\n\n"
+            f"{summary}\n\n"
+            f"**Key Operational Questions Answered:**\n{qa_formatted}\n\n"
+            f"*Governing Tariff Module:* {module} under FERC jurisdiction."
+        )
+
+        kpis = [
+            KpiCard(label="BPM Number", value=bpm_num, color="sky"),
+            KpiCard(label="Effective Date", value=effective, color="emerald"),
+            KpiCard(label="Tariff Grounding", value=module[:18], color="purple"),
+            KpiCard(label="Category", value=category[:18], color="slate"),
+        ]
+
+        follow_ups = []
+        if concepts:
+            follow_ups.append(FollowUpAction(label=f"Explore {concepts[0]}", action="search_query", params={"q": concepts[0]}))
+        if bpm.get("number") == 2:
+            follow_ups.append(FollowUpAction(label="Compare with BPM 005 (Settlements)", action="search_query", params={"q": "BPM 005"}))
+            follow_ups.append(FollowUpAction(label="View Indiana Hub LMP Pricing", action="search_query", params={"q": "Indiana Hub LMP"}))
+        elif bpm.get("number") == 11:
+            follow_ups.append(FollowUpAction(label="What is CONE?", action="search_query", params={"q": "What is CONE?"}))
+            follow_ups.append(FollowUpAction(label="Explain Planning Reserve Auction", action="search_query", params={"q": "What is PRA?"}))
+        elif bpm.get("number") == 20:
+            follow_ups.append(FollowUpAction(label="Explore MTEP24 LRTP Transmission", action="search_query", params={"q": "MTEP24 LRTP Transmission"}))
+            follow_ups.append(FollowUpAction(label="Compare Regional vs Local Portfolios", action="compare_plans", params={"plans": ["mtep_local", "lrtp_regional"]}))
+        else:
+            follow_ups.append(FollowUpAction(label="Explore All MISO Rulebooks", action="search_query", params={"q": "MISO BPM Rulebooks"}))
+            follow_ups.append(FollowUpAction(label="Return to Indiana Hub Pricing", action="search", params={"q": "Indiana Hub LMP"}))
+
+        return SearchResponse(
+            query=raw_query,
+            directAnswer=narrative,
+            sourceCitation=f"MISO Business Practice Manuals ({bpm_num}: {title})",
+            kpis=kpis,
+            chartType="bpm_card",
+            hubId=None,
+            data=bpm,
+            proactiveFollowUps=follow_ups,
+            isAiSynthesized=False,
+        )
+
+    def _build_bpm_directory_response(self, raw_query: str, persona: str) -> SearchResponse:
+        bpms = self.dm.get_all_bpms()
+        featured = [b for b in bpms if b.get("number") in [1, 2, 4, 5, 8, 9, 10, 11, 15, 20, 26, 31]]
+        if not featured:
+            featured = bpms[:10]
+
+        narrative = (
+            "**MISO Business Practice Manuals (BPMs)** are the authoritative operational rulebooks implementing the FERC-approved MISO Tariff. "
+            "They translate high-level legal tariffs into day-to-day dispatch rules, settlement formulas, capacity auctions, and transmission engineering specifications across 15 states."
+        )
+
+        kpis = [
+            KpiCard(label="Total Manuals", value=f"{len(bpms)} Official BPMs", color="sky"),
+            KpiCard(label="Primary Tariff", value="Module A–E & Attachments", color="purple"),
+            KpiCard(label="Jurisdiction", value="FERC Regulated", color="emerald"),
+            KpiCard(label="Format", value="Public Operational Specs", color="slate"),
+        ]
+
+        follow_ups = [
+            FollowUpAction(label="BPM 002: Energy & Reserves", action="search_query", params={"q": "BPM 002"}),
+            FollowUpAction(label="BPM 011: Resource Adequacy", action="search_query", params={"q": "BPM 011"}),
+            FollowUpAction(label="BPM 020: Transmission Planning", action="search_query", params={"q": "BPM 020"}),
+            FollowUpAction(label="BPM 005: Market Settlements", action="search_query", params={"q": "BPM 005"}),
+        ]
+
+        data_payload = {
+            "isCatalog": True,
+            "title": "MISO Business Practices Manuals Directory",
+            "description": "Browse and search MISO's comprehensive regulatory implementation manuals.",
+            "manuals": featured,
+            "allManualsCount": len(bpms),
+            "misoWebUrl": "https://www.misoenergy.org/legal/rules-manuals-and-agreements/business-practice-manuals/"
+        }
+
+        return SearchResponse(
+            query=raw_query,
+            directAnswer=narrative,
+            sourceCitation="MISO Legal & Rules — Business Practices Manuals Library",
+            kpis=kpis,
+            chartType="bpm_card",
+            hubId=None,
+            data=data_payload,
+            proactiveFollowUps=follow_ups,
+            isAiSynthesized=False,
+        )
+
     # -----------------------------------------------------------------------
     # Session-Aware Pre-Fetching (Zero Cold Start)
     # -----------------------------------------------------------------------
@@ -774,6 +946,7 @@ Provide a direct, helpful 2-3 sentence answer tailored to a {persona}. Do NOT us
                 {"label": "Compare vs. Michigan", "query": "compare Indiana and Michigan", "type": "compare"},
                 {"label": "MISO Peak Records", "query": "Solar and Wind Peak records", "type": "peaks"},
                 {"label": "What is LRTP?", "query": "What is LRTP?", "type": "glossary"},
+                {"label": "📘 MISO BPM Rulebooks", "query": "MISO Business Practice Manuals BPM", "type": "bpm"},
             ],
         )
 

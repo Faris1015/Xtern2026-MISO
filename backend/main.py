@@ -128,6 +128,7 @@ async def root() -> Dict[str, Any]:
             "sessionPrefetch": "/api/session-prefetch",
             "compare": "/api/compare?type={hubs|fuels|plans}&items={id1,id2}",
             "glossary": "/api/glossary",
+            "bpms": "/api/bpms",
             "gridTelemetry": "/api/grid-telemetry",
             "misoStatus": "/api/miso-status",
             "feedback": "/api/feedback",
@@ -168,6 +169,34 @@ async def api_glossary_term(term: str) -> Dict[str, Any]:
     if not entry:
         raise HTTPException(status_code=404, detail=f"Glossary term '{term}' not found.")
     return entry
+
+
+@app.get(
+    "/api/bpms",
+    summary="List All MISO Business Practice Manuals (BPMs)",
+    description="Returns the authoritative directory of all 20+ MISO Business Practice Manuals, effective dates, questions answered, and CDN download links.",
+    tags=["BPM Rulebooks"],
+)
+async def api_bpms() -> Dict[str, Any]:
+    manuals = data_manager.get_all_bpms()
+    return {
+        "count": len(manuals),
+        "source": "https://www.misoenergy.org/legal/rules-manuals-and-agreements/business-practice-manuals/",
+        "manuals": manuals,
+    }
+
+
+@app.get(
+    "/api/bpms/{identifier}",
+    summary="Get Specific MISO Business Practice Manual",
+    description="Returns detailed metadata, questions answered, governed concepts, and official download URL for a specific BPM (e.g. '002', 'BPM 002', or 'BPM-020').",
+    tags=["BPM Rulebooks"],
+)
+async def api_bpm_detail(identifier: str) -> Dict[str, Any]:
+    bpm = data_manager.get_bpm(identifier)
+    if not bpm:
+        raise HTTPException(status_code=404, detail=f"Business Practice Manual '{identifier}' not found.")
+    return bpm
 
 
 @app.get(

@@ -21,6 +21,7 @@ import {
 import {
   ArrowRight,
   BookOpen,
+  CheckCircle2,
   Compass,
   Database,
   Download,
@@ -31,6 +32,7 @@ import {
 } from "lucide-react";
 import type {
   AudienceMode,
+  BpmSearchResponse,
   ChartType,
   FollowUp,
   GlossarySearchResponse,
@@ -44,8 +46,8 @@ import { CanvasCopilotDrawer } from "./CanvasCopilotDrawer";
 
 
 const kpiColors: Record<KpiColor, string> = {
-  sky: MISO_THEME.blue,
-  slate: MISO_THEME.ink,
+  sky: MISO_THEME.navy,
+  slate: MISO_THEME.slate,
   red: MISO_THEME.red,
   emerald: MISO_THEME.green,
   amber: MISO_THEME.amber,
@@ -75,6 +77,10 @@ const SOURCE_DIRECTORY: Record<ChartType, { title: string; url: string }> = {
   guidance_card: {
     title: "MISO Knowledge Scope Directory",
     url: "https://www.misoenergy.org",
+  },
+  bpm_card: {
+    title: "MISO Business Practices Manuals (BPMs)",
+    url: "https://www.misoenergy.org/legal/rules-manuals-and-agreements/business-practice-manuals/",
   },
 };
 
@@ -121,7 +127,7 @@ function briefingUrl(
 }
 
 function resultRows(result: SearchResponse): Array<Record<string, unknown>> {
-  if (result.chartType === "glossary_card" || result.chartType === "guidance_card") return [];
+  if (result.chartType === "glossary_card" || result.chartType === "guidance_card" || result.chartType === "bpm_card") return [];
   return result.data.map((row) => ({ ...row }));
 }
 
@@ -190,7 +196,7 @@ function SourceEvidence({
 }
 
 function MetricRail({ result }: { result: SearchResponse }) {
-  if (result.chartType === "glossary_card" || result.chartType === "guidance_card") return null;
+  if (result.chartType === "glossary_card" || result.chartType === "guidance_card" || result.chartType === "bpm_card") return null;
 
   return (
     <dl className="grid grid-cols-4 divide-x divide-miso-border border-b border-miso-border bg-miso-card">
@@ -700,7 +706,13 @@ function HourlyDataDetails({
   );
 }
 
-function GlossaryReference({ result }: { result: GlossarySearchResponse }) {
+function GlossaryReference({
+  result,
+  onFollowUp,
+}: {
+  result: GlossarySearchResponse;
+  onFollowUp?: (followUp: FollowUp) => void;
+}) {
   const acronym =
     result.data.acronym ??
     result.kpis.find((kpi) => kpi.label === "Standard Acronym")?.value ??
@@ -712,18 +724,41 @@ function GlossaryReference({ result }: { result: GlossarySearchResponse }) {
         <BookOpen size={15} aria-hidden="true" /> MISO terminology
       </p>
 
-      <div className="mt-3 flex items-start gap-4 border-b border-miso-border pb-5">
-        <span className="bg-miso-navy px-3 py-2 text-base font-bold text-white">
-          {acronym}
-        </span>
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-miso-navy">
-            {result.data.term}
-          </h2>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-miso-muted">
-            {result.data.category}
-          </p>
+      <div className="mt-3 flex flex-wrap items-start justify-between gap-4 border-b border-miso-border pb-5">
+        <div className="flex items-start gap-4">
+          <span className="bg-miso-navy px-3 py-2 text-base font-bold text-white">
+            {acronym}
+          </span>
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-miso-navy">
+              {result.data.term}
+            </h2>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-miso-muted">
+              {result.data.category}
+            </p>
+          </div>
         </div>
+
+        {result.data.governingBpm && onFollowUp && (
+          <button
+            type="button"
+            onClick={() =>
+              onFollowUp({
+                label: result.data.governingBpm!,
+                action: "search_query",
+                params: { q: result.data.governingBpm! },
+              })
+            }
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 border border-blue-200 hover:bg-blue-100 transition cursor-pointer shadow-2xs"
+            title={`Search MISO Rulebook ${result.data.governingBpm}`}
+          >
+            <FileText size={13} className="text-blue-600" />
+            <span>
+              Governing Rulebook: <strong>{result.data.governingBpm}</strong>
+            </span>
+            <ArrowRight size={12} className="text-blue-500" />
+          </button>
+        )}
       </div>
 
       <section aria-labelledby="plain-language-heading" className="mt-6">
@@ -853,6 +888,205 @@ function GuidanceCardView({
   );
 }
 
+function BpmCardView({
+  result,
+  onFollowUp,
+}: {
+  result: BpmSearchResponse;
+  onFollowUp: (followUp: FollowUp) => void;
+}) {
+  const bpm = result.data;
+  const isCatalog = Boolean(bpm.isCatalog);
+
+  if (isCatalog && bpm.manuals) {
+    return (
+      <article className="p-6 lg:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-miso-border pb-5">
+          <div>
+            <p className="miso-eyebrow flex items-center gap-2 text-miso-sky">
+              <BookOpen size={15} aria-hidden="true" /> MISO Regulatory Library
+            </p>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-miso-navy">
+              Business Practices Manuals (BPM) Directory
+            </h2>
+            <p className="mt-1 text-xs text-miso-muted">
+              Authoritative operational rulebooks implementing the FERC-approved MISO Tariff across 15 states.
+            </p>
+          </div>
+          <a
+            href={bpm.misoWebUrl || "https://www.misoenergy.org/legal/rules-manuals-and-agreements/business-practice-manuals/"}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md bg-miso-navy px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-miso-navy/90"
+          >
+            MISO Legal BPM Portal
+            <ExternalLink size={13} />
+          </a>
+        </div>
+
+        <div className="mt-6 rounded-lg border border-sky-100 bg-sky-50/60 p-4 text-xs text-slate-700 leading-relaxed">
+          <strong className="text-miso-navy">What are MISO BPMs?</strong> While the Open Access Transmission Tariff (OATT) establishes high-level statutory rules, the 30+ Business Practice Manuals define exact market clearing algorithms, interconnection study milestones, outage scheduling protocols, and settlement timelines.
+        </div>
+
+        <div className="mt-6">
+          <h3 className="text-sm font-bold text-miso-navy mb-3">Featured Core Rulebooks ({bpm.manuals.length} Indexed)</h3>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {bpm.manuals.map((m) => (
+              <div
+                key={m.bpmNumber}
+                className="flex flex-col justify-between rounded-lg border border-miso-border bg-white p-4 shadow-2xs hover:border-miso-sky hover:shadow-xs transition"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="rounded-md bg-miso-navy px-2 py-0.5 text-xs font-bold text-white">
+                      {m.bpmNumber}
+                    </span>
+                    <span className="text-[10px] font-medium text-slate-500">
+                      Eff: {m.effectiveDate}
+                    </span>
+                  </div>
+                  <h4 className="mt-2 text-sm font-semibold text-miso-navy leading-snug">
+                    {m.title}
+                  </h4>
+                  <p className="mt-1 line-clamp-2 text-xs text-slate-600">
+                    {m.summary}
+                  </p>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => onFollowUp({ label: m.bpmNumber, action: "search_query", params: { q: m.bpmNumber } })}
+                    className="text-xs font-semibold text-miso-sky hover:underline cursor-pointer"
+                  >
+                    Inspect Manual →
+                  </button>
+                  <a
+                    href={m.downloadUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-slate-400 hover:text-slate-700"
+                    title={`Download ${m.bpmNumber} (ZIP)`}
+                  >
+                    <Download size={14} />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  return (
+    <article className="p-6 lg:p-8">
+      <p className="miso-eyebrow flex items-center gap-2 text-miso-sky">
+        <BookOpen size={15} aria-hidden="true" /> MISO Business Practice Manual • {bpm.category}
+      </p>
+
+      <div className="mt-3 flex flex-wrap items-start justify-between gap-4 border-b border-miso-border pb-5">
+        <div className="flex items-start gap-4">
+          <span className="rounded-md bg-miso-navy px-3.5 py-2 text-lg font-black text-white shadow-xs">
+            {bpm.bpmNumber}
+          </span>
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-miso-navy">
+              {bpm.title}
+            </h2>
+            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
+                Effective: {bpm.effectiveDate}
+              </span>
+              {bpm.tariffModule && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-semibold text-purple-800 border border-purple-200">
+                  {bpm.tariffModule}
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-semibold text-sky-800 border border-sky-200">
+                FERC Regulated
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <a
+            href={bpm.downloadUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md bg-miso-navy px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-miso-navy/90 transition"
+          >
+            <Download size={14} />
+            Download Official Manual (ZIP)
+          </a>
+          <a
+            href={bpm.misoWebUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+          >
+            Portal
+            <ExternalLink size={12} />
+          </a>
+        </div>
+      </div>
+
+      <section aria-labelledby="bpm-scope-heading" className="mt-6">
+        <h3 id="bpm-scope-heading" className="text-sm font-bold text-miso-navy">
+          Operational Scope & Mandate
+        </h3>
+        <p className="mt-2 max-w-4xl text-base leading-8 text-miso-slate">
+          {bpm.summary}
+        </p>
+      </section>
+
+      {bpm.questionsAnswered && bpm.questionsAnswered.length > 0 && (
+        <section aria-labelledby="bpm-qa-heading" className="mt-6 border-t border-miso-border pt-6">
+          <h3 id="bpm-qa-heading" className="text-sm font-bold text-miso-navy flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-emerald-600" />
+            Key Operational Questions This Manual Answers
+          </h3>
+          <div className="mt-3 grid gap-2.5 max-w-4xl">
+            {bpm.questionsAnswered.map((q, idx) => (
+              <div
+                key={idx}
+                className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3.5 text-xs font-medium text-slate-800"
+              >
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-800">
+                  {idx + 1}
+                </span>
+                <span className="leading-relaxed">{q}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {bpm.governedConcepts && bpm.governedConcepts.length > 0 && (
+        <section aria-labelledby="bpm-concepts-heading" className="mt-6 border-t border-miso-border pt-6">
+          <h3 id="bpm-concepts-heading" className="text-xs font-bold uppercase tracking-[0.1em] text-miso-muted">
+            Governed Market Concepts & Acronyms
+          </h3>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {bpm.governedConcepts.map((concept) => (
+              <button
+                key={concept}
+                type="button"
+                onClick={() => onFollowUp({ label: concept, action: "search_query", params: { q: concept } })}
+                className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-miso-navy shadow-2xs hover:border-miso-sky hover:bg-sky-50 transition cursor-pointer"
+              >
+                <span>{concept}</span>
+                <span className="text-miso-sky">↗</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+    </article>
+  );
+}
+
 function stringParameter(followUp: FollowUp, key: string) {
   const value = followUp.params[key];
   return typeof value === "string" && value.trim() ? value.trim() : null;
@@ -900,6 +1134,7 @@ function canRunFollowUp(result: SearchResponse, followUp: FollowUp) {
     case "view_glossary":
       return Boolean(stringParameter(followUp, "term"));
     case "search":
+    case "search_query":
       return Boolean(stringParameter(followUp, "q"));
     case "view_fuel_mix":
       return true;
@@ -934,6 +1169,7 @@ function resultCategory(result: SearchResponse) {
   if (result.chartType === "fuel_mix") return "Generation result";
   if (result.chartType === "transmission_bar") return "Planning result";
   if (result.chartType === "guidance_card") return "Scope guidance";
+  if (result.chartType === "bpm_card") return "MISO Business Practice Manual";
   return "Glossary result";
 }
 
@@ -1122,7 +1358,31 @@ export default function KnowledgeCanvas({
           className="miso-panel overflow-hidden border-t-4 border-t-miso-sky"
         >
           <div className="grid xl:grid-cols-[minmax(0,1fr)_19rem]">
-            <GlossaryReference result={result} />
+            <GlossaryReference result={result} onFollowUp={onFollowUp} />
+            {actionSidebar}
+          </div>
+        </section>
+        <CanvasCopilotDrawer
+          isOpen={isCopilotOpen}
+          onClose={() => setIsCopilotOpen(false)}
+          apiBase={apiBase}
+          result={result}
+          audienceMode={audienceMode}
+        />
+      </>
+    );
+  }
+
+  if (result.chartType === "bpm_card") {
+    return (
+      <>
+        <section
+          data-tour="knowledge-canvas"
+          aria-live="polite"
+          className="miso-panel overflow-hidden border-t-4 border-t-miso-navy"
+        >
+          <div className="grid xl:grid-cols-[minmax(0,1fr)_19rem]">
+            <BpmCardView result={result} onFollowUp={onFollowUp} />
             {actionSidebar}
           </div>
         </section>
@@ -1173,7 +1433,7 @@ export default function KnowledgeCanvas({
             <header className="border-b border-miso-border p-6 lg:p-8">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <p className="miso-eyebrow">{resultCategory(result)}</p>
                     {result.isAiSynthesized && (
                       <span
@@ -1183,6 +1443,40 @@ export default function KnowledgeCanvas({
                         <Sparkles size={11} className="text-purple-600" />
                         Grounded AI
                       </span>
+                    )}
+                    {result.chartType === "lmp_series" && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onFollowUp({
+                            label: "BPM 002",
+                            action: "search_query",
+                            params: { q: "BPM 002" },
+                          })
+                        }
+                        className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold text-blue-800 border border-blue-200 hover:bg-blue-100 transition cursor-pointer"
+                        title="Governed by MISO Business Practice Manual 002: Energy & Operating Reserve Markets"
+                      >
+                        <FileText size={10} className="text-blue-600" />
+                        Governing Rulebook: BPM 002
+                      </button>
+                    )}
+                    {result.chartType === "transmission_bar" && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onFollowUp({
+                            label: "BPM 020",
+                            action: "search_query",
+                            params: { q: "BPM 020" },
+                          })
+                        }
+                        className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold text-blue-800 border border-blue-200 hover:bg-blue-100 transition cursor-pointer"
+                        title="Governed by MISO Business Practice Manual 020: Transmission Planning"
+                      >
+                        <FileText size={10} className="text-blue-600" />
+                        Governing Rulebook: BPM 020
+                      </button>
                     )}
                   </div>
                   <h2 className="mt-1 text-2xl font-bold tracking-tight text-miso-navy">

@@ -303,6 +303,71 @@ class TestMISOBackendQA(unittest.TestCase):
                 )
                 doc.close()
 
+    # -----------------------------------------------------------------------
+    # MISO Business Practice Manuals (BPM) Rulebooks Integration Tests
+    # -----------------------------------------------------------------------
+    def test_24_bpm_endpoint(self):
+        """Verify GET /api/bpms and GET /api/bpms/{id}."""
+        resp_all = self.client.get("/api/bpms")
+        self.assertEqual(resp_all.status_code, 200)
+        data_all = resp_all.json()
+        self.assertGreaterEqual(data_all["count"], 20)
+        self.assertIn("manuals", data_all)
+
+        # Single BPM retrieval
+        resp_single = self.client.get("/api/bpms/BPM 002")
+        self.assertEqual(resp_single.status_code, 200)
+        data_single = resp_single.json()
+        self.assertEqual(data_single["bpmNumber"], "BPM 002")
+        self.assertIn("Energy and Operating Reserve", data_single["title"])
+        self.assertIn("questionsAnswered", data_single)
+        self.assertGreater(len(data_single["questionsAnswered"]), 0)
+        self.assertIn("downloadUrl", data_single)
+
+        # 404 for unknown BPM
+        resp_404 = self.client.get("/api/bpms/BPM 999")
+        self.assertEqual(resp_404.status_code, 404)
+
+    def test_25_bpm_search_routing(self):
+        """Verify natural language search queries routing to bpm_card."""
+        queries = ["BPM 002", "BPM 2", "BPM 020", "interconnection rules", "generator interconnection rules"]
+        for q in queries:
+            resp = self.client.get(f"/api/search?q={q}")
+            self.assertEqual(resp.status_code, 200)
+            data = resp.json()
+            self.assertEqual(data["chartType"], "bpm_card", f"Query '{q}' failed to route to bpm_card")
+            self.assertIn("data", data)
+            self.assertIn("bpmNumber", data["data"])
+            self.assertTrue(len(data["data"]["questionsAnswered"]) > 0)
+            self.assertIn("downloadUrl", data["data"])
+
+    def test_26_bpm_catalog_search(self):
+        """Verify generic BPM/rulebook query returns full catalog directory."""
+        resp = self.client.get("/api/search?q=MISO BPM Rulebooks")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["chartType"], "bpm_card")
+        self.assertTrue(data["data"].get("isCatalog"))
+        self.assertIn("manuals", data["data"])
+        self.assertGreaterEqual(len(data["data"]["manuals"]), 10)
+
+    def test_27_glossary_bpm_linkage(self):
+        """Verify glossary terms are linked to governing BPMs."""
+        resp = self.client.get("/api/glossary/LMP")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data.get("governingBpm"), "BPM 002")
+
+        resp_lrtp = self.client.get("/api/glossary/LRTP")
+        self.assertEqual(resp_lrtp.status_code, 200)
+        self.assertEqual(resp_lrtp.json().get("governingBpm"), "BPM 020")
+
+        resp_all = self.client.get("/api/glossary")
+        self.assertEqual(resp_all.status_code, 200)
+        all_terms = resp_all.json()
+        bpm_category_terms = [t for t in all_terms.values() if t.get("category") == "Rulebooks (BPMs)"]
+        self.assertGreaterEqual(len(bpm_category_terms), 20)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
