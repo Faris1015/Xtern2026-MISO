@@ -45,7 +45,7 @@ def _load_env_file():
 _load_env_file()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest").strip()
 GEMINI_ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
 # Common energy / grid / MISO terminology for fast offline domain validation
@@ -92,16 +92,18 @@ class LLMService:
                     parts = candidates[0].get("content", {}).get("parts", [])
                     if parts:
                         return parts[0].get("text", "").strip()
-            elif resp.status_code == 404 and "gemini-2.5-flash" in GEMINI_MODEL:
-                # Fallback to gemini-1.5-flash if 2.5 is not accessible
-                fallback_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.api_key}"
-                resp2 = self.client.post(fallback_url, json=payload, headers={"Content-Type": "application/json"})
-                if resp2.status_code == 200:
-                    candidates = resp2.json().get("candidates", [])
-                    if candidates:
-                        parts = candidates[0].get("content", {}).get("parts", [])
-                        if parts:
-                            return parts[0].get("text", "").strip()
+            elif resp.status_code == 404:
+                for fallback_model in ["gemini-flash-latest", "gemini-3.6-flash"]:
+                    if fallback_model == GEMINI_MODEL:
+                        continue
+                    fallback_url = f"https://generativelanguage.googleapis.com/v1beta/models/{fallback_model}:generateContent?key={self.api_key}"
+                    resp2 = self.client.post(fallback_url, json=payload, headers={"Content-Type": "application/json"})
+                    if resp2.status_code == 200:
+                        candidates = resp2.json().get("candidates", [])
+                        if candidates:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            if parts:
+                                return parts[0].get("text", "").strip()
         except Exception as e:
             # Graceful fallback: log and continue
             pass
