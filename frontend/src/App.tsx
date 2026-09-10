@@ -6,17 +6,19 @@ import {
   useRef,
   useState,
 } from "react";
-import { BookOpen, ExternalLink, GitCompareArrows, HelpCircle, X } from "lucide-react";
+import { BookOpen, ExternalLink, GitCompareArrows, HelpCircle, MessageSquarePlus, X } from "lucide-react";
 import OmniSearch from "./components/OmniSearch";
 import AudioBriefing from "./components/AudioBriefing";
 import SessionRadar from "./components/SessionRadar";
 import GuidedTour from "./components/GuidedTour";
 import JargonHUD from "./components/JargonHUD";
+import FeedbackModal from "./components/FeedbackModal";
 import SearchHistoryFavorites, {
   type StarredItem,
 } from "./components/SearchHistoryFavorites";
 import MisoIntegrationModal from "./components/MisoIntegrationModal";
 import ErrorBoundary from "./components/ErrorBoundary";
+
 import misoLogo from "./assets/miso-logo.png";
 import { parseSearchResponse } from "./api/guards";
 import {
@@ -82,6 +84,8 @@ export default function App() {
   });
   const [isJargonHudOpen, setIsJargonHudOpen] = useState(false);
   const [isIntegrationModalOpen, setIsIntegrationModalOpen] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [dismissedPersonaSuggestion, setDismissedPersonaSuggestion] = useState<string | null>(null);
   const [starredQueries, setStarredQueries] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem("miso_omnisearch_starred");
@@ -406,6 +410,16 @@ export default function App() {
           <div className="flex items-center gap-3">
             <button
               type="button"
+              onClick={() => setIsFeedbackModalOpen(true)}
+              aria-label="Submit feedback to MISO engineering team"
+              className="miso-button-secondary text-xs sm:text-sm flex items-center gap-1.5 border-sky-300 text-sky-900 bg-sky-50/70 hover:bg-sky-100"
+            >
+              <MessageSquarePlus size={16} className="text-miso-sky" aria-hidden="true" />
+              <span>Feedback</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setIsIntegrationModalOpen(true)}
               aria-label="Connect to misoenergy.org website search bar"
               className="miso-button-secondary text-xs sm:text-sm flex items-center gap-1.5 border-sky-300 text-sky-900 bg-sky-50/70 hover:bg-sky-100"
@@ -431,6 +445,17 @@ export default function App() {
                 Ctrl+J
               </kbd>
             </button>
+
+            <button
+              type="button"
+              onClick={() => setIsFeedbackModalOpen(true)}
+              aria-label="Submit feedback to MISO engineering team"
+              className="miso-button-secondary text-xs sm:text-sm flex items-center gap-1.5 border-emerald-300 text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100"
+            >
+              <MessageSquarePlus size={16} className="text-emerald-600" aria-hidden="true" />
+              <span>Feedback</span>
+            </button>
+
 
             <button
               type="button"
@@ -482,6 +507,52 @@ export default function App() {
           onSearch={search}
           isSearching={isSearching}
         />
+
+        {/* Dynamic Persona Inference Suggestion */}
+        {result?.inferredPersona &&
+          result.inferredPersona !== audienceMode &&
+          dismissedPersonaSuggestion !== `${result.query}-${result.inferredPersona}` && (
+            <div
+              role="status"
+              className="flex items-center justify-between gap-4 rounded-lg border border-sky-300 bg-sky-50/95 p-3.5 text-xs sm:text-sm text-sky-950 shadow-sm animate-fadeIn"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-200 text-sky-800 text-xs font-bold">
+                  💡
+                </span>
+                <span>
+                  <strong>Persona Insight:</strong> Your query pattern suggests{" "}
+                  <strong className="text-sky-900 underline">{result.inferredPersona}</strong> mode{" "}
+                  <span className="text-sky-700">
+                    ({result.personaSuggestionReason || "based on domain terminology"})
+                  </span>
+                  .
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleAudienceModeChange(result.inferredPersona!);
+                    setDismissedPersonaSuggestion(`${result.query}-${result.inferredPersona}`);
+                  }}
+                  className="rounded-md bg-sky-600 px-3 py-1 text-xs font-semibold text-white shadow hover:bg-sky-700 transition-colors"
+                >
+                  Switch to {result.inferredPersona}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setDismissedPersonaSuggestion(`${result.query}-${result.inferredPersona}`)
+                  }
+                  aria-label="Dismiss persona suggestion"
+                  className="rounded p-1 text-sky-700 hover:bg-sky-100 hover:text-sky-900 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          )}
 
         <SearchHistoryFavorites
           currentQuery={result?.query ?? lastQuery}
@@ -615,7 +686,16 @@ export default function App() {
         onClose={() => setIsIntegrationModalOpen(false)}
         apiBase={API_BASE}
       />
+
+      <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        activePersona={audienceMode}
+        queryContext={result?.query ?? lastQuery}
+        apiBaseUrl={API_BASE}
+      />
       </div>
     </GlossaryProvider>
   );
 }
+

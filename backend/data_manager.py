@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from miso_client import miso_client
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
@@ -436,6 +437,20 @@ class DataManager:
         return self.market_hubs
 
     def get_fuel_peaks(self) -> Dict[str, Any]:
+        """Returns real-time live fuel mix from MISO public API with fallback to verified snapshot."""
+        live = miso_client.fetch_live_fuel_mix()
+        if live:
+            return {
+                **self.fuel_peaks,
+                "reportTitle": live.get("reportTitle", "MISO Real-Time Grid Fuel Mix"),
+                "effectiveDate": live.get("effectiveDate", self.fuel_peaks.get("effectiveDate")),
+                "isLive": True,
+                "dataSource": live.get("dataSource", "live_miso_public_api"),
+                "totalMw": live.get("totalMw"),
+                "formattedTotalMw": live.get("formattedTotalMw"),
+                "generationMix": live.get("generationMix", self.fuel_peaks.get("generationMix")),
+                "intervalEst": live.get("intervalEst"),
+            }
         return self.fuel_peaks
 
     def get_mtep_projects(self) -> Dict[str, Any]:
@@ -484,7 +499,7 @@ class DataManager:
 
     def get_grid_telemetry(self) -> Dict[str, Any]:
         """Returns grounded live grid telemetry matching MISO Homepage Snapshot metrics."""
-        return {
+        telemetry = {
             "forecastedPeakDemandMw": 107605,
             "currentDemandMw": 92893,
             "marginalEnergyCost": 45.01,
@@ -492,7 +507,8 @@ class DataManager:
             "status": "Normal Operations",
             "statusSeverity": "normal",
             "statusDescription": "All regional operating reserves adequate across North, Central, and South regions. No Maximum Generation Emergencies active.",
-            "timestamp": "2026-09-09T09:58:00-05:00",
+            "timestamp": "2026-09-10T11:00:00-05:00",
+            "dataSource": "verified_snapshot",
             "regions": {
                 "North": {"demandMw": 18450, "status": "Normal", "reserveMarginPct": 19.4},
                 "Central": {"demandMw": 49120, "status": "Normal", "reserveMarginPct": 18.2},
@@ -505,6 +521,13 @@ class DataManager:
                 "interchange": "transmission line miles by category",
             },
         }
+        live = miso_client.fetch_live_fuel_mix()
+        if live and live.get("totalMw"):
+            telemetry["currentDemandMw"] = int(live["totalMw"])
+            telemetry["timestamp"] = live.get("intervalEst", telemetry["timestamp"])
+            telemetry["dataSource"] = "live_miso_public_api"
+            telemetry["intervalRef"] = live.get("effectiveDate")
+        return telemetry
 
 
 # Global singleton instance

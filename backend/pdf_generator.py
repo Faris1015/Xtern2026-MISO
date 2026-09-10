@@ -412,7 +412,7 @@ def generate_market_briefing_pdf(
         mix_rows.append([
             Paragraph(m["fuel"], styles["TableCellBold"]),
             Paragraph(f"<b>{m['percentage']:.0f}%</b>", styles["TableCell"]),
-            Paragraph(f"{m['installedGw']} GW", styles["TableCell"]),
+            Paragraph(f"{m.get('installedGw', round(m.get('actualMw', 0) / 1000.0, 1))} GW", styles["TableCell"]),
         ])
 
     mix_table = Table(

@@ -90,6 +90,11 @@
     "annualProductionMwh": "638M MWh",
     "transmissionMiles": 77000,
     "populationServed": "45 Million"
+    "populationServed": "45 Million",
+    "statesServed": 15,
+    "provincesServed": 1,
+    "canadianProvinces": ["Manitoba"],
+    "serviceTerritory": "15 U.S. states and the Canadian province of Manitoba"
   },
   "system_facts": {
     "installed_capacity_gw": 203,
@@ -97,5 +102,10 @@
     "transmission_line_miles": 77000,
     "population_served": 45000000,
     "states_served": 15
+    "states_served": 15,
+    "provinces_served": 1,
+    "canadian_provinces": ["Manitoba"],
+    "service_territory": "15 U.S. states and the Canadian province of Manitoba",
+    "market_scope_note": "Installed capacity (203 GW) and generation mix reflect MISO Market Dispatched Footprint (LRZ 1-10). Manitoba Hydro participates via transmission coordination and external interchange."
   }
 }

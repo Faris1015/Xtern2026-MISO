@@ -6,7 +6,9 @@ Session-Aware Pre-Fetching, Multi-Hub Comparison Engine, and 1-Click PDF Generat
 
 from __future__ import annotations
 
+import json
 import time
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -58,11 +60,30 @@ class CanvasChatResponse(BaseModel):
     suggestedFollowUps: List[str]
     isAiGenerated: bool
 
+
+class FeedbackRequest(BaseModel):
+    category: str = Field("general", description="'bug' | 'data_inaccuracy' | 'feature_request' | 'general'")
+    rating: Optional[int] = Field(None, ge=1, le=5, description="1-5 satisfaction rating")
+    message: str = Field(..., min_length=2, description="Feedback message content")
+    persona: Optional[str] = Field("Power Trader", description="Active audience persona")
+    queryContext: Optional[str] = Field(None, description="Query context or canvas topic")
+    userEmail: Optional[str] = Field(None, description="Optional user email")
+
+
+class FeedbackResponse(BaseModel):
+    status: str
+    feedbackId: str
+    message: str
+    timestamp: str
+
+
 # Ensure Pydantic v2 type annotations are fully resolved
 ChatMessage.model_rebuild()
 CanvasChatRequest.model_rebuild()
 CanvasChatResponse.model_rebuild()
 BriefingRequest.model_rebuild()
+FeedbackRequest.model_rebuild()
+FeedbackResponse.model_rebuild()
 
 
 
@@ -74,7 +95,6 @@ origins = [
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "*",
 ]
 
 app.add_middleware(
@@ -257,6 +277,66 @@ async def api_generate_briefing_get(
 ) -> Response:
     req = BriefingRequest(hub_id=hub_id, custom_title=custom_title, audience_mode=audience_mode)
     return await api_generate_briefing_post(req)
+
+
+@app.post(
+    "/api/feedback",
+    summary="Submit User Feedback to Engineering Team",
+    description="Captures user feedback, bug reports, data inaccuracies, and feature suggestions for the engineering maintenance team.",
+    tags=["Feedback"],
+)
+async def api_submit_feedback(body: FeedbackRequest) -> FeedbackResponse:
+    feedback_file = Path(__file__).resolve().parent / "data" / "user_feedback.json"
+    feedback_file.parent.mkdir(parents=True, exist_ok=True)
+
+    entries = []
+    if feedback_file.exists():
+        try:
+            with open(feedback_file, "r", encoding="utf-8") as f:
+                entries = json.load(f)
+        except Exception:
+            entries = []
+
+    feedback_id = f"FB-{int(time.time())}-{len(entries) + 1}"
+    record = {
+        "id": feedback_id,
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "category": body.category,
+        "rating": body.rating,
+        "message": body.message,
+        "persona": body.persona,
+        "queryContext": body.queryContext,
+        "userEmail": body.userEmail,
+    }
+    entries.append(record)
+
+    with open(feedback_file, "w", encoding="utf-8") as f:
+        json.dump(entries, f, indent=2)
+
+    return FeedbackResponse(
+        status="success",
+        feedbackId=feedback_id,
+        message="Thank you! Your feedback has been securely submitted to the MISO OmniSearch engineering team.",
+        timestamp=record["timestamp"],
+    )
+
+
+@app.get(
+    "/api/feedback",
+    summary="List Recent Feedback Submissions",
+    description="Returns recent feedback submissions for engineering inspection and maintenance monitoring.",
+    tags=["Feedback"],
+)
+async def api_get_feedback(limit: int = Query(50, ge=1, le=200)) -> List[Dict[str, Any]]:
+    feedback_file = Path(__file__).resolve().parent / "data" / "user_feedback.json"
+    if not feedback_file.exists():
+        return []
+    try:
+        with open(feedback_file, "r", encoding="utf-8") as f:
+            entries = json.load(f)
+        return entries[-limit:][::-1]
+    except Exception:
+        return []
 
 
 if __name__ == "__main__":

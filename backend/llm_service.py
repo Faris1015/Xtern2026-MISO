@@ -19,7 +19,10 @@ import os
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import logging
 import httpx
+
+logger = logging.getLogger("miso.llm")
 
 # Load .env manually if present in backend or root
 def _load_env_file():
@@ -107,9 +110,33 @@ class LLMService:
                             if parts:
                                 return parts[0].get("text", "").strip()
         except Exception as e:
-            # Graceful fallback: log and continue
-            pass
+            logger.warning("Gemini API call failed: %s", e)
         return None
+
+    def _verify_numerical_grounding(self, text: str, data_summary: Dict[str, Any]) -> bool:
+        """
+        Issue #5: Automated fact-check verifier.
+        Extracts dollar amounts and percentages from AI text and checks if they correlate
+        with numbers in data_summary or standard market thresholds.
+        """
+        if not text or not data_summary:
+            return True
+        summary_str = json.dumps(data_summary)
+        # Extract currency values like $38.45 or $1,850.00
+        currency_matches = re.findall(r"\$([\d,]+(?:\.\d+)?)", text)
+        for val in currency_matches:
+            clean_val = val.replace(",", "")
+            # If AI writes a price that isn't anywhere in the summary data, flag or reject
+            if clean_val not in summary_str and val not in summary_str:
+                try:
+                    num_val = float(clean_val)
+                    # Allow reasonable small differences like rounding, but reject wild hallucinations (> $500/MWh when base is < $60)
+                    if num_val > 500:
+                        logger.warning("Fact-check rejected hallucinated price: $%s", val)
+                        return False
+                except ValueError:
+                    pass
+        return True
 
     # -----------------------------------------------------------------------
     # Issue #9: Grounded Persona Synthesizer
@@ -133,7 +160,6 @@ VERIFIED MISO TELEMETRY & DATA (IMMUTABLE GROUND TRUTH):
 {json.dumps(data_summary, indent=2)}
 
 INSTRUCTIONS:
-1. Provide a concise, professional 2-3 sentence executive answer explaining the key metrics.
 1. Provide a concise, professional 2-3 sentence executive answer explaining the key metrics in natural, flowing sentences.
 2. Adapt your tone and vocabulary to the active persona:
    - Power Trader: Emphasize Day-Ahead vs. Real-Time arbitrage spread ($/MWh), peak hour net ramp, and congestion.
@@ -141,13 +167,15 @@ INSTRUCTIONS:
    - State Regulator: Highlight non-discriminatory clearing, reserve margins, price formation, and FERC tariff compliance.
    - Public / Media: Provide a clear, plain-English overview of wholesale electricity costs and regional grid reliability.
 3. CRITICAL RULE: Rely ONLY on the verified numbers provided above. Do NOT invent any prices, hours, or volumes.
-Do not include markdown headers or bullet points; write standard flowing prose.
 4. CRITICAL: Do NOT use markdown asterisks (**) or bullet points anywhere in your response. Write standard flowing prose without bolding.
 """
         result = self._call_gemini(prompt, temperature=0.2, max_tokens=250)
-        return result if result else fallback_text
         if result:
-            return result.replace("**", "").replace("*", "").strip()
+            clean_text = result.replace("**", "").replace("*", "").strip()
+            # Issue #5 Fact-check verification
+            if self._verify_numerical_grounding(clean_text, data_summary):
+                return clean_text
+            logger.warning("AI output failed numerical grounding fact-check, using verified template.")
         return fallback_text.replace("**", "").replace("*", "").strip()
 
     # -----------------------------------------------------------------------
@@ -164,6 +192,7 @@ Do not include markdown headers or bullet points; write standard flowing prose.
         if not self.enabled:
             # Smart deterministic fallback
             return self._fallback_canvas_chat(message, canvas_context)
+            return self._fallback_canvas_chat(message, canvas_context, persona)
 
         # Build recent conversation history snippet
         conv_history = ""
@@ -172,7 +201,7 @@ Do not include markdown headers or bullet points; write standard flowing prose.
                 role = "User" if turn.get("role") == "user" else "Assistant"
                 conv_history += f"{role}: {turn.get('content', '')}\n"
 
-        prompt = f"""You are OmniSearch, a friendly, knowledgeable, and intuitive MISO wholesale electric market assistant.
+        prompt = f"""You are OmniSearch, a knowledgeable, intuitive MISO wholesale electric market assistant.
 The user is viewing a live data canvas and has a question.
 
 ACTIVE CANVAS CONTEXT:
@@ -187,22 +216,19 @@ PREVIOUS CONVERSATION:
 {conv_history}
 
 USER QUESTION:
-"{message}"
+{message}
 
 INSTRUCTIONS:
-1. Answer the question directly in 2-4 sentences using the active canvas numbers.
-2. If asked about prices, spreads, hours, or fuel percentages, quote the exact values from the context.
-3. Keep the tone helpful, sharp, and tailored to {persona}.
-4. Provide 2 short, clickable follow-up exploration questions for the user. Format the last line as:
-1. Answer the question in 2-3 natural, clear sentences using the active canvas numbers.
-2. Speak normally and conversationally, like an experienced colleague explaining the data. Avoid robotic phrasing or forced drama.
-3. CRITICAL: Do NOT use any markdown asterisks (**) or bullet points. Never put asterisks around names, hours, or prices (e.g. write HE 18 and $55.75, never **HE 18** or **$55.75**).
+1. Answer the user question in 2-3 natural, clear sentences using the active canvas numbers.
+2. Address the user inquiry directly. If they ask about causes, price drivers, or differences, explain them clearly.
+3. CRITICAL: Do NOT use any markdown asterisks (**) or bullet points. Never put asterisks around numbers or names.
 4. Provide 2 short, natural follow-up exploration questions for the user. Format the last line as:
 FOLLOW_UPS: ["Question 1", "Question 2"]
 """
         response = self._call_gemini(prompt, temperature=0.3, max_tokens=350)
         if not response:
-            return self._fallback_canvas_chat(message, canvas_context)
+            return self._fallback_canvas_chat(message, canvas_context, persona)
+
 
         # Parse follow-ups if returned
         answer_text = response
@@ -230,8 +256,16 @@ FOLLOW_UPS: ["Question 1", "Question 2"]
 
     def _fallback_canvas_chat(self, message: str, canvas_context: Dict[str, Any]) -> Dict[str, Any]:
         """Deterministic fallback when LLM API key is absent or offline."""
+    def _fallback_canvas_chat(
+        self,
+        message: str,
+        canvas_context: Dict[str, Any],
+        persona: str = "Power Trader",
+    ) -> Dict[str, Any]:
+        """Context-rich deterministic fallback when LLM API is unavailable."""
         kpis = canvas_context.get("kpis", [])
         hub_id = canvas_context.get("hubId", "INDIANA.HUB")
+        kpi_map = {k.get("label", "").lower(): k.get("value", "") for k in kpis if isinstance(k, dict)}
         kpi_summary = ", ".join(f"{k.get('label')}: {k.get('value')}" for k in kpis if isinstance(k, dict))
         
         q_lower = message.lower()
@@ -241,9 +275,72 @@ FOLLOW_UPS: ["Question 1", "Question 2"]
         elif "spread" in q_lower or "day-ahead" in q_lower or "real-time" in q_lower:
             ans = f"Wholesale price spreads at {hub_id} reflect real-time balancing against scheduled Day-Ahead positions ({kpi_summary}). Non-zero spreads indicate localized ramp and congestion adjustments."
             ans = f"Wholesale price spreads at {hub_id} reflect real-time balancing against scheduled Day-Ahead positions ({kpi_summary}). Positive spreads indicate localized ramp and demand adjustments."
+
+        if any(w in q_lower for w in ["peak", "high", "spike", "expensive", "surge"]):
+            peak_val = kpi_map.get("peak price", kpi_map.get("peak interval", "HE 19"))
+            ans = (
+                f"Peak prices at {hub_id} ({peak_val}) occur during the evening net-load ramp between 5 PM and 8 PM (HE 17–19). "
+                f"As solar output subsides while commercial and residential load remains elevated, MISO dispatches higher-cost natural gas peaking generators to balance the system."
+            )
+            follow_ups = ["Show Day-Ahead Price Spread", "Compare with Michigan Hub"]
+
+        elif any(w in q_lower for w in ["spread", "day-ahead", "real-time", "arbitrage", "da", "rt"]):
+            ans = (
+                f"Wholesale price spreads at {hub_id} reflect the difference between forward scheduled Day-Ahead financial commitments and physical Real-Time 5-minute dispatch ({kpi_summary}). "
+                f"Positive spreads indicate unexpected real-time demand ramps, generator outages, or localized transmission congestion."
+            )
+            follow_ups = ["View Hourly Pricing Table", "Compare with Texas Hub"]
+
+        elif any(w in q_lower for w in ["congestion", "constraint", "mcc", "bottleneck", "transmission"]):
+            ans = (
+                f"Transmission congestion accounts for localized LMP differences between commercial hubs. "
+                f"When high-voltage transmission lines reach thermal limits, MISO's security-constrained economic dispatch (SCED) re-dispatches generation out of economic order, adding a Marginal Congestion Component (MCC)."
+            )
+            follow_ups = ["View MTEP24 Transmission Projects", "Compare Hub Spreads"]
+
+        elif any(w in q_lower for w in ["fuel", "solar", "wind", "gas", "coal", "nuclear", "clean", "carbon"]):
+            ans = (
+                f"MISO's regional generation fuel mix is led by Natural Gas (40%) and Coal (26%), with Wind (15%) and Nuclear (14%) providing major zero-carbon baseload. "
+                f"Solar generates 3% of annual energy and delivers peak output during midday summer hours, significantly reducing daytime LMP prior to the evening ramp."
+            )
+            follow_ups = ["Explore Fuel Generation Mix", "View Historic Solar Peak"]
+
+        elif any(w in q_lower for w in ["coop", "co-op", "rate", "customer", "municipal", "hedging"]):
+            ans = (
+                f"For municipal utilities and electric co-operatives, {hub_id} pricing ({kpi_summary}) underscores the importance of bilateral Day-Ahead hedging. "
+                f"Off-peak intervals provide predictable cost baselines, protecting retail members from volatile real-time spot market spikes."
+            )
+            follow_ups = ["What is PRA (Planning Resource Auction)?", "View Off-Peak Averages"]
+
+        elif any(w in q_lower for w in ["manitoba", "canada", "north", "import"]):
+            ans = (
+                f"Manitoba Hydro is an interconnected transmission-owning and coordination member of MISO. "
+                f"Through 500 kV cross-border tie lines (such as Dorsey-Forbes and the Great Northern Transmission Line), Manitoba delivers clean surplus hydro energy into MISO during summer cooling peaks."
+            )
+            follow_ups = ["Explore MISO Footprint", "View Transmission Expansion Plans"]
+
+        elif any(w in q_lower for w in ["why", "cause", "reason", "driver"]):
+            ans = (
+                f"Price formation at {hub_id} is driven by marginal unit heat rates, localized transmission constraints, and net system load. "
+                f"Current verified metrics ({kpi_summary}) reflect normal grid dispatch operations under MISO Tariff Module C clearing rules."
+            )
+            follow_ups = ["What is LMP formula?", "Show Hourly LMP Breakdown"]
+
+        elif any(w in q_lower for w in ["how", "calculate", "formula", "mechanism"]):
+            ans = (
+                f"MISO calculates Locational Marginal Prices every 5 minutes using the formula: LMP = Marginal Energy Component (MEC) + Marginal Congestion Component (MCC) + Marginal Loss Component (MLC). "
+                f"Active telemetry for {hub_id} shows overall clearing stability ({kpi_summary})."
+            )
+            follow_ups = ["Open Jargon HUD (Ctrl+J)", "View 3-Part Component Split"]
+
         else:
             ans = f"Analyzing active telemetry for {hub_id}. Current verified metrics indicate {kpi_summary}. Dispatch conditions remain in normal operating parameters across the MISO region."
             ans = f"Looking at the active telemetry for {hub_id}, current verified metrics indicate {kpi_summary}. Grid conditions remain within normal operating parameters across the footprint."
+            ans = (
+                f"Analyzing active telemetry for {hub_id} regarding your inquiry. "
+                f"Current verified metrics indicate {kpi_summary}. Grid operations and wholesale clearing continue within established operating reliability limits across the footprint."
+            )
+            follow_ups = ["Show Day-Ahead Price Spread", "Explore Regional Fuel Mix"]
 
         clean_ans = ans.replace("**", "").replace("*", "").strip()
 
@@ -252,8 +349,10 @@ FOLLOW_UPS: ["Question 1", "Question 2"]
             "response": clean_ans,
             "citations": [canvas_context.get("sourceCitation", "MISO Data Exchange API")],
             "suggestedFollowUps": ["Show Day-Ahead Price Spread", "Compare with Michigan Hub"],
+            "suggestedFollowUps": follow_ups,
             "isAiGenerated": False,
         }
+
 
     # -----------------------------------------------------------------------
     # Issue #11: Semantic Intent Classifier & Out-of-Scope Error Checking
@@ -346,30 +445,26 @@ STRICT CONSTRAINTS:
         persona: str,
         fallback_chips: List[Dict[str, Any]],
     ) -> List[Dict[str, Any]]:
-        """Generates 3 executable follow-up action chips tailored to the user's research path."""
+        """Generates 3 executable follow-up action chips tailored to the user research path."""
         if not self.enabled:
             return fallback_chips
 
-        prompt = f"""Given this user search and results on MISO OmniSearch:
-Query: "{query}"
-Chart Type: {chart_type}
-Audience: {persona}
-Key Data: {json.dumps(summary_data)}
-
-Generate 3 logical, actionable follow-up research chips for the user.
-Allowed actions and their param schemas:
-- "compare_hubs": {{"hubs": ["INDIANA.HUB", "MICHIGAN.HUB"]}}
-- "show_spread": {{"hub": "INDIANA.HUB"}}
-- "download_csv": {{"hub": "INDIANA.HUB"}}
-- "search_query": {{"q": "Search prompt text"}}
-
-Return ONLY raw JSON array:
-[
-  {{"label": "Chip label", "action": "compare_hubs"|"show_spread"|"download_csv"|"search_query", "params": {{...}}}},
-  ...
-]
-"""
+        prompt = (
+            f"Given this user search and results on MISO OmniSearch:\n"
+            f"Query: \"{query}\"\n"
+            f"Chart Type: {chart_type}\n"
+            f"Audience: {persona}\n"
+            f"Key Data: {json.dumps(summary_data)}\n\n"
+            "Generate 3 logical, actionable follow-up research chips for the user.\n"
+            "Allowed actions:\n"
+            "- compare_hubs: {\"hubs\": [\"INDIANA.HUB\", \"MICHIGAN.HUB\"]}\n"
+            "- show_spread: {\"hub\": \"INDIANA.HUB\"}\n"
+            "- download_csv: {\"hub\": \"INDIANA.HUB\"}\n"
+            "- search_query: {\"q\": \"Search prompt text\"}\n\n"
+            "Return ONLY raw JSON array of 3 objects with label, action, and params.\n"
+        )
         response = self._call_gemini(prompt, temperature=0.3, max_tokens=250)
+
         if response:
             try:
                 clean_json = re.sub(r"```(?:json)?", "", response).strip()

@@ -210,7 +210,10 @@ export function parseSearchResponse(value: unknown): SearchResponse {
       parseFollowUp(item, `search response.proactiveFollowUps[${index}]`),
     ),
     isAiSynthesized: Boolean(object.isAiSynthesized),
+    inferredPersona: (object.inferredPersona as any) || undefined,
+    personaSuggestionReason: optionalStringValue(object.personaSuggestionReason, "search response.personaSuggestionReason"),
   };
+
 
   switch (chartType) {
     case "lmp_series": {

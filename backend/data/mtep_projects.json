@@ -50,8 +50,10 @@
       "categoryName": "Regional LRTP (Long Range Transmission Planning)",
       "projectsCount": 24,
       "miles": 3631,
-      "investmentEst": "$10.3B",
-      "focus": "Tranche 1 & 2 regional backbone lines connecting high-yield renewables to load centers"
+      "investmentEst": "$10.3B approved (Tranche 1) / $21.8B proposed (Tranche 2)",
+      "tranche1Investment": "$10.3B",
+      "tranche2Investment": "$21.8B",
+      "focus": "LRTP Tranche 1 ($10.3B approved in 2022, 18 projects) and Tranche 2 ($21.8B proposed in 2024) high-voltage 345/765 kV regional backbone lines connecting renewables to load centers"
     },
     {
       "id": "jtiq_interregional",

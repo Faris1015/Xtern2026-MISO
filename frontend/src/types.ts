@@ -107,7 +107,10 @@ type SearchResponseBase<
   data: TData;
   proactiveFollowUps: FollowUp[];
   isAiSynthesized?: boolean;
+  inferredPersona?: AudienceMode;
+  personaSuggestionReason?: string;
 };
+
 
 export type GuidanceData = {
   message?: string;
@@ -287,5 +290,27 @@ export interface CanvasChatResponse {
   citations: string[];
   suggestedFollowUps: string[];
   isAiGenerated: boolean;
+}
+
+export type FeedbackCategory =
+  | "bug"
+  | "data_inaccuracy"
+  | "feature_request"
+  | "general";
+
+export interface FeedbackPayload {
+  category: FeedbackCategory;
+  rating?: number;
+  message: string;
+  persona?: AudienceMode;
+  queryContext?: string;
+  userEmail?: string;
+}
+
+export interface FeedbackResponse {
+  status: string;
+  feedbackId: string;
+  message: string;
+  timestamp: string;
 }
 
