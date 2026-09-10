@@ -45,8 +45,7 @@ def _load_env_file():
 _load_env_file()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest").strip()
-GEMINI_ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest").strip()
 
 # Common energy / grid / MISO terminology for fast offline domain validation
 MISO_DOMAIN_TERMS = {
@@ -61,21 +60,27 @@ MISO_DOMAIN_TERMS = {
 class LLMService:
     def __init__(self):
         self.api_key = GEMINI_API_KEY
+        self.model = GEMINI_MODEL
         self.enabled = bool(self.api_key)
-        self.client = httpx.Client(timeout=3.0)
+        self.client = httpx.Client(timeout=8.0)
 
     def reload_config(self):
-        """Reloads API key if updated at runtime in .env."""
+        """Reloads API key and model if updated at runtime in .env."""
         _load_env_file()
         self.api_key = os.getenv("GEMINI_API_KEY", "").strip()
+        self.model = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest").strip()
         self.enabled = bool(self.api_key)
 
     def _call_gemini(self, prompt: str, temperature: float = 0.2, max_tokens: int = 400) -> Optional[str]:
-        """Calls Google Gemini REST API using httpx with tight timeout."""
+        """Calls Google Gemini REST API using httpx with automatic fallback."""
         if not self.enabled:
             return None
 
-        url = f"{GEMINI_ENDPOINT}?key={self.api_key}"
+        candidate_models = [self.model]
+        for fallback in ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.8-flash"]:
+            if fallback not in candidate_models:
+                candidate_models.append(fallback)
+
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
@@ -83,30 +88,21 @@ class LLMService:
                 "maxOutputTokens": max_tokens,
             },
         }
-        try:
-            resp = self.client.post(url, json=payload, headers={"Content-Type": "application/json"})
-            if resp.status_code == 200:
-                data = resp.json()
-                candidates = data.get("candidates", [])
-                if candidates:
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    if parts:
-                        return parts[0].get("text", "").strip()
-            elif resp.status_code == 404:
-                for fallback_model in ["gemini-flash-latest", "gemini-3.6-flash"]:
-                    if fallback_model == GEMINI_MODEL:
-                        continue
-                    fallback_url = f"https://generativelanguage.googleapis.com/v1beta/models/{fallback_model}:generateContent?key={self.api_key}"
-                    resp2 = self.client.post(fallback_url, json=payload, headers={"Content-Type": "application/json"})
-                    if resp2.status_code == 200:
-                        candidates = resp2.json().get("candidates", [])
-                        if candidates:
-                            parts = candidates[0].get("content", {}).get("parts", [])
-                            if parts:
-                                return parts[0].get("text", "").strip()
-        except Exception as e:
-            # Graceful fallback: log and continue
-            pass
+
+        for model_name in candidate_models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.api_key}"
+            try:
+                resp = self.client.post(url, json=payload, headers={"Content-Type": "application/json"})
+                if resp.status_code == 200:
+                    data = resp.json()
+                    candidates = data.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts:
+                            return parts[0].get("text", "").strip()
+            except Exception:
+                continue
+
         return None
 
     # -----------------------------------------------------------------------
