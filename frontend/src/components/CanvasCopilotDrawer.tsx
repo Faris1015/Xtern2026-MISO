@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Sparkles, X, Send, Bot, User, CornerDownLeft, ShieldCheck } from "lucide-react";
+import { Sparkles, X, Send, Bot, User, ShieldCheck } from "lucide-react";
 import type { AudienceMode, ChatMessage, SearchResponse } from "../types";
 
 interface Props {
@@ -53,7 +53,7 @@ export const CanvasCopilotDrawer: React.FC<Props> = ({
       setMessages([
         {
           role: "assistant",
-          content: `I'm your **MISO Grid Copilot**. I have loaded verified telemetry for **${hubLabel}** (${result.chartType.replace("_", " ")}). Ask me any analytical question about these numbers, spreads, or dispatch conditions!`,
+          content: `Hi! I'm OmniSearch. I have loaded verified telemetry for ${hubLabel} (${result.chartType.replace("_", " ")}). What would you like to know about these numbers, price spreads, or grid conditions?`,
         },
       ]);
     }
@@ -94,9 +94,10 @@ export const CanvasCopilotDrawer: React.FC<Props> = ({
 
       if (res.ok) {
         const data = await res.json();
+        const cleanResponse = (data.response || "").replace(/\*\*/g, "").replace(/\*/g, "");
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: data.response },
+          { role: "assistant", content: cleanResponse },
         ]);
         if (data.suggestedFollowUps && data.suggestedFollowUps.length > 0) {
           setSuggestedChips(data.suggestedFollowUps);
@@ -115,7 +116,7 @@ export const CanvasCopilotDrawer: React.FC<Props> = ({
         ...prev,
         {
           role: "assistant",
-          content: "Unable to reach the Copilot service. Please check your network connection.",
+          content: "Unable to reach OmniSearch. Please check your network connection.",
         },
       ]);
     } finally {
@@ -126,7 +127,7 @@ export const CanvasCopilotDrawer: React.FC<Props> = ({
   return (
     <aside
       className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl border-l border-slate-200 flex flex-col transition-transform duration-300 ease-in-out"
-      aria-label="Canvas Copilot Assistant"
+      aria-label="Chat with OmniSearch"
     >
       {/* Header */}
       <div className="bg-[#0F2942] text-white px-5 py-4 flex items-center justify-between shadow-sm">
@@ -136,7 +137,7 @@ export const CanvasCopilotDrawer: React.FC<Props> = ({
           </div>
           <div>
             <h2 className="text-base font-semibold tracking-wide flex items-center gap-2">
-              Canvas Copilot
+              Chat with OmniSearch
               <span className="text-[10px] font-normal uppercase tracking-wider px-2 py-0.5 rounded bg-sky-500/30 text-sky-200">
                 Grounded AI
               </span>
@@ -149,7 +150,7 @@ export const CanvasCopilotDrawer: React.FC<Props> = ({
         <button
           onClick={onClose}
           className="p-1.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-sky-400"
-          aria-label="Close Copilot drawer"
+          aria-label="Close OmniSearch drawer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -191,7 +192,9 @@ export const CanvasCopilotDrawer: React.FC<Props> = ({
                   : "bg-slate-100 text-slate-800 rounded-tl-none border border-slate-200 shadow-sm"
               }`}
             >
-              <div className="whitespace-pre-wrap">{msg.content}</div>
+              <div className="whitespace-pre-wrap">
+                {msg.content.replace(/\*\*/g, "").replace(/\*/g, "")}
+              </div>
             </div>
           </div>
         ))}
@@ -247,7 +250,7 @@ export const CanvasCopilotDrawer: React.FC<Props> = ({
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask about this canvas data..."
+            placeholder="Ask OmniSearch about this data..."
             disabled={isLoading}
             className="flex-1 text-xs px-3.5 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 disabled:bg-slate-100"
           />
@@ -255,7 +258,7 @@ export const CanvasCopilotDrawer: React.FC<Props> = ({
             type="submit"
             disabled={!inputValue.trim() || isLoading}
             className="bg-[#0F2942] hover:bg-sky-700 text-white p-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-sky-500"
-            aria-label="Send question to Copilot"
+            aria-label="Send question to OmniSearch"
           >
             <Send className="w-4 h-4" />
           </button>
@@ -267,4 +270,3 @@ export const CanvasCopilotDrawer: React.FC<Props> = ({
     </aside>
   );
 };
-

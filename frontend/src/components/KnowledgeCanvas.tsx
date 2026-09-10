@@ -1046,13 +1046,16 @@ export default function KnowledgeCanvas({
 
       <div className="mt-6 border-t border-miso-border pt-5">
         <p className="miso-eyebrow">Interactive Copilot</p>
+        <p className="miso-eyebrow">Interactive Assistant</p>
         <div className="mt-3 rounded-lg border border-purple-200 bg-purple-50/70 p-3.5 text-xs text-purple-950">
           <div className="flex items-center gap-1.5 font-semibold text-purple-900">
             <Sparkles size={14} className="text-purple-600" />
             <span>Canvas Copilot</span>
+            <span>OmniSearch</span>
           </div>
           <p className="mt-1 text-[11px] leading-4 text-purple-700">
             Ask grounded questions, explore spreads, or request deeper analysis on this data.
+            Chat directly with OmniSearch about these numbers, spreads, or grid conditions.
           </p>
           <button
             type="button"
@@ -1061,6 +1064,7 @@ export default function KnowledgeCanvas({
           >
             <Sparkles size={13} />
             <span>Ask Canvas Copilot</span>
+            <span>Chat with OmniSearch</span>
           </button>
         </div>
       </div>

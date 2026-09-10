@@ -45,7 +45,8 @@ def _load_env_file():
 _load_env_file()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest").strip()
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash").strip()
+GEMINI_ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
 # Common energy / grid / MISO terminology for fast offline domain validation
 MISO_DOMAIN_TERMS = {
@@ -62,25 +63,21 @@ class LLMService:
         self.api_key = GEMINI_API_KEY
         self.model = GEMINI_MODEL
         self.enabled = bool(self.api_key)
-        self.client = httpx.Client(timeout=8.0)
+        self.client = httpx.Client(timeout=12.0)
 
     def reload_config(self):
         """Reloads API key and model if updated at runtime in .env."""
         _load_env_file()
         self.api_key = os.getenv("GEMINI_API_KEY", "").strip()
-        self.model = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest").strip()
+        self.model = os.getenv("GEMINI_MODEL", "gemini-3.6-flash").strip()
         self.enabled = bool(self.api_key)
 
     def _call_gemini(self, prompt: str, temperature: float = 0.2, max_tokens: int = 400) -> Optional[str]:
-        """Calls Google Gemini REST API using httpx with automatic fallback."""
+        """Calls Google Gemini REST API using httpx with tight timeout."""
         if not self.enabled:
             return None
 
-        candidate_models = [self.model]
-        for fallback in ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.8-flash"]:
-            if fallback not in candidate_models:
-                candidate_models.append(fallback)
-
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
@@ -88,21 +85,30 @@ class LLMService:
                 "maxOutputTokens": max_tokens,
             },
         }
-
-        for model_name in candidate_models:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.api_key}"
-            try:
-                resp = self.client.post(url, json=payload, headers={"Content-Type": "application/json"})
-                if resp.status_code == 200:
-                    data = resp.json()
-                    candidates = data.get("candidates", [])
-                    if candidates:
-                        parts = candidates[0].get("content", {}).get("parts", [])
-                        if parts:
-                            return parts[0].get("text", "").strip()
-            except Exception:
-                continue
-
+        try:
+            resp = self.client.post(url, json=payload, headers={"Content-Type": "application/json"})
+            if resp.status_code == 200:
+                data = resp.json()
+                candidates = data.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts:
+                        return parts[0].get("text", "").strip()
+            elif resp.status_code == 404:
+                for fallback_model in ["gemini-flash-latest", "gemini-3.6-flash"]:
+                    if fallback_model == GEMINI_MODEL:
+                        continue
+                    fallback_url = f"https://generativelanguage.googleapis.com/v1beta/models/{fallback_model}:generateContent?key={self.api_key}"
+                    resp2 = self.client.post(fallback_url, json=payload, headers={"Content-Type": "application/json"})
+                    if resp2.status_code == 200:
+                        candidates = resp2.json().get("candidates", [])
+                        if candidates:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            if parts:
+                                return parts[0].get("text", "").strip()
+        except Exception as e:
+            # Graceful fallback: log and continue
+            pass
         return None
 
     # -----------------------------------------------------------------------
@@ -128,6 +134,7 @@ VERIFIED MISO TELEMETRY & DATA (IMMUTABLE GROUND TRUTH):
 
 INSTRUCTIONS:
 1. Provide a concise, professional 2-3 sentence executive answer explaining the key metrics.
+1. Provide a concise, professional 2-3 sentence executive answer explaining the key metrics in natural, flowing sentences.
 2. Adapt your tone and vocabulary to the active persona:
    - Power Trader: Emphasize Day-Ahead vs. Real-Time arbitrage spread ($/MWh), peak hour net ramp, and congestion.
    - Municipal Co-op: Focus on wholesale power procurement cost stability, off-peak hedging, and customer rate impact.
@@ -135,9 +142,13 @@ INSTRUCTIONS:
    - Public / Media: Provide a clear, plain-English overview of wholesale electricity costs and regional grid reliability.
 3. CRITICAL RULE: Rely ONLY on the verified numbers provided above. Do NOT invent any prices, hours, or volumes.
 Do not include markdown headers or bullet points; write standard flowing prose.
+4. CRITICAL: Do NOT use markdown asterisks (**) or bullet points anywhere in your response. Write standard flowing prose without bolding.
 """
         result = self._call_gemini(prompt, temperature=0.2, max_tokens=250)
         return result if result else fallback_text
+        if result:
+            return result.replace("**", "").replace("*", "").strip()
+        return fallback_text.replace("**", "").replace("*", "").strip()
 
     # -----------------------------------------------------------------------
     # Issue #10: Contextual "Chat with this Canvas" Copilot
@@ -161,7 +172,7 @@ Do not include markdown headers or bullet points; write standard flowing prose.
                 role = "User" if turn.get("role") == "user" else "Assistant"
                 conv_history += f"{role}: {turn.get('content', '')}\n"
 
-        prompt = f"""You are the MISO OmniSearch Canvas Copilot, a grid intelligence assistant embedded inside the 360° Knowledge Canvas.
+        prompt = f"""You are OmniSearch, a friendly, knowledgeable, and intuitive MISO wholesale electric market assistant.
 The user is viewing a live data canvas and has a question.
 
 ACTIVE CANVAS CONTEXT:
@@ -183,6 +194,10 @@ INSTRUCTIONS:
 2. If asked about prices, spreads, hours, or fuel percentages, quote the exact values from the context.
 3. Keep the tone helpful, sharp, and tailored to {persona}.
 4. Provide 2 short, clickable follow-up exploration questions for the user. Format the last line as:
+1. Answer the question in 2-3 natural, clear sentences using the active canvas numbers.
+2. Speak normally and conversationally, like an experienced colleague explaining the data. Avoid robotic phrasing or forced drama.
+3. CRITICAL: Do NOT use any markdown asterisks (**) or bullet points. Never put asterisks around names, hours, or prices (e.g. write HE 18 and $55.75, never **HE 18** or **$55.75**).
+4. Provide 2 short, natural follow-up exploration questions for the user. Format the last line as:
 FOLLOW_UPS: ["Question 1", "Question 2"]
 """
         response = self._call_gemini(prompt, temperature=0.3, max_tokens=350)
@@ -199,11 +214,15 @@ FOLLOW_UPS: ["Question 1", "Question 2"]
                 parsed_fus = json.loads(parts[1].strip())
                 if isinstance(parsed_fus, list) and len(parsed_fus) >= 1:
                     follow_ups = [str(f) for f in parsed_fus[:3]]
+                    follow_ups = [str(f).replace("**", "").replace("*", "") for f in parsed_fus[:3]]
             except Exception:
                 pass
 
+        clean_answer = answer_text.replace("**", "").replace("*", "").strip()
+
         return {
             "response": answer_text,
+            "response": clean_answer,
             "citations": [canvas_context.get("sourceCitation", "MISO Data Exchange API")],
             "suggestedFollowUps": follow_ups,
             "isAiGenerated": True,
@@ -218,13 +237,19 @@ FOLLOW_UPS: ["Question 1", "Question 2"]
         q_lower = message.lower()
         if "peak" in q_lower or "high" in q_lower or "spike" in q_lower:
             ans = f"Based on current {hub_id} telemetry, peak price cleared at evening net-load ramp ({kpi_summary}). Generation dispatch margins tightened as solar generation subsided."
+            ans = f"Based on current {hub_id} telemetry, peak price cleared during the evening net-load ramp ({kpi_summary}). Generation margins tightened as solar generation dropped off into the sunset hours."
         elif "spread" in q_lower or "day-ahead" in q_lower or "real-time" in q_lower:
             ans = f"Wholesale price spreads at {hub_id} reflect real-time balancing against scheduled Day-Ahead positions ({kpi_summary}). Non-zero spreads indicate localized ramp and congestion adjustments."
+            ans = f"Wholesale price spreads at {hub_id} reflect real-time balancing against scheduled Day-Ahead positions ({kpi_summary}). Positive spreads indicate localized ramp and demand adjustments."
         else:
             ans = f"Analyzing active telemetry for {hub_id}. Current verified metrics indicate {kpi_summary}. Dispatch conditions remain in normal operating parameters across the MISO region."
+            ans = f"Looking at the active telemetry for {hub_id}, current verified metrics indicate {kpi_summary}. Grid conditions remain within normal operating parameters across the footprint."
+
+        clean_ans = ans.replace("**", "").replace("*", "").strip()
 
         return {
             "response": ans,
+            "response": clean_ans,
             "citations": [canvas_context.get("sourceCitation", "MISO Data Exchange API")],
             "suggestedFollowUps": ["Show Day-Ahead Price Spread", "Compare with Michigan Hub"],
             "isAiGenerated": False,
@@ -290,20 +315,25 @@ Return ONLY raw JSON with these keys:
         if not self.enabled:
             return fallback_text
 
+        rt_val = round(float(summary.get('realTimeAvg') or 0.0), 2)
+        da_val = round(float(summary.get('dayAheadAvg') or 0.0), 2)
+        peak_hour = summary.get('peakHour', 'HE 18')
+        vol = summary.get('formattedVolume', '')
+
         prompt = f"""Write an executive commentary paragraph for a 1-page MISO Energy Market Fact Sheet.
 Hub: {hub_id}
-Metrics: Real-Time Avg ${summary.get('realTimeAvg', 0):.2f}/MWh, Day-Ahead Avg ${summary.get('dayAheadAvg', 0):.2f}/MWh, Peak Hour {summary.get('peakHour', 'HE 18')}, Total Cleared Volume {summary.get('formattedVolume', '')}.
+Metrics: Real-Time Avg ${rt_val}/MWh, Day-Ahead Avg ${da_val}/MWh, Peak Hour {peak_hour}, Total Cleared Volume {vol}.
 Audience: {audience_mode}
 
 STRICT CONSTRAINTS:
 1. Exactly 45 to 55 words total (will break layout if longer).
 2. Authoritative, board-level tone summarizing price stability and net-load clearing.
-3. No headers, bullets, or quotes.
+3. No headers, bullets, quotes, or asterisks (**).
 """
         result = self._call_gemini(prompt, temperature=0.2, max_tokens=120)
         if result and len(result.split()) <= 65:
-            return result.strip()
-        return fallback_text
+            return result.replace("**", "").replace("*", "").strip()
+        return fallback_text.replace("**", "").replace("*", "").strip()
 
     # -----------------------------------------------------------------------
     # Issue #13: Dynamic Proactive Follow-Up Generator

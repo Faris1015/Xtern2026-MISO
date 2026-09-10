@@ -12,7 +12,6 @@ import AudioBriefing from "./components/AudioBriefing";
 import SessionRadar from "./components/SessionRadar";
 import GuidedTour from "./components/GuidedTour";
 import JargonHUD from "./components/JargonHUD";
-import GridAlertTicker from "./components/GridAlertTicker";
 import SearchHistoryFavorites, {
   type StarredItem,
 } from "./components/SearchHistoryFavorites";
@@ -389,8 +388,6 @@ export default function App() {
           </a>
         </div>
       </div>
-
-      <GridAlertTicker apiBase={API_BASE} onSearch={(q) => void search(q)} />
 
       <header className="border-b border-miso-border bg-white">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-8 px-8 py-4">
