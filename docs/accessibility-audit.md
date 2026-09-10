@@ -79,9 +79,11 @@ Energy markets are notorious for incomprehensible acronyms (LMP, MCC, MLC, CONE,
 ### 4.1 Assistive Technology & ARIA Architecture (WCAG 4.1.2 & 4.1.3)
 * **ARIA Live Regions:** Dynamic search results, KPI card changes, and session pre-fetch notifications are wrapped in `aria-live="polite"` and `aria-atomic="true"`, ensuring screen readers announce updates without interrupting active user speech.
 * **Semantic Roles:** Explicit roles are assigned to all complex components:
-  * `role="dialog"` & `aria-modal="true"` for Jargon HUD and Guided Tour.
+  * `role="dialog"` & `aria-modal="true"` for Jargon HUD, Guided Tour, Engineer Feedback Modal, and Canvas Copilot Drawer.
+  * `role="radiogroup"` & `role="radio"` with `aria-checked` for the Audience Persona selector.
   * `role="combobox"`, `role="listbox"`, and `role="option"` with `aria-selected` for OmniSearch autocomplete.
   * `role="toolbar"` for chart metric view switchers (Real-Time vs. Day-Ahead vs. Spread).
+  * Accessible star rating buttons with clear `aria-label="Rate 1 star"` through `5 stars` in `FeedbackModal.tsx`.
 * **HTML5 Standards:** Valid, clean semantic structure (`<header>`, `<main>`, `<nav>`, `<section>`, `<article>`, `<aside>`, `<footer>`, `<dl>`, `<dt>`, `<dd>`).
 
 ---
