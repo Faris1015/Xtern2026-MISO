@@ -527,6 +527,8 @@ class DataManager:
             telemetry["timestamp"] = live.get("intervalEst", telemetry["timestamp"])
             telemetry["dataSource"] = "live_miso_public_api"
             telemetry["intervalRef"] = live.get("effectiveDate")
+        telemetry["misoApiKeyConfigured"] = bool(miso_client.api_key)
+        telemetry["misoApiKeyMasked"] = f"{miso_client.api_key[:4]}...{miso_client.api_key[-4:]}" if miso_client.api_key else None
         return telemetry
 
 

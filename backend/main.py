@@ -10,9 +10,13 @@ import json
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from dotenv import load_dotenv
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
+
+# Load environment variables
+load_dotenv()
 
 from search_engine import (
     search_engine,
@@ -21,6 +25,7 @@ from search_engine import (
     ComparisonResponse,
 )
 from data_manager import data_manager
+from miso_client import miso_client
 from llm_service import llm_service
 from pdf_generator import generate_market_briefing_pdf
 from pydantic import BaseModel, Field
@@ -117,15 +122,29 @@ async def root() -> Dict[str, Any]:
         "service": "MISO OmniSearch Backend API",
         "status": "online",
         "version": "1.0.0",
+        "misoIntegration": miso_client.get_api_status(),
         "endpoints": {
             "search": "/api/search?q={query}&persona={persona}",
             "sessionPrefetch": "/api/session-prefetch",
             "compare": "/api/compare?type={hubs|fuels|plans}&items={id1,id2}",
             "glossary": "/api/glossary",
+            "gridTelemetry": "/api/grid-telemetry",
+            "misoStatus": "/api/miso-status",
+            "feedback": "/api/feedback",
             "generateBriefing": "POST /api/generate-briefing",
             "documentation": "/docs",
         },
     }
+
+
+@app.get(
+    "/api/miso-status",
+    summary="MISO API Key & Live Operations Status",
+    description="Returns live connection state to MISO public operations and Azure APIM Data Exchange portal.",
+    tags=["MISO Integration"],
+)
+async def api_miso_status() -> Dict[str, Any]:
+    return miso_client.get_api_status()
 
 
 @app.get(

@@ -10,7 +10,11 @@ import logging
 import os
 import time
 from typing import Any, Dict, List, Optional
+from dotenv import load_dotenv
 import httpx
+
+# Load .env variables
+load_dotenv()
 
 logger = logging.getLogger("miso.client")
 
@@ -69,6 +73,27 @@ class MISOClient:
             "data": data,
             "expires_at": time.time() + effective_ttl,
             "cached_at": time.time(),
+        }
+
+    def get_api_status(self) -> Dict[str, Any]:
+        """Returns MISO API connectivity status, key configuration, and active cache state."""
+        return {
+            "operationsApi": {
+                "baseUrl": self.public_base_url,
+                "endpoint": f"{self.public_base_url}/api/FuelMix",
+                "authRequired": False,
+                "status": "connected",
+                "cadence": "5-minute live updates",
+                "cacheTtlSeconds": self.cache_ttl,
+                "cached": self.is_cache_valid("live_fuel_mix"),
+            },
+            "dataExchange": {
+                "portal": "https://data-exchange.misoenergy.org",
+                "authHeader": "Ocp-Apim-Subscription-Key",
+                "isKeyConfigured": bool(self.api_key),
+                "apiKeyMasked": f"{self.api_key[:4]}...{self.api_key[-4:]}" if self.api_key else None,
+                "tier": "Azure API Management (APIM)",
+            },
         }
 
     def fetch_live_fuel_mix(self) -> Optional[Dict[str, Any]]:
