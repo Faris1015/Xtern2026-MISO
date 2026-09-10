@@ -246,7 +246,58 @@ class TestMISOBackendQA(unittest.TestCase):
         self.assertIn("South", data["regions"])
         self.assertIn("demand", data["drillDownQueries"])
 
+    # -----------------------------------------------------------------------
+    # Issues #9-#13: LLM Enhancements, Copilot Chat & Domain Guardrail Tests
+    # -----------------------------------------------------------------------
+    def test_21_out_of_scope_domain_guidance(self):
+        """Issue #11: Non-MISO queries return structured guidance card instead of arbitrary market data."""
+        resp = self.client.get("/api/search?q=how+to+bake+chocolate+chip+cookies")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["chartType"], "guidance_card")
+        self.assertIn("outside the scope of MISO", data["directAnswer"])
+        self.assertGreaterEqual(len(data["proactiveFollowUps"]), 3)
+        self.assertIn("suggestedQueries", data["data"])
+
+    def test_22_canvas_copilot_chat(self):
+        """Issue #10: POST /api/canvas-chat returns grounded analytical response and follow-ups."""
+        canvas_ctx = {
+            "query": "Indiana Hub LMP",
+            "chartType": "lmp_series",
+            "hubId": "INDIANA.HUB",
+            "kpis": [{"label": "Real-Time Avg", "value": "$38.45/MWh"}],
+            "data": [{"hourEnding": 18, "realTimeLmp": 48.20}],
+            "sourceCitation": "MISO Data Exchange API",
+        }
+        payload = {
+            "message": "Why did price spike around hour 18?",
+            "canvasContext": canvas_ctx,
+            "persona": "Power Trader",
+            "history": []
+        }
+        resp = self.client.post("/api/canvas-chat", json=payload)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("response", data)
+        self.assertGreater(len(data["response"]), 15)
+        self.assertGreaterEqual(len(data["suggestedFollowUps"]), 1)
+        self.assertIn("citations", data)
+
+    def test_23_pdf_executive_commentary_single_page_budget(self):
+        """Issue #12: 1-Page PDF budget strictly maintained with AI executive commentary included."""
+        for hub_id in ["INDIANA.HUB", "MICHIGAN.HUB", "TEXAS.HUB"]:
+            for persona in ["Power Trader", "State Regulator", "Municipal Co-op", "Public / Media"]:
+                pdf_bytes = generate_market_briefing_pdf(hub_id=hub_id, audience_mode=persona)
+                doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+                self.assertEqual(
+                    doc.page_count,
+                    1,
+                    f"PDF budget exceeded for {hub_id} ({persona}): got {doc.page_count} pages, expected exactly 1."
+                )
+                doc.close()
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
 

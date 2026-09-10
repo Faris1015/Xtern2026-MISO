@@ -20,6 +20,9 @@ export type ChartType =
   | "fuel_mix"
   | "transmission_bar"
   | "glossary_card";
+  | "glossary_card"
+  | "guidance_card";
+
 
 export type KpiColor =
   | "sky"
@@ -104,7 +107,20 @@ type SearchResponseBase<
   hubId: THub;
   data: TData;
   proactiveFollowUps: FollowUp[];
+  isAiSynthesized?: boolean;
 };
+
+export type GuidanceData = {
+  message?: string;
+  suggestedQueries: string[];
+  scopeCategories: { category: string; examples: string }[];
+};
+
+export type GuidanceSearchResponse = SearchResponseBase<
+  "guidance_card",
+  GuidanceData,
+  null
+>;
 
 export type HubSearchResponse = SearchResponseBase<
   "lmp_series",
@@ -135,6 +151,9 @@ export type SearchResponse =
   | FuelSearchResponse
   | TransmissionSearchResponse
   | GlossarySearchResponse;
+  | GlossarySearchResponse
+  | GuidanceSearchResponse;
+
 
 export type HubMetricSummary = {
   hubId: string;
@@ -252,3 +271,23 @@ export type SessionPrefetchResponse = {
   recentPeaks: RecentPeaks;
   quickStartChips: SessionQuickStartChip[];
 };
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface CanvasChatRequest {
+  message: string;
+  canvasContext: Record<string, unknown>;
+  persona: AudienceMode;
+  history?: ChatMessage[];
+}
+
+export interface CanvasChatResponse {
+  response: string;
+  citations: string[];
+  suggestedFollowUps: string[];
+  isAiGenerated: boolean;
+}
+

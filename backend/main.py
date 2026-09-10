@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import time
 from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
@@ -19,6 +20,7 @@ from search_engine import (
     ComparisonResponse,
 )
 from data_manager import data_manager
+from llm_service import llm_service
 from pdf_generator import generate_market_briefing_pdf
 from pydantic import BaseModel, Field
 
@@ -32,11 +34,38 @@ app = FastAPI(
 
 # ---------------------------------------------------------------------------
 # Request Models
+# Request & Response Models
 # ---------------------------------------------------------------------------
 class BriefingRequest(BaseModel):
     hub_id: str = Field("INDIANA.HUB", description="Target commercial hub (e.g. 'INDIANA.HUB', 'MICHIGAN.HUB')")
     custom_title: Optional[str] = Field(None, description="Optional custom document title")
     audience_mode: str = Field("Power Trader", description="Persona mode: 'Power Trader', 'Municipal Co-op', 'Public / Media', 'State Regulator'")
+
+
+class ChatMessage(BaseModel):
+    role: str = Field(..., description="'user' or 'assistant'")
+    content: str = Field(..., description="Message content")
+
+
+class CanvasChatRequest(BaseModel):
+    message: str = Field(..., description="User follow-up question regarding active canvas data")
+    canvasContext: Dict[str, Any] = Field(..., description="Active dataset payload and KPIs from 360 Canvas")
+    persona: str = Field("Power Trader", description="Active audience persona")
+    history: Optional[List[ChatMessage]] = Field(default_factory=list, description="Recent conversation turns")
+
+
+class CanvasChatResponse(BaseModel):
+    response: str
+    citations: List[str]
+    suggestedFollowUps: List[str]
+    isAiGenerated: bool
+
+# Ensure Pydantic v2 type annotations are fully resolved
+ChatMessage.model_rebuild()
+CanvasChatRequest.model_rebuild()
+CanvasChatResponse.model_rebuild()
+BriefingRequest.model_rebuild()
+
 
 
 # ---------------------------------------------------------------------------
@@ -164,6 +193,28 @@ async def api_compare(
             detail=f"Invalid comparison type '{type}'. Allowed types: 'hubs', 'fuels', 'plans'.",
         )
     return search_engine.compare(compare_type=type, items_str=items)
+
+
+@app.post(
+    "/api/canvas-chat",
+    response_model=CanvasChatResponse,
+    summary="Chat with this Canvas (Copilot Q&A)",
+    description="Allows users to ask conversational follow-up questions about the chart and metrics currently displayed on the 360° Knowledge Canvas.",
+    tags=["Canvas Copilot"],
+)
+async def api_canvas_chat(body: CanvasChatRequest) -> CanvasChatResponse:
+    if not body.message or not body.message.strip():
+        raise HTTPException(status_code=400, detail="Message parameter cannot be empty.")
+
+    history_dicts = [{"role": m.role, "content": m.content} for m in body.history] if body.history else []
+    result = llm_service.chat_with_canvas(
+        message=body.message.strip(),
+        canvas_context=body.canvasContext,
+        persona=body.persona,
+        history=history_dicts,
+    )
+    return CanvasChatResponse(**result)
+
 
 
 @app.post(

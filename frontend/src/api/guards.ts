@@ -209,6 +209,7 @@ export function parseSearchResponse(value: unknown): SearchResponse {
     ).map((item, index) =>
       parseFollowUp(item, `search response.proactiveFollowUps[${index}]`),
     ),
+    isAiSynthesized: Boolean(object.isAiSynthesized),
   };
 
   switch (chartType) {
@@ -260,10 +261,18 @@ export function parseSearchResponse(value: unknown): SearchResponse {
         hubId: null,
         data: parseGlossaryPoint(object.data, "search response.data"),
       };
+    case "guidance_card":
+      return {
+        ...common,
+        chartType: "guidance_card",
+        hubId: null,
+        data: (object.data as any) || { suggestedQueries: [], scopeCategories: [] },
+      };
     default:
       return invalid(
         "search response.chartType",
         '"lmp_series", "fuel_mix", "transmission_bar", or "glossary_card"',
+        '"lmp_series", "fuel_mix", "transmission_bar", "glossary_card", or "guidance_card"',
       );
   }
 }

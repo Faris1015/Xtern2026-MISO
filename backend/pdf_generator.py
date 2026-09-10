@@ -24,6 +24,7 @@ from reportlab.platypus import (
 )
 
 from data_manager import data_manager
+from llm_service import llm_service
 
 # ---------------------------------------------------------------------------
 # Official MISO Color Palette
@@ -314,8 +315,21 @@ def generate_market_briefing_pdf(
             f"accommodating heavy air conditioning and industrial load."
         )
 
+    # Issue #12: Grounded AI Executive Commentary (Strictly spatial budgeted <= 55 words)
+    ai_commentary = llm_service.generate_pdf_executive_commentary(
+        hub_id=hub["hubId"],
+        summary=summary,
+        audience_mode=audience_mode,
+        fallback_text="",
+    )
+    if ai_commentary:
+        display_narrative = f"<b>Executive AI Commentary ({audience_mode}):</b> {ai_commentary}"
+    else:
+        display_narrative = narrative
+
     narrative_table = Table(
         [[Paragraph(narrative, styles["NarrativeText"])]],
+        [[Paragraph(display_narrative, styles["NarrativeText"])]],
         colWidths=[usable_width],
         style=[
             ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F0F9FF")),  # Light soft cyan

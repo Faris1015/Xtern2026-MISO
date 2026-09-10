@@ -19,11 +19,14 @@ import {
   YAxis,
 } from "recharts";
 import {
+  ArrowRight,
   BookOpen,
+  Compass,
   Database,
   Download,
   ExternalLink,
   FileText,
+  Sparkles,
   Star,
 } from "lucide-react";
 import type {
@@ -31,11 +34,14 @@ import type {
   ChartType,
   FollowUp,
   GlossarySearchResponse,
+  GuidanceSearchResponse,
   KpiColor,
   SearchResponse,
 } from "../types";
 import { CHART_SERIES, CHART_TOOLTIP_STYLE, MISO_THEME } from "../theme";
 import { GlossaryHighlight } from "./GlossaryHighlight";
+import { CanvasCopilotDrawer } from "./CanvasCopilotDrawer";
+
 
 const kpiColors: Record<KpiColor, string> = {
   sky: MISO_THEME.blue,
@@ -65,6 +71,10 @@ const SOURCE_DIRECTORY: Record<ChartType, { title: string; url: string }> = {
   glossary_card: {
     title: "Tariff and business practice documentation",
     url: TARIFF_DOCUMENTATION_URL,
+  },
+  guidance_card: {
+    title: "MISO Knowledge Scope Directory",
+    url: "https://www.misoenergy.org",
   },
 };
 
@@ -112,8 +122,10 @@ function briefingUrl(
 
 function resultRows(result: SearchResponse): Array<Record<string, unknown>> {
   if (result.chartType === "glossary_card") return [];
+  if (result.chartType === "glossary_card" || result.chartType === "guidance_card") return [];
   return result.data.map((row) => ({ ...row }));
 }
+
 
 function downloadCsv(result: SearchResponse) {
   const rows = resultRows(result);
@@ -180,6 +192,7 @@ function SourceEvidence({
 
 function MetricRail({ result }: { result: SearchResponse }) {
   if (result.chartType === "glossary_card") return null;
+  if (result.chartType === "glossary_card" || result.chartType === "guidance_card") return null;
 
   return (
     <dl className="grid grid-cols-4 divide-x divide-miso-border border-b border-miso-border bg-miso-card">
@@ -761,6 +774,87 @@ function GlossaryReference({ result }: { result: GlossarySearchResponse }) {
   );
 }
 
+function GuidanceCardView({
+  result,
+  onFollowUp,
+}: {
+  result: GuidanceSearchResponse;
+  onFollowUp: (followUp: FollowUp) => void;
+}) {
+  return (
+    <article className="p-6 lg:p-8">
+      <div className="flex items-center gap-2 text-amber-700">
+        <Compass size={18} aria-hidden="true" />
+        <span className="text-xs font-bold uppercase tracking-wider">MISO Domain Guidance</span>
+      </div>
+
+      <div className="mt-3 border-b border-miso-border pb-5">
+        <h2 className="text-2xl font-bold tracking-tight text-miso-navy">
+          Out of Scope or Ambiguous Query
+        </h2>
+        <p className="mt-1 text-sm text-miso-muted">
+          &ldquo;{result.query}&rdquo; does not match operational MISO wholesale electric market records.
+        </p>
+      </div>
+
+      <section aria-labelledby="guidance-explanation" className="mt-6">
+        <h3 id="guidance-explanation" className="text-sm font-bold text-miso-navy">
+          Why did this happen?
+        </h3>
+        <p className="mt-2 max-w-4xl text-base leading-8 text-miso-slate">
+          {result.directAnswer}
+        </p>
+      </section>
+
+      {result.data?.scopeCategories && result.data.scopeCategories.length > 0 && (
+        <section aria-labelledby="supported-topics" className="mt-8 border-t border-miso-border pt-6">
+          <h3 id="supported-topics" className="text-xs font-bold uppercase tracking-wider text-miso-navy">
+            Supported MISO Search Domains
+          </h3>
+          <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+            {result.data.scopeCategories.map((item, idx) => (
+              <li
+                key={idx}
+                className="flex flex-col gap-1 rounded-lg border border-miso-border bg-slate-50/70 p-3.5 text-xs text-miso-slate"
+              >
+                <span className="font-bold text-miso-navy">{item.category}</span>
+                <span className="text-miso-muted text-[11px] leading-4">e.g. {item.examples}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {result.data?.suggestedQueries && result.data.suggestedQueries.length > 0 && (
+        <section aria-labelledby="sample-queries" className="mt-8 border-t border-miso-border pt-6">
+          <h3 id="sample-queries" className="text-xs font-bold uppercase tracking-wider text-miso-navy">
+            Recommended Starting Searches
+          </h3>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {result.data.suggestedQueries.map((sampleQ) => (
+              <button
+                key={sampleQ}
+                type="button"
+                onClick={() =>
+                  onFollowUp({
+                    action: "search",
+                    label: sampleQ,
+                    params: { q: sampleQ },
+                  })
+                }
+                className="inline-flex items-center gap-1.5 rounded-full border border-miso-sky/40 bg-sky-50/60 px-3.5 py-1.5 text-xs font-medium text-miso-sky hover:bg-sky-100 hover:border-miso-sky transition cursor-pointer"
+              >
+                <span>{sampleQ}</span>
+                <ArrowRight size={12} aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+    </article>
+  );
+}
+
 function stringParameter(followUp: FollowUp, key: string) {
   const value = followUp.params[key];
   return typeof value === "string" && value.trim() ? value.trim() : null;
@@ -841,6 +935,7 @@ function resultCategory(result: SearchResponse) {
   if (result.chartType === "lmp_series") return "Market pricing result";
   if (result.chartType === "fuel_mix") return "Generation result";
   if (result.chartType === "transmission_bar") return "Planning result";
+  if (result.chartType === "guidance_card") return "Scope guidance";
   return "Glossary result";
 }
 
@@ -852,6 +947,7 @@ export default function KnowledgeCanvas({
   isStarred,
   onToggleStar,
 }: Props) {
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [lmpChartMode, setLmpChartMode] = useState<LmpChartMode>("prices");
   const [transmissionMetric, setTransmissionMetric] =
     useState<TransmissionMetric>("projectsCount");
@@ -950,6 +1046,27 @@ export default function KnowledgeCanvas({
     <aside data-tour="export-sidebar" className="border-t border-miso-border bg-miso-card p-5 xl:border-l xl:border-t-0 xl:p-6">
       <SourceEvidence result={result} audienceMode={audienceMode} />
 
+      <div className="mt-6 border-t border-miso-border pt-5">
+        <p className="miso-eyebrow">Interactive Copilot</p>
+        <div className="mt-3 rounded-lg border border-purple-200 bg-purple-50/70 p-3.5 text-xs text-purple-950">
+          <div className="flex items-center gap-1.5 font-semibold text-purple-900">
+            <Sparkles size={14} className="text-purple-600" />
+            <span>Canvas Copilot</span>
+          </div>
+          <p className="mt-1 text-[11px] leading-4 text-purple-700">
+            Ask grounded questions, explore spreads, or request deeper analysis on this data.
+          </p>
+          <button
+            type="button"
+            onClick={() => setIsCopilotOpen(true)}
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded bg-purple-700 px-3 py-2 font-semibold text-white shadow-xs hover:bg-purple-800 transition cursor-pointer"
+          >
+            <Sparkles size={13} />
+            <span>Ask Canvas Copilot</span>
+          </button>
+        </div>
+      </div>
+
       {(visibleFollowUps.length > 0 || activeHubId) && (
         <div className="mt-6 border-t border-miso-border pt-5">
           <p className="miso-eyebrow">Next actions</p>
@@ -1000,6 +1117,54 @@ export default function KnowledgeCanvas({
 
   if (result.chartType === "glossary_card") {
     return (
+      <>
+        <section
+          data-tour="knowledge-canvas"
+          aria-live="polite"
+          className="miso-panel overflow-hidden border-t-4 border-t-miso-sky"
+        >
+          <div className="grid xl:grid-cols-[minmax(0,1fr)_19rem]">
+            <GlossaryReference result={result} />
+            {actionSidebar}
+          </div>
+        </section>
+        <CanvasCopilotDrawer
+          isOpen={isCopilotOpen}
+          onClose={() => setIsCopilotOpen(false)}
+          apiBase={apiBase}
+          result={result}
+          audienceMode={audienceMode}
+        />
+      </>
+    );
+  }
+
+  if (result.chartType === "guidance_card") {
+    return (
+      <>
+        <section
+          data-tour="knowledge-canvas"
+          aria-live="polite"
+          className="miso-panel overflow-hidden border-t-4 border-t-amber-500"
+        >
+          <div className="grid xl:grid-cols-[minmax(0,1fr)_19rem]">
+            <GuidanceCardView result={result} onFollowUp={onFollowUp} />
+            {actionSidebar}
+          </div>
+        </section>
+        <CanvasCopilotDrawer
+          isOpen={isCopilotOpen}
+          onClose={() => setIsCopilotOpen(false)}
+          apiBase={apiBase}
+          result={result}
+          audienceMode={audienceMode}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
       <section
         data-tour="knowledge-canvas"
         aria-live="polite"
@@ -1029,6 +1194,26 @@ export default function KnowledgeCanvas({
                   {result.query}
                 </h2>
               </div>
+          <div className="min-w-0">
+            <header className="border-b border-miso-border p-6 lg:p-8">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="miso-eyebrow">{resultCategory(result)}</p>
+                    {result.isAiSynthesized && (
+                      <span
+                        className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-semibold text-purple-800 border border-purple-200"
+                        title="Executive synthesis generated with Google Gemini based strictly on grounded MISO operational data"
+                      >
+                        <Sparkles size={11} className="text-purple-600" />
+                        Grounded AI
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="mt-1 text-2xl font-bold tracking-tight text-miso-navy">
+                    {result.query}
+                  </h2>
+                </div>
               {onToggleStar && (
                 <button
                   type="button"
@@ -1183,5 +1368,13 @@ export default function KnowledgeCanvas({
         {actionSidebar}
       </div>
     </section>
+    <CanvasCopilotDrawer
+      isOpen={isCopilotOpen}
+      onClose={() => setIsCopilotOpen(false)}
+      apiBase={apiBase}
+      result={result}
+      audienceMode={audienceMode}
+    />
+  </>
   );
 }
