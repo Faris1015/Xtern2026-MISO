@@ -446,15 +446,6 @@ export default function App() {
               </kbd>
             </button>
 
-            <button
-              type="button"
-              onClick={() => setIsFeedbackModalOpen(true)}
-              aria-label="Submit feedback to MISO engineering team"
-              className="miso-button-secondary text-xs sm:text-sm flex items-center gap-1.5 border-emerald-300 text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100"
-            >
-              <MessageSquarePlus size={16} className="text-emerald-600" aria-hidden="true" />
-              <span>Feedback</span>
-            </button>
 
 
             <button
