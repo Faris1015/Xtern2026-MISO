@@ -366,7 +366,7 @@ USER QUESTION:
 
 Provide a direct, helpful 2-3 sentence answer tailored to a {persona}. Do NOT use markdown asterisks (**) or bullet points. Write natural prose.
 """
-            ai_resp = llm_service._call_gemini(prompt, temperature=0.3, max_tokens=250)
+            ai_resp = llm_service._call_llm(prompt, temperature=0.3, max_tokens=250)
 
         if ai_resp:
             clean_answer = ai_resp.replace("**", "").replace("*", "").strip()

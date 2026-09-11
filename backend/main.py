@@ -64,6 +64,7 @@ class CanvasChatResponse(BaseModel):
     citations: List[str]
     suggestedFollowUps: List[str]
     isAiGenerated: bool
+    provider: Optional[str] = "deterministic"
 
 
 class FeedbackRequest(BaseModel):
@@ -123,6 +124,7 @@ async def root() -> Dict[str, Any]:
         "status": "online",
         "version": "1.0.0",
         "misoIntegration": miso_client.get_api_status(),
+        "llmProvider": llm_service.get_provider_status(),
         "endpoints": {
             "search": "/api/search?q={query}&persona={persona}",
             "sessionPrefetch": "/api/session-prefetch",
@@ -131,10 +133,35 @@ async def root() -> Dict[str, Any]:
             "bpms": "/api/bpms",
             "gridTelemetry": "/api/grid-telemetry",
             "misoStatus": "/api/miso-status",
+            "llmStatus": "/api/llm/status",
             "feedback": "/api/feedback",
             "generateBriefing": "POST /api/generate-briefing",
             "documentation": "/docs",
         },
+    }
+
+
+@app.get(
+    "/api/llm/status",
+    summary="LLM Provider Connectivity & Model Status",
+    description="Returns live status of the dual-engine AI system: Ollama (local on-premise) and Google Gemini (cloud).",
+    tags=["LLM Intelligence"],
+)
+async def api_llm_status() -> Dict[str, Any]:
+    return llm_service.get_provider_status()
+
+
+@app.post(
+    "/api/llm/reload",
+    summary="Hot-Reload LLM Provider Configuration",
+    description="Reloads .env configuration and re-probes local Ollama and Gemini endpoints without server downtime.",
+    tags=["LLM Intelligence"],
+)
+async def api_llm_reload() -> Dict[str, Any]:
+    llm_service.reload_config()
+    return {
+        "status": "reloaded",
+        "llmProvider": llm_service.get_provider_status(),
     }
 
 

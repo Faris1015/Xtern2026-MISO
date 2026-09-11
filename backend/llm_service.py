@@ -7,9 +7,10 @@ Grounded RAG and Multi-Persona Intelligence Layer powering:
 - Issue #12: AI-Generated Executive Commentary for 1-Page PDF Fact Sheets
 - Issue #13: Context-Aware Dynamic Research Follow-Up Action Chips
 
-Features automatic zero-downtime fallback: if no GEMINI_API_KEY is configured,
-or if any network timeout occurs, every method falls back immediately to
-deterministic MISO data and templates without interrupting the user.
+Dual-Engine Architecture:
+- Local On-Premise: Ollama (Llama 3.2, Mistral, Gemma 2) for air-gapped NERC CIP compliance
+- Cloud Fallback: Google Gemini 3.6 Flash REST API
+- Deterministic Rule-Engine: 100% offline fallback when no model daemon or API key is available
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 import logging
@@ -47,6 +49,15 @@ def _load_env_file():
 
 _load_env_file()
 
+# Provider configuration: "auto" | "ollama" | "gemini"
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "auto").strip().lower()
+
+# Ollama local configuration (Air-gapped NERC CIP on-premise inference)
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").strip().rstrip("/")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2").strip()
+OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "25.0"))
+
+# Google Gemini API configuration (Cloud fallback)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash").strip()
 GEMINI_ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
@@ -64,21 +75,148 @@ MISO_DOMAIN_TERMS = {
 
 class LLMService:
     def __init__(self):
+        self.provider = LLM_PROVIDER
+        self.ollama_base_url = OLLAMA_BASE_URL
+        self.ollama_model = OLLAMA_MODEL
+        self.ollama_timeout = OLLAMA_TIMEOUT
         self.api_key = GEMINI_API_KEY
         self.model = GEMINI_MODEL
-        self.enabled = bool(self.api_key)
         self.client = httpx.Client(timeout=12.0)
+        self.ollama_client = httpx.Client(timeout=self.ollama_timeout)
+        self._ollama_status_cache: Optional[Dict[str, Any]] = None
+        self._ollama_status_time: float = 0.0
 
     def reload_config(self):
-        """Reloads API key and model if updated at runtime in .env."""
+        """Reloads API key, models, and providers if updated at runtime in .env."""
         _load_env_file()
+        self.provider = os.getenv("LLM_PROVIDER", "auto").strip().lower()
+        self.ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").strip().rstrip("/")
+        self.ollama_model = os.getenv("OLLAMA_MODEL", "llama3.2").strip()
+        self.ollama_timeout = float(os.getenv("OLLAMA_TIMEOUT", "25.0"))
         self.api_key = os.getenv("GEMINI_API_KEY", "").strip()
         self.model = os.getenv("GEMINI_MODEL", "gemini-3.6-flash").strip()
-        self.enabled = bool(self.api_key)
+        self.ollama_client = httpx.Client(timeout=self.ollama_timeout)
+        self._ollama_status_cache = None
+        self._ollama_status_time = 0.0
+
+    @property
+    def enabled(self) -> bool:
+        """Returns True if any AI provider (Ollama or Gemini) is actively available."""
+        if self.provider == "ollama":
+            return self.check_ollama_status().get("available", False)
+        elif self.provider == "gemini":
+            return bool(self.api_key)
+        else:  # "auto"
+            return self.check_ollama_status().get("available", False) or bool(self.api_key)
+
+    def check_ollama_status(self, force: bool = False) -> Dict[str, Any]:
+        """Checks if local Ollama daemon is running and auto-discovers installed models."""
+        now = time.time()
+        if not force and self._ollama_status_cache and (now - self._ollama_status_time < 15.0):
+            return self._ollama_status_cache
+
+        status: Dict[str, Any] = {
+            "available": False,
+            "url": self.ollama_base_url,
+            "models": [],
+            "activeModel": None,
+            "version": None,
+            "error": None,
+        }
+        try:
+            resp = httpx.get(f"{self.ollama_base_url}/api/tags", timeout=1.5)
+            if resp.status_code == 200:
+                data = resp.json()
+                raw_models = data.get("models", [])
+                models_list = [m.get("name", "") for m in raw_models if isinstance(m, dict)]
+                status["available"] = True
+                status["models"] = models_list
+
+                # Select active model: prefer exact match, then prefix/contains, then first installed
+                selected = None
+                if self.ollama_model in models_list:
+                    selected = self.ollama_model
+                else:
+                    for m_name in models_list:
+                        if m_name.startswith(self.ollama_model) or self.ollama_model in m_name:
+                            selected = m_name
+                            break
+                if not selected and models_list:
+                    selected = models_list[0]
+                status["activeModel"] = selected or self.ollama_model
+
+                try:
+                    v_resp = httpx.get(f"{self.ollama_base_url}/api/version", timeout=1.0)
+                    if v_resp.status_code == 200:
+                        status["version"] = v_resp.json().get("version")
+                except Exception:
+                    pass
+        except Exception as e:
+            status["error"] = str(e)
+
+        self._ollama_status_cache = status
+        self._ollama_status_time = now
+        return status
+
+    def get_provider_status(self) -> Dict[str, Any]:
+        """Returns comprehensive status report on active provider, Ollama connectivity, and Gemini status."""
+        ollama_info = self.check_ollama_status()
+        gemini_enabled = bool(self.api_key)
+
+        if self.provider == "ollama":
+            active = "ollama" if ollama_info["available"] else "none"
+        elif self.provider == "gemini":
+            active = "gemini" if gemini_enabled else "none"
+        else:  # "auto"
+            if ollama_info["available"]:
+                active = "ollama"
+            elif gemini_enabled:
+                active = "gemini"
+            else:
+                active = "deterministic"
+
+        return {
+            "configuredProvider": self.provider,
+            "activeProvider": active,
+            "isAiEnabled": active in ("ollama", "gemini"),
+            "ollama": ollama_info,
+            "gemini": {
+                "enabled": gemini_enabled,
+                "model": self.model,
+            },
+        }
+
+    def _call_ollama(self, prompt: str, temperature: float = 0.2, max_tokens: int = 400) -> Optional[str]:
+        """Calls local Ollama REST API endpoint with structured parameters."""
+        ollama_status = self.check_ollama_status()
+        if not ollama_status.get("available"):
+            return None
+
+        target_model = ollama_status.get("activeModel") or self.ollama_model
+        url = f"{self.ollama_base_url}/api/generate"
+        payload = {
+            "model": target_model,
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "temperature": temperature,
+                "num_predict": max_tokens,
+            },
+        }
+        try:
+            resp = self.ollama_client.post(url, json=payload)
+            if resp.status_code == 200:
+                data = resp.json()
+                text = data.get("response", "").strip()
+                if text:
+                    return text
+        except Exception as e:
+            logger.warning("Ollama API call failed on model %s: %s", target_model, e)
+        return None
 
     def _call_gemini(self, prompt: str, temperature: float = 0.2, max_tokens: int = 400) -> Optional[str]:
         """Calls Google Gemini REST API using httpx with tight timeout."""
-        if not self.enabled:
+        if not bool(self.api_key):
             return None
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
@@ -100,7 +238,7 @@ class LLMService:
                         return parts[0].get("text", "").strip()
             elif resp.status_code == 404:
                 for fallback_model in ["gemini-flash-latest", "gemini-3.6-flash"]:
-                    if fallback_model == GEMINI_MODEL:
+                    if fallback_model == self.model:
                         continue
                     fallback_url = f"https://generativelanguage.googleapis.com/v1beta/models/{fallback_model}:generateContent?key={self.api_key}"
                     resp2 = self.client.post(fallback_url, json=payload, headers={"Content-Type": "application/json"})
@@ -112,6 +250,31 @@ class LLMService:
                                 return parts[0].get("text", "").strip()
         except Exception as e:
             logger.warning("Gemini API call failed: %s", e)
+        return None
+
+    def _call_llm(self, prompt: str, temperature: float = 0.2, max_tokens: int = 400) -> Optional[str]:
+        """
+        Unified LLM Dispatcher with automatic fallback hierarchy:
+        - 'ollama': calls local Ollama only
+        - 'gemini': calls Google Gemini only
+        - 'auto': probes Ollama first (air-gapped NERC CIP); falls back to Gemini if available
+        """
+        provider = self.provider
+
+        if provider == "ollama":
+            return self._call_ollama(prompt, temperature=temperature, max_tokens=max_tokens)
+        elif provider == "gemini":
+            return self._call_gemini(prompt, temperature=temperature, max_tokens=max_tokens)
+        else:  # "auto"
+            ollama_status = self.check_ollama_status()
+            if ollama_status.get("available"):
+                ollama_res = self._call_ollama(prompt, temperature=temperature, max_tokens=max_tokens)
+                if ollama_res:
+                    return ollama_res
+
+            if self.api_key:
+                return self._call_gemini(prompt, temperature=temperature, max_tokens=max_tokens)
+
         return None
 
     def _verify_numerical_grounding(self, text: str, data_summary: Dict[str, Any]) -> bool:
@@ -170,7 +333,7 @@ INSTRUCTIONS:
 3. CRITICAL RULE: Rely ONLY on the verified numbers provided above. Do NOT invent any prices, hours, or volumes.
 4. CRITICAL: Do NOT use markdown asterisks (**) or bullet points anywhere in your response. Write standard flowing prose without bolding.
 """
-        result = self._call_gemini(prompt, temperature=0.2, max_tokens=250)
+        result = self._call_llm(prompt, temperature=0.2, max_tokens=250)
         if result:
             clean_text = result.replace("**", "").replace("*", "").strip()
             # Issue #5 Fact-check verification
@@ -191,8 +354,6 @@ INSTRUCTIONS:
     ) -> Dict[str, Any]:
         """Provides an interactive analytical chat response grounded in the active canvas chart."""
         if not self.enabled:
-            # Smart deterministic fallback
-            return self._fallback_canvas_chat(message, canvas_context)
             return self._fallback_canvas_chat(message, canvas_context, persona)
 
         # Build recent conversation history snippet
@@ -226,10 +387,9 @@ INSTRUCTIONS:
 4. Provide 2 short, natural follow-up exploration questions for the user. Format the last line as:
 FOLLOW_UPS: ["Question 1", "Question 2"]
 """
-        response = self._call_gemini(prompt, temperature=0.3, max_tokens=350)
+        response = self._call_llm(prompt, temperature=0.3, max_tokens=350)
         if not response:
             return self._fallback_canvas_chat(message, canvas_context, persona)
-
 
         # Parse follow-ups if returned
         answer_text = response
@@ -240,23 +400,24 @@ FOLLOW_UPS: ["Question 1", "Question 2"]
             try:
                 parsed_fus = json.loads(parts[1].strip())
                 if isinstance(parsed_fus, list) and len(parsed_fus) >= 1:
-                    follow_ups = [str(f) for f in parsed_fus[:3]]
                     follow_ups = [str(f).replace("**", "").replace("*", "") for f in parsed_fus[:3]]
             except Exception:
                 pass
 
         clean_answer = answer_text.replace("**", "").replace("*", "").strip()
 
+        active_prov = self.get_provider_status().get("activeProvider", "deterministic")
+        prov_model = self.check_ollama_status().get("activeModel") if active_prov == "ollama" else self.model
+        prov_label = f"{active_prov} ({prov_model})"
+
         return {
-            "response": answer_text,
             "response": clean_answer,
             "citations": [canvas_context.get("sourceCitation", "MISO Data Exchange API")],
             "suggestedFollowUps": follow_ups,
             "isAiGenerated": True,
+            "provider": prov_label,
         }
 
-    def _fallback_canvas_chat(self, message: str, canvas_context: Dict[str, Any]) -> Dict[str, Any]:
-        """Deterministic fallback when LLM API key is absent or offline."""
     def _fallback_canvas_chat(
         self,
         message: str,
@@ -354,12 +515,11 @@ FOLLOW_UPS: ["Question 1", "Question 2"]
         clean_ans = ans.replace("**", "").replace("*", "").strip()
 
         return {
-            "response": ans,
             "response": clean_ans,
             "citations": [canvas_context.get("sourceCitation", "MISO Data Exchange API")],
-            "suggestedFollowUps": ["Show Day-Ahead Price Spread", "Compare with Michigan Hub"],
             "suggestedFollowUps": follow_ups,
             "isAiGenerated": False,
+            "provider": "deterministic",
         }
 
 
@@ -396,7 +556,7 @@ Categories:
 Return ONLY raw JSON with these keys:
 {{"intent": "hub_pricing"|"hub_comparison"|"fuel_mix_peak"|"transmission_planning"|"glossary_acronym"|"out_of_scope", "hub_id": "INDIANA.HUB"|null, "compare_items": ["HUB1", "HUB2"]|null, "persona": "Power Trader"|null}}
 """
-        response = self._call_gemini(prompt, temperature=0.0, max_tokens=150)
+        response = self._call_llm(prompt, temperature=0.0, max_tokens=150)
         if response:
             try:
                 # Strip any markdown code blocks
@@ -438,7 +598,7 @@ STRICT CONSTRAINTS:
 2. Authoritative, board-level tone summarizing price stability and net-load clearing.
 3. No headers, bullets, quotes, or asterisks (**).
 """
-        result = self._call_gemini(prompt, temperature=0.2, max_tokens=120)
+        result = self._call_llm(prompt, temperature=0.2, max_tokens=120)
         if result and len(result.split()) <= 65:
             return result.replace("**", "").replace("*", "").strip()
         return fallback_text.replace("**", "").replace("*", "").strip()
@@ -472,7 +632,7 @@ STRICT CONSTRAINTS:
             "- search_query: {\"q\": \"Search prompt text\"}\n\n"
             "Return ONLY raw JSON array of 3 objects with label, action, and params.\n"
         )
-        response = self._call_gemini(prompt, temperature=0.3, max_tokens=250)
+        response = self._call_llm(prompt, temperature=0.3, max_tokens=250)
 
         if response:
             try:
