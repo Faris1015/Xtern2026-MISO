@@ -13,6 +13,9 @@ import SessionRadar from "./components/SessionRadar";
 import GuidedTour from "./components/GuidedTour";
 import JargonHUD from "./components/JargonHUD";
 import FeedbackModal from "./components/FeedbackModal";
+import DevOpsModal from "./components/DevOpsModal";
+import DataContractModal from "./components/DataContractModal";
+import BpmSearchModal from "./components/BpmSearchModal";
 import SearchHistoryFavorites, {
   type StarredItem,
 } from "./components/SearchHistoryFavorites";
@@ -85,6 +88,11 @@ export default function App() {
   const [isJargonHudOpen, setIsJargonHudOpen] = useState(false);
   const [isIntegrationModalOpen, setIsIntegrationModalOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [isDevOpsModalOpen, setIsDevOpsModalOpen] = useState(false);
+  const [isDataContractModalOpen, setIsDataContractModalOpen] = useState(false);
+  const [isBpmSearchModalOpen, setIsBpmSearchModalOpen] = useState(false);
+  const [activeEntraRole, setActiveEntraRole] = useState("MISO.PowerTrader");
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [dismissedPersonaSuggestion, setDismissedPersonaSuggestion] = useState<string | null>(null);
   const [starredQueries, setStarredQueries] = useState<string[]>(() => {
     try {
@@ -284,6 +292,29 @@ export default function App() {
     [lastQuery, result, search],
   );
 
+  const handleSwitchEntraRole = useCallback(
+    async (role: string) => {
+      setActiveEntraRole(role);
+      setIsRoleDropdownOpen(false);
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/switch-role`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role }),
+        });
+        if (res.ok) {
+          const user = await res.json();
+          if (user.mappedPersona) {
+            handleAudienceModeChange(user.mappedPersona as AudienceMode);
+          }
+        }
+      } catch {
+        // fallback
+      }
+    },
+    [handleAudienceModeChange],
+  );
+
   const handleFollowUp = useCallback(
     (followUp: FollowUp) => {
       setError("");
@@ -424,7 +455,76 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {/* Microsoft Entra ID RBAC Role Simulator */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsRoleDropdownOpen((prev) => !prev)}
+                className="miso-button-secondary text-xs sm:text-sm flex items-center gap-1.5 border-purple-300 text-purple-900 bg-purple-50/70 hover:bg-purple-100 cursor-pointer"
+                aria-haspopup="true"
+                aria-expanded={isRoleDropdownOpen}
+                title="Microsoft Entra ID (Azure AD) RBAC Role Simulator"
+              >
+                <span className="h-2 w-2 rounded-full bg-purple-600 animate-pulse" />
+                <span>SSO: <strong>{activeEntraRole.replace("MISO.", "")}</strong></span>
+                <span className="text-[10px]">▼</span>
+              </button>
+              {isRoleDropdownOpen && (
+                <div className="absolute right-0 mt-1 w-64 rounded-lg bg-white p-2 shadow-xl border border-slate-200 z-50 text-xs">
+                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Microsoft Entra ID RBAC Roles
+                  </div>
+                  {[
+                    { role: "MISO.PowerTrader", label: "Power Trader", desc: "Wholesale spreads & LMP decomposition" },
+                    { role: "MISO.CoOpMember", label: "Municipal Co-op", desc: "Baseload hedging & PRA capacity" },
+                    { role: "MISO.StateRegulator", label: "State Regulator", desc: "FERC compliance & LRTP investments" },
+                    { role: "MISO.Public", label: "Public / Media", desc: "Clean energy & grid reliability" },
+                    { role: "MISO.Admin", label: "MISO Admin", desc: "Full telemetry & diagnostics" },
+                  ].map((item) => (
+                    <button
+                      key={item.role}
+                      type="button"
+                      onClick={() => void handleSwitchEntraRole(item.role)}
+                      className={`w-full text-left px-2.5 py-1.5 rounded transition cursor-pointer flex flex-col ${
+                        activeEntraRole === item.role
+                          ? "bg-purple-50 text-purple-950 font-bold"
+                          : "hover:bg-slate-50 text-slate-700"
+                      }`}
+                    >
+                      <span className="flex items-center justify-between">
+                        <span>{item.label}</span>
+                        <span className="font-mono text-[9px] text-slate-400">{item.role}</span>
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-normal">{item.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Hybrid BPM Rulebook RAG */}
+            <button
+              type="button"
+              onClick={() => setIsBpmSearchModalOpen(true)}
+              aria-label="Search MISO Business Practice Manuals with Hybrid RAG"
+              className="miso-button-secondary text-xs sm:text-sm flex items-center gap-1.5 border-purple-300 text-purple-900 bg-purple-50/70 hover:bg-purple-100"
+            >
+              <BookOpen size={16} className="text-purple-600" aria-hidden="true" />
+              <span>BPMs (RAG)</span>
+            </button>
+
+            {/* Cloud-Native DevOps & SRE Dashboard */}
+            <button
+              type="button"
+              onClick={() => setIsDevOpsModalOpen(true)}
+              aria-label="Open DevOps & SRE observability dashboard"
+              className="miso-button-secondary text-xs sm:text-sm flex items-center gap-1.5 border-emerald-300 text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100"
+            >
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span>DevOps / SRE</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setIsFeedbackModalOpen(true)}
@@ -567,7 +667,11 @@ export default function App() {
           onSelectQuery={(q) => void search(q)}
         />
 
-        <SessionRadar apiBase={API_BASE} onSelectChip={handleSessionChip} />
+        <SessionRadar
+          apiBase={API_BASE}
+          onSelectChip={handleSessionChip}
+          onOpenDataContract={() => setIsDataContractModalOpen(true)}
+        />
 
         {isSearching && (
           <div
@@ -701,6 +805,24 @@ export default function App() {
         activePersona={audienceMode}
         queryContext={result?.query ?? lastQuery}
         apiBaseUrl={API_BASE}
+      />
+
+      <DevOpsModal
+        isOpen={isDevOpsModalOpen}
+        onClose={() => setIsDevOpsModalOpen(false)}
+        apiBase={API_BASE}
+      />
+
+      <DataContractModal
+        isOpen={isDataContractModalOpen}
+        onClose={() => setIsDataContractModalOpen(false)}
+        apiBase={API_BASE}
+      />
+
+      <BpmSearchModal
+        isOpen={isBpmSearchModalOpen}
+        onClose={() => setIsBpmSearchModalOpen(false)}
+        apiBase={API_BASE}
       />
       </div>
     </GlossaryProvider>

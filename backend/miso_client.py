@@ -64,7 +64,17 @@ class MISOClient:
 
     def get_cached(self, cache_key: str) -> Optional[Any]:
         if self.is_cache_valid(cache_key):
+            try:
+                from observability import metrics_registry
+                metrics_registry.record_cache_hit()
+            except Exception:
+                pass
             return self._cache[cache_key]["data"]
+        try:
+            from observability import metrics_registry
+            metrics_registry.record_cache_miss()
+        except Exception:
+            pass
         return None
 
     def set_cached(self, cache_key: str, data: Any, ttl: Optional[int] = None) -> None:
@@ -108,8 +118,15 @@ class MISOClient:
 
         url = f"{self.public_base_url}/api/FuelMix"
         try:
+            t0 = time.perf_counter()
             with httpx.Client(timeout=4.0) as client:
                 resp = client.get(url)
+                duration = time.perf_counter() - t0
+                try:
+                    from observability import metrics_registry
+                    metrics_registry.set_miso_api_latency(duration)
+                except Exception:
+                    pass
                 if resp.status_code != 200:
                     logger.warning("MISO FuelMix API returned HTTP %s: %s", resp.status_code, resp.text[:120])
                     return None

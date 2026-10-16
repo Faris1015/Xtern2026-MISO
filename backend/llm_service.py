@@ -297,9 +297,19 @@ class LLMService:
                     # Allow reasonable small differences like rounding, but reject wild hallucinations (> $500/MWh when base is < $60)
                     if num_val > 500:
                         logger.warning("Fact-check rejected hallucinated price: $%s", val)
+                        try:
+                            from observability import metrics_registry
+                            metrics_registry.record_grounding_result(passed=False)
+                        except Exception:
+                            pass
                         return False
                 except ValueError:
                     pass
+        try:
+            from observability import metrics_registry
+            metrics_registry.record_grounding_result(passed=True)
+        except Exception:
+            pass
         return True
 
     # -----------------------------------------------------------------------

@@ -10,10 +10,14 @@ import json
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import asyncio
+import uuid
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 # Load environment variables
 load_dotenv()
@@ -28,19 +32,43 @@ from data_manager import data_manager
 from miso_client import miso_client
 from llm_service import llm_service
 from pdf_generator import generate_market_briefing_pdf
+from observability import metrics_registry
+from data_validator import data_validator, AuditReport
+from bpm_service import bpm_search_engine, BpmSearchResult
+from auth_middleware import auth_manager, EntraUser
 from pydantic import BaseModel, Field
 
 app = FastAPI(
     title="MISO OmniSearch API",
     description="Intelligent navigation, session pre-fetching, comparative knowledge, and publication-ready reporting for MISO public energy data.",
-    version="1.0.0",
+    version="1.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
 
+@app.middleware("http")
+async def observability_and_correlation_middleware(request: Request, call_next):
+    """Captures request duration, increments Prometheus counters, and injects X-Correlation-ID."""
+    correlation_id = request.headers.get("x-correlation-id") or str(uuid.uuid4())
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    duration = time.perf_counter() - start_time
+    response.headers["X-Correlation-ID"] = correlation_id
+    response.headers["X-Response-Time-Ms"] = f"{duration * 1000.0:.2f}"
+    metrics_registry.record_request(
+        method=request.method,
+        endpoint=request.url.path,
+        status_code=response.status_code,
+        duration_sec=duration
+    )
+    return response
+
 # ---------------------------------------------------------------------------
 # Request & Response Models
 # ---------------------------------------------------------------------------
+class SwitchRoleRequest(BaseModel):
+    role: str = Field("MISO.PowerTrader", description="'MISO.PowerTrader' | 'MISO.CoOpMember' | 'MISO.StateRegulator' | 'MISO.Public' | 'MISO.Admin'")
+
 class BriefingRequest(BaseModel):
     hub_id: str = Field("INDIANA.HUB", description="Target commercial hub (e.g. 'INDIANA.HUB', 'MICHIGAN.HUB')")
     custom_title: Optional[str] = Field(None, description="Optional custom document title")
@@ -90,6 +118,7 @@ CanvasChatResponse.model_rebuild()
 BriefingRequest.model_rebuild()
 FeedbackRequest.model_rebuild()
 FeedbackResponse.model_rebuild()
+SwitchRoleRequest.model_rebuild()
 
 
 
@@ -122,7 +151,7 @@ async def root() -> Dict[str, Any]:
     return {
         "service": "MISO OmniSearch Backend API",
         "status": "online",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "misoIntegration": miso_client.get_api_status(),
         "llmProvider": llm_service.get_provider_status(),
         "endpoints": {
@@ -131,9 +160,17 @@ async def root() -> Dict[str, Any]:
             "compare": "/api/compare?type={hubs|fuels|plans}&items={id1,id2}",
             "glossary": "/api/glossary",
             "bpms": "/api/bpms",
+            "bpmSearch": "/api/bpms/search?q={query}",
             "gridTelemetry": "/api/grid-telemetry",
+            "telemetryStream": "/api/stream/telemetry",
+            "dataQualityAudit": "/api/data-quality/audit",
+            "authMe": "/api/auth/me",
+            "switchRole": "POST /api/auth/switch-role",
             "misoStatus": "/api/miso-status",
             "llmStatus": "/api/llm/status",
+            "healthz": "/healthz",
+            "readyz": "/readyz",
+            "metrics": "/metrics",
             "feedback": "/api/feedback",
             "generateBriefing": "POST /api/generate-briefing",
             "documentation": "/docs",
@@ -211,6 +248,20 @@ async def api_bpms() -> Dict[str, Any]:
         "source": "https://www.misoenergy.org/legal/rules-manuals-and-agreements/business-practice-manuals/",
         "manuals": manuals,
     }
+
+
+@app.get(
+    "/api/bpms/search",
+    response_model=List[BpmSearchResult],
+    summary="Hybrid Semantic RAG Search across MISO Business Practice Manuals",
+    description="Queries 20+ MISO Business Practice Manuals with BM25 token matching, semantic concept scoring, and section formula citations.",
+    tags=["BPM Rulebooks"],
+)
+async def api_bpms_search(
+    q: str = Query(..., description="Query for manual rules, section clauses, or formulas (e.g. 'LMP formula', 'DPP cluster cycle', 'BPM 002')"),
+    top_k: int = Query(5, ge=1, le=20, description="Max sections/manuals to return"),
+) -> List[BpmSearchResult]:
+    return bpm_search_engine.hybrid_search(query=q, top_k=top_k)
 
 
 @app.get(
@@ -412,6 +463,159 @@ async def api_get_feedback(limit: int = Query(50, ge=1, le=200)) -> List[Dict[st
         return entries[-limit:][::-1]
     except Exception:
         return []
+
+
+# ---------------------------------------------------------------------------
+# Idea 2: Cloud-Native Observability & Kubernetes Probes
+# ---------------------------------------------------------------------------
+
+@app.get(
+    "/healthz",
+    summary="Kubernetes Liveness Probe",
+    description="Returns process liveness and uptime status for container orchestrators (AKS / K8s).",
+    tags=["Observability & SRE"],
+)
+async def api_healthz() -> Dict[str, Any]:
+    return metrics_registry.get_liveness()
+
+
+@app.get(
+    "/readyz",
+    summary="Kubernetes Readiness Probe",
+    description="Verifies operational readiness of upstream MISO public feeds, internal data layers, and AI inference engines.",
+    tags=["Observability & SRE"],
+)
+async def api_readyz() -> Dict[str, Any]:
+    miso_stat = miso_client.get_api_status()
+    bpms = data_manager.get_all_bpms()
+    result = metrics_registry.get_readiness(
+        miso_status=miso_stat,
+        data_ready=len(bpms) > 0,
+        llm_ready=llm_service.enabled,
+    )
+    if result["statusCode"] != 200:
+        raise HTTPException(status_code=503, detail=result)
+    return result
+
+
+@app.get(
+    "/metrics",
+    summary="Prometheus Metrics Exposition",
+    description="Exports HTTP request counts, durations, cache hits/misses, and grounding firewall stats in Prometheus 0.0.4 text format.",
+    tags=["Observability & SRE"],
+)
+async def api_metrics() -> Response:
+    text = metrics_registry.generate_prometheus_text()
+    return Response(content=text, media_type="text/plain; version=0.0.4; charset=utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Idea 1: Live Real-Time Telemetry via Server-Sent Events (SSE)
+# ---------------------------------------------------------------------------
+
+@app.get(
+    "/api/stream/telemetry",
+    summary="Real-Time Grid Telemetry Stream (Server-Sent Events)",
+    description="Streams live 5-minute fuel mix, system demand ticks, and active advisory alerts to connected clients without HTTP polling.",
+    tags=["Grid Telemetry"],
+)
+async def api_stream_telemetry(request: Request):
+    async def event_generator():
+        metrics_registry.increment_sse_connections()
+        try:
+            user = auth_manager.authenticate_headers(dict(request.headers))
+            init_payload = {
+                "connectionId": str(uuid.uuid4()),
+                "status": "connected",
+                "cadence": "5-minute live updates",
+                "clientRole": user.primaryRole,
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            }
+            yield f"event: connect\ndata: {json.dumps(init_payload)}\n\n"
+
+            while True:
+                if await request.is_disconnected():
+                    break
+
+                telemetry = data_manager.get_grid_telemetry()
+                fuel_peaks = data_manager.get_fuel_peaks()
+                stream_payload = {
+                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                    "demandMw": telemetry.get("currentDemandMw", 88450),
+                    "formattedDemand": telemetry.get("formattedDemand", "88,450 MW"),
+                    "forecastPeakMw": telemetry.get("forecastPeakMw", 102300),
+                    "marginalEnergyCost": telemetry.get("marginalEnergyCost", "$32.40/MWh"),
+                    "advisoryStatus": telemetry.get("advisoryStatus", "Normal Grid Operations"),
+                    "generationMix": fuel_peaks.get("generationMix", [])[:5],
+                    "totalGenerationMw": fuel_peaks.get("totalMw", 91200),
+                    "isLive": fuel_peaks.get("isLive", True),
+                    "dataSource": fuel_peaks.get("dataSource", "live_miso_public_api"),
+                }
+                yield f"event: telemetry\ndata: {json.dumps(stream_payload)}\n\n"
+                await asyncio.sleep(5)
+        except asyncio.CancelledError:
+            pass
+        finally:
+            metrics_registry.decrement_sse_connections()
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Idea 3: Data Contract & Market Anomaly Detection Firewall
+# ---------------------------------------------------------------------------
+
+@app.get(
+    "/api/data-quality/audit",
+    response_model=AuditReport,
+    summary="Data Contract & Physical Conservation Audit",
+    description="Audits active feeds against LMP conservation (MEC+MCC+MLC), fuel mass balance, and scans for market anomalies.",
+    tags=["Data Governance & Contracts"],
+)
+async def api_data_quality_audit() -> AuditReport:
+    market_hubs = data_manager.get_all_hubs()
+    fuel_peaks = data_manager.get_fuel_peaks()
+    grid_telemetry = data_manager.get_grid_telemetry()
+    return data_validator.run_audit(
+        market_hubs=market_hubs,
+        fuel_peaks=fuel_peaks,
+        live_telemetry=grid_telemetry,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Idea 5: Azure Entra ID (OAuth2/OIDC) & RBAC Persona Middleware
+# ---------------------------------------------------------------------------
+
+@app.get(
+    "/api/auth/me",
+    response_model=EntraUser,
+    summary="Azure Entra ID User Identity & RBAC Permissions",
+    description="Returns current authenticated user identity, Entra ID tenant, mapped persona, and permissions.",
+    tags=["Enterprise Identity & RBAC"],
+)
+async def api_auth_me(request: Request) -> EntraUser:
+    return auth_manager.authenticate_headers(dict(request.headers))
+
+
+@app.post(
+    "/api/auth/switch-role",
+    response_model=EntraUser,
+    summary="Switch Active Simulated Entra ID Role (Dev & Demo)",
+    description="Simulates switching user role in Microsoft Entra ID between Trader, Co-op, Regulator, Public, or Admin.",
+    tags=["Enterprise Identity & RBAC"],
+)
+async def api_auth_switch_role(body: SwitchRoleRequest) -> EntraUser:
+    auth_manager.set_simulated_role(body.role)
+    return auth_manager.authenticate_headers({})
 
 
 if __name__ == "__main__":

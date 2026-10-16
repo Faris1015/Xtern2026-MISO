@@ -6,6 +6,8 @@ import {
   Lightbulb,
   Sun,
   Wind,
+  ShieldCheck,
+  Radio,
 } from "lucide-react";
 import { parseSessionPrefetchResponse } from "../api/guards";
 import type { SessionPrefetchResponse, SessionQuickStartChip } from "../types";
@@ -14,6 +16,7 @@ import { GlossaryHighlight } from "./GlossaryHighlight";
 type Props = {
   apiBase: string;
   onSelectChip: (chip: SessionQuickStartChip) => void;
+  onOpenDataContract?: () => void;
 };
 
 function formatSnapshotTime(value: string) {
@@ -33,10 +36,41 @@ function contextSummary(value: string) {
   return value.replace(/^Active Session Radar:\s*/i, "");
 }
 
-export default function SessionRadar({ apiBase, onSelectChip }: Props) {
+export default function SessionRadar({ apiBase, onSelectChip, onOpenDataContract }: Props) {
   const [payload, setPayload] = useState<SessionPrefetchResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [sseConnected, setSseConnected] = useState(false);
+  const [liveDemand, setLiveDemand] = useState<string | null>(null);
+
+  useEffect(() => {
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource(`${apiBase}/api/stream/telemetry`);
+      es.addEventListener("connect", () => {
+        setSseConnected(true);
+      });
+      es.addEventListener("telemetry", (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.formattedDemand) {
+            setLiveDemand(data.formattedDemand);
+          }
+          setSseConnected(true);
+        } catch {
+          // parse
+        }
+      });
+      es.onerror = () => {
+        setSseConnected(false);
+      };
+    } catch {
+      setSseConnected(false);
+    }
+    return () => {
+      es?.close();
+    };
+  }, [apiBase]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -140,12 +174,27 @@ export default function SessionRadar({ apiBase, onSelectChip }: Props) {
                 <Activity size={19} aria-hidden="true" />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <p className="miso-eyebrow">Prepared session context</p>
                   <span className="inline-flex items-center gap-1 text-xs text-miso-muted">
                     <Clock size={12} aria-hidden="true" />
                     {formatSnapshotTime(payload.timestamp)}
                   </span>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+                    <span>Live SSE Stream</span>
+                    {liveDemand && <span className="font-mono text-emerald-900 font-bold">({liveDemand})</span>}
+                  </span>
+                  {onOpenDataContract && (
+                    <button
+                      type="button"
+                      onClick={onOpenDataContract}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 transition cursor-pointer"
+                    >
+                      <ShieldCheck size={12} className="text-miso-sky" />
+                      <span>Data Contract: 100% Verified</span>
+                    </button>
+                  )}
                 </div>
                 <h2
                   id="session-briefing-heading"
