@@ -303,3 +303,4 @@ Keep these concise, battle-tested answers ready for the discussion:
 
 #### ❓ Tech Question 4: *"What is the memory and CPU footprint of your ReportLab PDF generator?"*
 > **Answer:** *"Unlike headless Chrome or Puppeteer, which require launching a 200MB Chromium process that introduces security attack vectors and memory spikes, ReportLab compiles pure Python byte streams in memory. It uses less than 15MB of RAM per worker and compiles the full 1-page PDF in under 2.5 seconds."*
+
